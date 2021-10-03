@@ -1,1 +1,12 @@
 /target
+/kafka/.gradle
+/kafka/.idea
+/kafka/docs/generated
+/kafka/*/build
+/kafka/connect/*/build
+/kafka/streams/*/build
+/kafka/storage/*/build
+/kafka/*/src/generated
+/kafka/*/src/generated-test
+/kafka/gradle/wrapper/gradle-wrapper.jar
+/kafka/raft/.jqwik-database
