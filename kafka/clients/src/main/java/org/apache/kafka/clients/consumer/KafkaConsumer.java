@@ -16,6 +16,7 @@
  */
 package org.apache.kafka.clients.consumer;
 
+import org.apache.kafka.RustLib;
 import org.apache.kafka.clients.ApiVersions;
 import org.apache.kafka.clients.ClientUtils;
 import org.apache.kafka.clients.CommonClientConfigs;
@@ -557,6 +558,10 @@ import java.util.regex.Pattern;
  * commit.
  */
 public class KafkaConsumer<K, V> implements Consumer<K, V> {
+
+    static {
+        RustLib.load();
+    }
 
     private static final String CLIENT_ID_METRIC_TAG = "client-id";
     private static final long NO_CURRENT_THREAD = -1L;
