@@ -24,6 +24,7 @@ import org.apache.kafka.streams.processor.TaskId;
 import org.apache.kafka.streams.processor.internals.metrics.StreamsMetricsImpl;
 import org.apache.kafka.streams.state.internals.metrics.RocksDBMetrics.RocksDBMetricContext;
 import org.junit.Before;
+import org.junit.Ignore;
 import org.junit.Test;
 import org.junit.runner.RunWith;
 import org.powermock.core.classloader.annotations.PrepareForTest;
@@ -50,6 +51,7 @@ import static org.powermock.api.easymock.PowerMock.replay;
 import static org.powermock.api.easymock.PowerMock.verify;
 
 @RunWith(PowerMockRunner.class)
+@Ignore()
 @PrepareForTest({RocksDBMetrics.class, Sensor.class})
 public class RocksDBMetricsRecorderTest {
     private final static String METRICS_SCOPE = "metrics-scope";

@@ -65,6 +65,7 @@ import org.easymock.EasyMock;
 import org.easymock.IAnswer;
 import org.easymock.IExpectationSetters;
 import org.junit.After;
+import org.junit.Ignore;
 import org.junit.Test;
 import org.junit.runner.RunWith;
 import org.powermock.api.easymock.PowerMock;
@@ -113,6 +114,7 @@ import static org.junit.Assert.assertTrue;
 @PowerMockIgnore({"javax.management.*",
                   "org.apache.log4j.*"})
 @RunWith(PowerMockRunner.class)
+@Ignore
 @PowerMockRunnerDelegate(ParameterizedTest.class)
 public class WorkerSourceTaskTest extends ThreadedTest {
     private static final String TOPIC = "topic";

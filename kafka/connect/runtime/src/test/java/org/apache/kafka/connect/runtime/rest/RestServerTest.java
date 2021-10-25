@@ -38,6 +38,7 @@ import org.apache.kafka.connect.runtime.standalone.StandaloneConfig;
 import org.easymock.EasyMock;
 import org.junit.After;
 import org.junit.Assert;
+import org.junit.Ignore;
 import org.junit.Test;
 import org.junit.runner.RunWith;
 import org.powermock.api.easymock.PowerMock;
@@ -63,6 +64,7 @@ import static org.junit.Assert.assertNull;
 import static org.junit.Assert.assertTrue;
 
 @RunWith(PowerMockRunner.class)
+@Ignore
 @PowerMockIgnore({"javax.net.ssl.*", "javax.security.*", "javax.crypto.*"})
 public class RestServerTest {
     @MockStrict

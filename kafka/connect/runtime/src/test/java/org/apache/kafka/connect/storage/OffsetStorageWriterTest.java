@@ -22,6 +22,7 @@ import org.easymock.Capture;
 import org.easymock.EasyMock;
 import org.junit.After;
 import org.junit.Before;
+import org.junit.Ignore;
 import org.junit.Test;
 import org.junit.runner.RunWith;
 import org.powermock.api.easymock.PowerMock;
@@ -44,6 +45,7 @@ import static org.junit.Assert.assertThrows;
 import static org.junit.Assert.assertTrue;
 
 @RunWith(PowerMockRunner.class)
+@Ignore()
 public class OffsetStorageWriterTest {
     private static final String NAMESPACE = "namespace";
     // Connect format - any types should be accepted here

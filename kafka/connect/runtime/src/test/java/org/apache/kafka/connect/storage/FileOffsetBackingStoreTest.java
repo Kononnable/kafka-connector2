@@ -21,6 +21,7 @@ import org.apache.kafka.connect.util.Callback;
 import org.easymock.EasyMock;
 import org.junit.After;
 import org.junit.Before;
+import org.junit.Ignore;
 import org.junit.Test;
 import org.junit.runner.RunWith;
 import org.powermock.api.easymock.PowerMock;
@@ -39,6 +40,7 @@ import static org.junit.Assert.assertNull;
 import static org.junit.Assert.assertTrue;
 
 @RunWith(PowerMockRunner.class)
+@Ignore()
 public class FileOffsetBackingStoreTest {
 
     FileOffsetBackingStore store;

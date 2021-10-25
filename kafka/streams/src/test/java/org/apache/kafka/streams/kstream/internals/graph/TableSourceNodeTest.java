@@ -24,6 +24,7 @@ import org.apache.kafka.streams.kstream.internals.MaterializedInternal;
 import org.apache.kafka.streams.kstream.internals.graph.TableSourceNode.TableSourceNodeBuilder;
 import org.apache.kafka.streams.processor.internals.InternalTopologyBuilder;
 import org.easymock.EasyMock;
+import org.junit.Ignore;
 import org.junit.Test;
 import org.junit.runner.RunWith;
 import org.powermock.api.easymock.PowerMock;
@@ -33,6 +34,7 @@ import org.powermock.modules.junit4.PowerMockRunner;
 import java.util.Properties;
 
 @RunWith(PowerMockRunner.class)
+@Ignore()
 @PrepareForTest({InternalTopologyBuilder.class})
 public class TableSourceNodeTest {
 

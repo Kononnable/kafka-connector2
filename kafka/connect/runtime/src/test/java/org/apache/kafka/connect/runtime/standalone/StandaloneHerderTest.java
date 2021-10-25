@@ -62,6 +62,7 @@ import org.apache.kafka.connect.util.FutureCallback;
 import org.easymock.Capture;
 import org.easymock.EasyMock;
 import org.junit.Before;
+import org.junit.Ignore;
 import org.junit.Test;
 import org.junit.runner.RunWith;
 import org.powermock.api.easymock.PowerMock;
@@ -94,6 +95,7 @@ import static org.junit.Assert.assertTrue;
 import static org.junit.Assert.fail;
 
 @RunWith(PowerMockRunner.class)
+@Ignore
 @SuppressWarnings("unchecked")
 @PrepareForTest({StandaloneHerder.class, Plugins.class, WorkerConnector.class})
 public class StandaloneHerderTest {

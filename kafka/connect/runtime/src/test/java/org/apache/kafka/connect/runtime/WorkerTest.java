@@ -71,6 +71,7 @@ import org.apache.kafka.connect.util.TopicAdmin;
 import org.apache.kafka.connect.util.TopicCreationGroup;
 import org.easymock.EasyMock;
 import org.junit.Before;
+import org.junit.Ignore;
 import org.junit.Test;
 import org.junit.runner.RunWith;
 import org.powermock.api.easymock.PowerMock;
@@ -119,6 +120,7 @@ import static org.junit.Assert.assertThrows;
 import static org.junit.Assert.fail;
 
 @RunWith(PowerMockRunner.class)
+@Ignore
 @PowerMockRunnerDelegate(ParameterizedTest.class)
 @PrepareForTest({Worker.class, Plugins.class, ConnectUtils.class})
 @PowerMockIgnore("javax.management.*")

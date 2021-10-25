@@ -65,6 +65,7 @@ import org.easymock.Capture;
 import org.easymock.EasyMock;
 import org.junit.Assert;
 import org.junit.Before;
+import org.junit.Ignore;
 import org.junit.Rule;
 import org.junit.Test;
 import org.junit.rules.TestName;
@@ -114,6 +115,7 @@ import static org.junit.Assert.assertTrue;
 import static org.junit.Assert.fail;
 
 @RunWith(PowerMockRunner.class)
+@Ignore()
 @PrepareForTest({KafkaStreams.class, StreamThread.class, ClientMetrics.class})
 public class KafkaStreamsTest {
 

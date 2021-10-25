@@ -22,6 +22,7 @@ import org.apache.kafka.common.config.provider.ConfigProvider;
 import org.easymock.EasyMock;
 import static org.easymock.EasyMock.eq;
 import org.junit.Before;
+import org.junit.Ignore;
 import org.junit.Test;
 import org.junit.runner.RunWith;
 import org.powermock.api.easymock.PowerMock;
@@ -41,6 +42,7 @@ import static org.junit.Assert.assertNull;
 import static org.powermock.api.easymock.PowerMock.replayAll;
 
 @RunWith(PowerMockRunner.class)
+@Ignore
 public class WorkerConfigTransformerTest {
 
     public static final String MY_KEY = "myKey";

@@ -63,6 +63,7 @@ import org.easymock.Capture;
 import org.easymock.EasyMock;
 import org.junit.After;
 import org.junit.Before;
+import org.junit.Ignore;
 import org.junit.Test;
 import org.junit.runner.RunWith;
 import org.powermock.api.easymock.PowerMock;
@@ -106,6 +107,7 @@ import static org.junit.Assert.fail;
 
 @SuppressWarnings("deprecation")
 @RunWith(PowerMockRunner.class)
+@Ignore
 @PrepareForTest({DistributedHerder.class, Plugins.class})
 @PowerMockIgnore({"javax.management.*", "javax.crypto.*"})
 public class DistributedHerderTest {

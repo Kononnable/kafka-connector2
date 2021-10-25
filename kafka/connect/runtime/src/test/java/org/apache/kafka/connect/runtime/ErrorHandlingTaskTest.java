@@ -65,6 +65,7 @@ import org.easymock.EasyMock;
 import org.easymock.IExpectationSetters;
 import org.junit.After;
 import org.junit.Before;
+import org.junit.Ignore;
 import org.junit.Test;
 import org.junit.runner.RunWith;
 import org.powermock.api.easymock.PowerMock;
@@ -102,6 +103,7 @@ import static org.apache.kafka.connect.runtime.WorkerConfig.TOPIC_CREATION_ENABL
 import static org.junit.Assert.assertEquals;
 
 @RunWith(PowerMockRunner.class)
+@Ignore
 @PowerMockRunnerDelegate(ParameterizedTest.class)
 @PrepareForTest({WorkerSinkTask.class, WorkerSourceTask.class})
 @PowerMockIgnore("javax.management.*")

@@ -29,6 +29,7 @@ import org.easymock.EasyMock;
 import org.easymock.Mock;
 import org.junit.After;
 import org.junit.Before;
+import org.junit.Ignore;
 import org.junit.Test;
 import org.junit.runner.RunWith;
 import org.powermock.core.classloader.annotations.PowerMockIgnore;
@@ -46,6 +47,7 @@ import static org.easymock.EasyMock.verify;
 import static org.junit.Assert.assertEquals;
 
 @RunWith(PowerMockRunner.class)
+@Ignore
 @PrepareForTest({WorkerTask.class})
 @PowerMockIgnore("javax.management.*")
 public class WorkerTaskTest {

@@ -41,6 +41,7 @@ import org.apache.kafka.common.utils.MockTime;
 import org.easymock.Capture;
 import org.easymock.EasyMock;
 import org.junit.Before;
+import org.junit.Ignore;
 import org.junit.Test;
 import org.junit.runner.RunWith;
 import org.powermock.api.easymock.PowerMock;
@@ -74,6 +75,7 @@ import static org.junit.Assert.assertThrows;
 import static org.junit.Assert.assertTrue;
 
 @RunWith(PowerMockRunner.class)
+@Ignore
 @PrepareForTest(KafkaBasedLog.class)
 @PowerMockIgnore("javax.management.*")
 public class KafkaBasedLogTest {

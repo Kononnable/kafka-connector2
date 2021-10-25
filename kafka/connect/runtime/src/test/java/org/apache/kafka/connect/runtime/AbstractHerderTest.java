@@ -48,6 +48,7 @@ import org.apache.kafka.connect.transforms.predicates.Predicate;
 import org.apache.kafka.connect.util.ConnectorTaskId;
 import org.easymock.Capture;
 import org.easymock.EasyMock;
+import org.junit.Ignore;
 import org.junit.Test;
 import org.junit.runner.RunWith;
 import org.powermock.api.easymock.PowerMock;
@@ -80,6 +81,7 @@ import static org.junit.Assert.assertNotNull;
 import static org.junit.Assert.assertTrue;
 
 @RunWith(PowerMockRunner.class)
+@Ignore
 @PrepareForTest({AbstractHerder.class})
 public class AbstractHerderTest {
 

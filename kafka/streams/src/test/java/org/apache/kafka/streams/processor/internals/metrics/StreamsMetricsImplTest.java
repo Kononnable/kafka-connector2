@@ -34,6 +34,7 @@ import org.easymock.Capture;
 import org.easymock.CaptureType;
 import org.easymock.EasyMock;
 import org.easymock.IArgumentMatcher;
+import org.junit.Ignore;
 import org.junit.Test;
 import org.junit.runner.RunWith;
 import org.powermock.core.classloader.annotations.PrepareForTest;
@@ -84,6 +85,7 @@ import static org.junit.Assert.assertTrue;
 import static org.powermock.api.easymock.PowerMock.createMock;
 
 @RunWith(PowerMockRunner.class)
+@Ignore()
 @PrepareForTest({Sensor.class, KafkaMetric.class})
 public class StreamsMetricsImplTest {
 

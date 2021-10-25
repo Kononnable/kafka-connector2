@@ -35,6 +35,7 @@ import org.easymock.EasyMock;
 import org.easymock.Mock;
 import org.junit.After;
 import org.junit.Before;
+import org.junit.Ignore;
 import org.junit.Test;
 import org.junit.runner.RunWith;
 import org.powermock.api.easymock.PowerMock;
@@ -65,6 +66,7 @@ import static org.junit.Assert.assertThrows;
 import static org.junit.Assert.assertTrue;
 
 @RunWith(PowerMockRunner.class)
+@Ignore
 @PowerMockIgnore("javax.management.*")
 public class ErrorReporterTest {
 

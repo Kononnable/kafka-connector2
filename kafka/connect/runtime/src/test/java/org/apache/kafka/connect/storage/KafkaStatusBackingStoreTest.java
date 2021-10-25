@@ -38,6 +38,7 @@ import org.easymock.EasyMock;
 import org.easymock.EasyMockSupport;
 import org.easymock.Mock;
 import org.junit.Before;
+import org.junit.Ignore;
 import org.junit.Test;
 import org.junit.runner.RunWith;
 import org.powermock.modules.junit4.PowerMockRunner;
@@ -61,6 +62,7 @@ import static org.junit.Assert.assertTrue;
 
 @SuppressWarnings("unchecked")
 @RunWith(PowerMockRunner.class)
+@Ignore()
 public class KafkaStatusBackingStoreTest extends EasyMockSupport {
 
     private static final String STATUS_TOPIC = "status-topic";

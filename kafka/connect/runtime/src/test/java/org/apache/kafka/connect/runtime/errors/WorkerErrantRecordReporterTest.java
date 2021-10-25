@@ -22,6 +22,7 @@ import org.apache.kafka.connect.storage.Converter;
 import org.apache.kafka.connect.storage.HeaderConverter;
 import org.easymock.Mock;
 import org.junit.Before;
+import org.junit.Ignore;
 import org.junit.Test;
 import org.junit.runner.RunWith;
 import org.powermock.core.classloader.annotations.PowerMockIgnore;
@@ -34,6 +35,7 @@ import static org.junit.Assert.assertTrue;
 
 
 @RunWith(PowerMockRunner.class)
+@Ignore
 @PowerMockIgnore("javax.management.*")
 public class WorkerErrantRecordReporterTest {
 
