@@ -16,6 +16,7 @@
  */
 package org.apache.kafka.clients.consumer;
 
+import org.apache.kafka.RustLib;
 import org.apache.kafka.common.header.Headers;
 import org.apache.kafka.common.header.internals.RecordHeaders;
 import org.apache.kafka.common.record.RecordBatch;
@@ -29,12 +30,17 @@ import java.util.Optional;
  * to the record in a Kafka partition, and a timestamp as marked by the corresponding ProducerRecord.
  */
 public class ConsumerRecord<K, V> {
+
+    static {
+        RustLib.load();
+    }
+    
     public static final long NO_TIMESTAMP = RecordBatch.NO_TIMESTAMP;
     public static final int NULL_SIZE = -1;
 
     /**
      * @deprecated checksums are no longer exposed by this class, this constant will be removed in Apache Kafka 4.0
-     *             (deprecated since 3.0).
+     *             (deprecated since 3.0).S
      */
     @Deprecated
     public static final int NULL_CHECKSUM = -1;
@@ -218,83 +224,61 @@ public class ConsumerRecord<K, V> {
     /**
      * The topic this record is received from (never null)
      */
-    public String topic() {
-        return this.topic;
-    }
+    public native String topic();
 
     /**
      * The partition from which this record is received
      */
-    public int partition() {
-        return this.partition;
-    }
+    public native int partition();
 
     /**
      * The headers (never null)
      */
-    public Headers headers() {
-        return headers;
-    }
-    
+    public native Headers headers();
+
     /**
      * The key (or null if no key is specified)
      */
-    public K key() {
-        return key;
-    }
+    public native K key();
 
     /**
      * The value
      */
-    public V value() {
-        return value;
-    }
+    public native V value();
 
     /**
      * The position of this record in the corresponding Kafka partition.
      */
-    public long offset() {
-        return offset;
-    }
+    public native long offset();
 
     /**
      * The timestamp of this record
      */
-    public long timestamp() {
-        return timestamp;
-    }
+    public native long timestamp();
 
     /**
      * The timestamp type of this record
      */
-    public TimestampType timestampType() {
-        return timestampType;
-    }
+    public native TimestampType timestampType();
 
     /**
      * The size of the serialized, uncompressed key in bytes. If key is null, the returned size
      * is -1.
      */
-    public int serializedKeySize() {
-        return this.serializedKeySize;
-    }
+    public native int serializedKeySize();
 
     /**
      * The size of the serialized, uncompressed value in bytes. If value is null, the
      * returned size is -1.
      */
-    public int serializedValueSize() {
-        return this.serializedValueSize;
-    }
+    public native  int serializedValueSize();
 
     /**
      * Get the leader epoch for the record if available
      *
      * @return the leader epoch or empty for legacy record formats
      */
-    public Optional<Integer> leaderEpoch() {
-        return leaderEpoch;
-    }
+    public native Optional<Integer> leaderEpoch();
 
     @Override
     public String toString() {
