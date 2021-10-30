@@ -36,7 +36,7 @@
   <allow pkg="javax.net.ssl" />
   <allow pkg="javax.security" />
   <allow pkg="org.ietf.jgss" />
-
+  <allow pkg="org.apache.kafka" />
   <!-- no one depends on the server -->
   <disallow pkg="kafka" />
 
@@ -47,6 +47,8 @@
   <allow pkg="org.apache.kafka.common.utils" />
   <allow pkg="org.apache.kafka.common.errors" exact-match="true" />
   <allow pkg="org.apache.kafka.common.memory" />
+
+  <allow class="org.apache.kafka.RustLib" exact-match="true" />
 
   <subpackage name="common">
     <allow class="org.apache.kafka.clients.consumer.ConsumerRecord" exact-match="true" />
@@ -269,7 +271,6 @@
 
   <subpackage name="clients">
     <allow pkg="org.apache.kafka.common" />
-    <allow pkg="org.apache.kafka" />
     <allow pkg="org.apache.kafka.clients" exact-match="true"/>
     <allow pkg="org.apache.kafka.test" />
 

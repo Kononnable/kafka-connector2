@@ -2,6 +2,7 @@ package org.apache.kafka;
 
 
 import java.io.File;
+import java.util.Iterator;
 
 public class RustLib {
 
@@ -14,5 +15,9 @@ public class RustLib {
     }
     public static void load(){
         // static code should be run the first time class is used
+    }
+
+    public static <T> Iterable<T> iteratorToIterable(Iterator<T> iterator) {
+        return () -> iterator;
     }
 }

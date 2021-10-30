@@ -16,9 +16,9 @@
  */
 package org.apache.kafka.common.header.internals;
 
+import org.apache.kafka.RustLib;
 import org.apache.kafka.common.header.Header;
 import org.apache.kafka.common.header.Headers;
-import org.apache.kafka.common.record.Record;
 import org.apache.kafka.common.utils.AbstractIterator;
 
 import java.util.ArrayList;
@@ -28,6 +28,10 @@ import java.util.List;
 import java.util.Objects;
 
 public class RecordHeaders implements Headers {
+
+    static {
+        RustLib.load();
+    }
 
     private final List<Header> headers;
     private volatile boolean isReadOnly;
@@ -56,71 +60,82 @@ public class RecordHeaders implements Headers {
     }
 
     @Override
-    public Headers add(Header header) throws IllegalStateException {
-        Objects.requireNonNull(header, "Header cannot be null.");
-        canWrite();
-        headers.add(header);
-        return this;
-    }
+    public native Headers add(Header header) throws IllegalStateException;
+//    public Headers add(Header header) throws IllegalStateException {
+//        Objects.requireNonNull(header, "Header cannot be null.");
+//        canWrite();
+//        headers.add(header);
+//        return this;
+//    }
 
     @Override
-    public Headers add(String key, byte[] value) throws IllegalStateException {
-        return add(new RecordHeader(key, value));
-    }
+    public native Headers add(String key, byte[] value) throws IllegalStateException;
+//    public Headers add(String key, byte[] value) throws IllegalStateException {
+//        return add(new RecordHeader(key, value));
+//    }
 
     @Override
-    public Headers remove(String key) throws IllegalStateException {
-        canWrite();
-        checkKey(key);
-        Iterator<Header> iterator = iterator();
-        while (iterator.hasNext()) {
-            if (iterator.next().key().equals(key)) {
-                iterator.remove();
-            }
-        }
-        return this;
-    }
+    public native Headers remove(String key) throws IllegalStateException;
+//        public Headers remove(String key) throws IllegalStateException {
+//        canWrite();
+//        checkKey(key);
+//        Iterator<Header> iterator = iterator();
+//        while (iterator.hasNext()) {
+//            if (iterator.next().key().equals(key)) {
+//                iterator.remove();
+//            }
+//        }
+//        return this;
+//    }
 
     @Override
-    public Header lastHeader(String key) {
-        checkKey(key);
-        for (int i = headers.size() - 1; i >= 0; i--) {
-            Header header = headers.get(i);
-            if (header.key().equals(key)) {
-                return header;
-            }
-        }
-        return null;
-    }
+    public native Header lastHeader(String key);
+//        public Header lastHeader(String key) {
+//        checkKey(key);
+//        for (int i = headers.size() - 1; i >= 0; i--) {
+//            Header header = headers.get(i);
+//            if (header.key().equals(key)) {
+//                return header;
+//            }
+//        }
+//        return null;
+//    }
+
 
     @Override
-    public Iterable<Header> headers(final String key) {
-        checkKey(key);
-        return () -> new FilterByKeyIterator(headers.iterator(), key);
-    }
+    public native Iterable<Header> headers(final String key);
+//    public Iterable<Header> headers(final String key) {
+//        checkKey(key);
+//        return () -> new FilterByKeyIterator(headers.iterator(), key);
+//    }
 
     @Override
-    public Iterator<Header> iterator() {
-        return closeAware(headers.iterator());
-    }
+    public native Iterator<Header> iterator();
+//    public Iterator<Header> iterator() {
+//        return closeAware(headers.iterator());
+//    }
 
-    public void setReadOnly() {
-        this.isReadOnly = true;
-    }
+    public native void setReadOnly();
+//            public void setReadOnly() {
+//        this.isReadOnly = true;
+//    }
 
-    public Header[] toArray() {
-        return headers.isEmpty() ? Record.EMPTY_HEADERS : headers.toArray(new Header[0]);     
-    }
+    public native Header[] toArray();
+//    public Header[] toArray() {
+//        return headers.isEmpty() ? Record.EMPTY_HEADERS : headers.toArray(new Header[0]);
+//    }
 
-    private void checkKey(String key) {
-        if (key == null)
-            throw new IllegalArgumentException("key cannot be null.");
-    }
+    private native void checkKey(String key);
+//    private void checkKey(String key) {
+//        if (key == null)
+//            throw new IllegalArgumentException("key cannot be null.");
+//    }
 
-    private void canWrite() {
-        if (isReadOnly)
-            throw new IllegalStateException("RecordHeaders has been closed.");
-    }
+    private native void canWrite();
+//    private void canWrite() {
+//        if (isReadOnly)
+//            throw new IllegalStateException("RecordHeaders has been closed.");
+//    }
 
     private Iterator<Header> closeAware(final Iterator<Header> original) {
         return new Iterator<Header>() {
