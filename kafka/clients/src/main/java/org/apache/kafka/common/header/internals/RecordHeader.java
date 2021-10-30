@@ -20,10 +20,13 @@ import java.nio.ByteBuffer;
 import java.util.Arrays;
 import java.util.Objects;
 
+import org.apache.kafka.RustLib;
 import org.apache.kafka.common.header.Header;
-import org.apache.kafka.common.utils.Utils;
 
 public class RecordHeader implements Header {
+    static {
+        RustLib.load();
+    }
     private ByteBuffer keyBuffer;
     private String key;
     private ByteBuffer valueBuffer;
@@ -39,22 +42,24 @@ public class RecordHeader implements Header {
         this.keyBuffer = Objects.requireNonNull(keyBuffer, "Null header keys are not permitted");
         this.valueBuffer = valueBuffer;
     }
-    
-    public String key() {
-        if (key == null) {
-            key = Utils.utf8(keyBuffer, keyBuffer.remaining());
-            keyBuffer = null;
-        }
-        return key;
-    }
 
-    public byte[] value() {
-        if (value == null && valueBuffer != null) {
-            value = Utils.toArray(valueBuffer);
-            valueBuffer = null;
-        }
-        return value;
-    }
+    public native String key();
+//    public String key() {
+//        if (key == null) {
+//            key = Utils.utf8(keyBuffer, keyBuffer.remaining());
+//            keyBuffer = null;
+//        }
+//        return key;
+//    }
+
+    public native byte[] value();
+//  public byte[] value() {
+//        if (value == null && valueBuffer != null) {
+//            value = Utils.toArray(valueBuffer);
+//            valueBuffer = null;
+//        }
+//        return value;
+//    }
 
     @Override
     public boolean equals(Object o) {
