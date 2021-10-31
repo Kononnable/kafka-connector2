@@ -1,6 +1,6 @@
 use jni::{
     objects::JObject,
-    sys::{jbyteArray, jobject, jstring},
+    sys::{jbyteArray, jstring},
     JNIEnv,
 };
 
