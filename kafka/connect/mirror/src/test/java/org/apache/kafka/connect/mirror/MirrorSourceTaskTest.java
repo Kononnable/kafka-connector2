@@ -36,6 +36,7 @@ import java.util.Optional;
 import static org.junit.jupiter.api.Assertions.assertEquals;
 import static org.junit.jupiter.api.Assertions.assertTrue;
 import static org.junit.jupiter.api.Assertions.assertFalse;
+import static org.junit.jupiter.api.Assertions.assertArrayEquals;
 import static org.mockito.ArgumentMatchers.any;
 import static org.mockito.Mockito.mock;
 import static org.mockito.Mockito.when;
@@ -66,9 +67,10 @@ public class MirrorSourceTaskTest {
                 "sourceRecord's timestamp is incorrect");
         assertEquals(key, sourceRecord.key(), "sourceRecord's key is incorrect");
         assertEquals(value, sourceRecord.value(), "sourceRecord's value is incorrect");
-        assertEquals(headers.lastHeader("header1").value(), sourceRecord.headers().lastWithName("header1").value(),
+
+        assertArrayEquals(headers.lastHeader("header1").value(), (byte[]) sourceRecord.headers().lastWithName("header1").value(),
                 "sourceRecord's header1 is incorrect");
-        assertEquals(headers.lastHeader("header2").value(), sourceRecord.headers().lastWithName("header2").value(),
+        assertArrayEquals(headers.lastHeader("header2").value(), (byte[]) sourceRecord.headers().lastWithName("header2").value(),
                 "sourceRecord's header2 is incorrect");
     }
 
@@ -167,7 +169,7 @@ public class MirrorSourceTaskTest {
             org.apache.kafka.connect.header.Header taskHeader = taskHeaders.get(i);
             assertEquals(expectedHeader.key(), taskHeader.key(),
                     "taskHeader's key expected to equal " + taskHeader.key());
-            assertEquals(expectedHeader.value(), taskHeader.value(),
+            assertArrayEquals(expectedHeader.value(), (byte[]) taskHeader.value(),
                     "taskHeader's value expected to equal " + taskHeader.value().toString());
         }
     }

@@ -62,6 +62,7 @@ dependencies = [
 name = "kafka-connector-jni"
 version = "0.1.0"
 dependencies = [
+ "bytes",
  "jni",
  "kafka-connector-macros",
 ]

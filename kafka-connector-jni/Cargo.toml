@@ -10,5 +10,6 @@ version = "0.1.0"
 crate_type = ["cdylib"]
 
 [dependencies]
+bytes = "1.0.1"
 jni = "0.19.0"
 kafka-connector-macros = {version = "0.1.0", path = "./../kafka-connector-macros"}

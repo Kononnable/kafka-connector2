@@ -22,44 +22,36 @@ import java.util.Objects;
 
 import org.apache.kafka.RustLib;
 import org.apache.kafka.common.header.Header;
+import org.apache.kafka.common.utils.Utils;
 
 public class RecordHeader implements Header {
     static {
         RustLib.load();
     }
-    private ByteBuffer keyBuffer;
-    private String key;
-    private ByteBuffer valueBuffer;
-    private byte[] value;
+    private long rustPointer;
 
     public RecordHeader(String key, byte[] value) {
         Objects.requireNonNull(key, "Null header keys are not permitted");
-        this.key = key;
-        this.value = value;
+        rustConstructor(key, value);
     }
 
     public RecordHeader(ByteBuffer keyBuffer, ByteBuffer valueBuffer) {
-        this.keyBuffer = Objects.requireNonNull(keyBuffer, "Null header keys are not permitted");
-        this.valueBuffer = valueBuffer;
+        Objects.requireNonNull(keyBuffer, "Null header keys are not permitted");
+        rustConstructor(Utils.utf8(keyBuffer), Utils.toArray(valueBuffer));
+    }
+
+    public native void rustConstructor(String key, byte[] value);
+    public native void rustDeconstructor();
+
+    @Override
+    protected void finalize() throws Throwable {
+        rustDeconstructor();
+        super.finalize();
     }
 
     public native String key();
-//    public String key() {
-//        if (key == null) {
-//            key = Utils.utf8(keyBuffer, keyBuffer.remaining());
-//            keyBuffer = null;
-//        }
-//        return key;
-//    }
 
     public native byte[] value();
-//  public byte[] value() {
-//        if (value == null && valueBuffer != null) {
-//            value = Utils.toArray(valueBuffer);
-//            valueBuffer = null;
-//        }
-//        return value;
-//    }
 
     @Override
     public boolean equals(Object o) {

@@ -3,6 +3,7 @@
 /kafka/.idea
 /kafka/build
 /kafka/core/data
+/kafka/core/data2
 /kafka/docs/generated
 /kafka/*/build
 /kafka/connect/*/build
