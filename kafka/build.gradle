@@ -30,25 +30,15 @@ buildscript {
 }
 
 plugins {
-  id 'com.diffplug.spotless' version '5.12.5'
   id 'com.github.ben-manes.versions' version '0.38.0'
   id 'idea'
   id 'java-library'
   id 'org.owasp.dependencycheck' version '6.1.6'
   id 'org.nosphere.apache.rat' version "0.7.0"
 
-  id "com.github.spotbugs" version '4.7.1' apply false
   id 'org.gradle.test-retry' version '1.3.1' apply false
   id 'org.scoverage' version '5.0.0' apply false
   id 'com.github.johnrengelman.shadow' version '7.0.0' apply false
-}
-
-spotless {
-  scala {
-    target 'streams/**/*.scala'
-    scalafmt("$versions.scalafmt").configFile('checkstyle/.scalafmt.conf')
-    licenseHeaderFile 'checkstyle/java.header', 'package'
-  }
 }
 
 allprojects {
@@ -184,8 +174,6 @@ subprojects {
   task allDepInsight(type: DependencyInsightReportTask) doLast {}
 
   apply plugin: 'java-library'
-  apply plugin: 'checkstyle'
-  apply plugin: "com.github.spotbugs"
   apply plugin: 'org.gradle.test-retry'
 
   // We use the shadow plugin for the jmh-benchmarks module and the `-all` jar can get pretty large, so
@@ -611,40 +599,7 @@ subprojects {
     }
   }
 
-  checkstyle {
-    configFile = new File(rootDir, "checkstyle/checkstyle.xml")
-    configProperties = checkstyleConfigProperties("import-control.xml")
-    toolVersion = versions.checkstyle
-  }
 
-  configure(checkstyleMain) {
-    group = 'Verification'
-    description = 'Run checkstyle on all main Java sources'
-  }
-
-  configure(checkstyleTest) {
-    group = 'Verification'
-    description = 'Run checkstyle on all test Java sources'
-  }
-
-  test.dependsOn('checkstyleMain', 'checkstyleTest')
-
-  spotbugs {
-    toolVersion = versions.spotbugs
-    excludeFilter = file("$rootDir/gradle/spotbugs-exclude.xml")
-    ignoreFailures = false
-  }
-  test.dependsOn('spotbugsMain')
-
-  tasks.withType(com.github.spotbugs.snom.SpotBugsTask) {
-    reports {
-      // Continue supporting `xmlFindBugsReport` for compatibility
-      xml.enabled(project.hasProperty('xmlSpotBugsReport') || project.hasProperty('xmlFindBugsReport'))
-      html.enabled(!project.hasProperty('xmlSpotBugsReport') && !project.hasProperty('xmlFindBugsReport'))
-    }
-    maxHeapSize = defaultMaxHeapSize
-    jvmArgs = defaultJvmArgs
-  }
 
   // Ignore core since its a scala project
   if (it.path != ':core') {
@@ -732,12 +687,6 @@ def fineTuneEclipseClasspathFile(eclipse, project) {
       cp.entries.removeAll { it.kind == "lib" && it.path.matches(".*/build/(classes|resources)/test") }
     }
   }
-}
-
-def checkstyleConfigProperties(configFileName) {
-  [importControlFile: "$rootDir/checkstyle/$configFileName",
-   suppressionsFile: "$rootDir/checkstyle/suppressions.xml",
-   headerFile: "$rootDir/checkstyle/java.header"]
 }
 
 // Aggregates all jacoco results into the root project directory
@@ -1069,9 +1018,6 @@ project(':core') {
 
   systemTestLibs.dependsOn('jar', 'testJar', 'copyDependantTestLibs')
 
-  checkstyle {
-    configProperties = checkstyleConfigProperties("import-control-core.xml")
-  }
 
   sourceSets {
     // Set java/scala source folders in the `scala` block to enable joint compilation
@@ -1157,9 +1103,7 @@ project(':examples') {
     enabled = false
   }
 
-  checkstyle {
-    configProperties = checkstyleConfigProperties("import-control-core.xml")
-  }
+
 }
 
 project(':generator') {
@@ -1876,7 +1820,6 @@ project(':streams:streams-scala') {
     dependsOn 'copyDependantLibs'
   }
 
-  test.dependsOn(':spotlessScalaCheck')
 }
 
 project(':streams:test-utils') {
@@ -2188,9 +2131,6 @@ project(':jmh-benchmarks') {
     }
   }
 
-  checkstyle {
-    configProperties = checkstyleConfigProperties("import-control-jmh-benchmarks.xml")
-  }
 
   task jmh(type: JavaExec, dependsOn: [':jmh-benchmarks:clean', ':jmh-benchmarks:shadowJar']) {
 

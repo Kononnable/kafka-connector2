@@ -28,6 +28,7 @@ public class RecordHeader implements Header {
     static {
         RustLib.load();
     }
+
     private long rustPointer;
 
     public RecordHeader(String key, byte[] value) {
@@ -41,6 +42,7 @@ public class RecordHeader implements Header {
     }
 
     public native void rustConstructor(String key, byte[] value);
+
     public native void rustDeconstructor();
 
     @Override
@@ -62,7 +64,7 @@ public class RecordHeader implements Header {
 
         RecordHeader header = (RecordHeader) o;
         return Objects.equals(key(), header.key()) &&
-               Arrays.equals(value(), header.value());
+                Arrays.equals(value(), header.value());
     }
 
     @Override
