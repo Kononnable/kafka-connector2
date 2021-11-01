@@ -6,6 +6,58 @@ use jni::{
     JNIEnv,
 };
 
+use crate::common::header::internals::record_header::{self, clone_to_java};
+
+use super::record_header::RecordHeader;
+
+pub type RecordHeaders = Vec<RecordHeader>;
+
+/*
+ * Class:     org_apache_kafka_common_header_internals_RecordHeader
+ * Method:    rustConstructor
+ * Signature: (Ljava/lang/String;[B)V
+ */
+#[no_mangle]
+#[allow(non_snake_case)]
+pub extern "system" fn Java_org_apache_kafka_common_header_internals_RecordHeaders_rustConstructor(
+    env: JNIEnv,
+    obj: JObject,
+) {
+    let result = || -> jni::errors::Result<_> {
+        let record_headers = Box::new(RecordHeaders::new());
+        let ptr = Box::into_raw(record_headers);
+        env.set_field(obj, "rustPointer", "J", JValue::Long(ptr as i64))?;
+
+        Ok(())
+    }();
+    match result {
+        Ok(_) | Err(jni::errors::Error::JavaException) => (),
+        _ => panic!("{:?}", result),
+    }
+}
+/*
+ * Class:     org_apache_kafka_common_header_internals_RecordHeader
+ * Method:    rustDeconstructor
+ * Signature: ()V
+ */
+#[no_mangle]
+#[allow(non_snake_case)]
+pub extern "system" fn Java_org_apache_kafka_common_header_internals_RecordHeaders_rustDeconstructor(
+    env: JNIEnv,
+    obj: JObject,
+) {
+    let result = || -> jni::errors::Result<_> {
+        let ptr = env.get_field(obj, "rustPointer", "J")?.j()?;
+        let _record_headers = unsafe { Box::from_raw(ptr as *mut RecordHeaders) };
+
+        Ok(())
+    }();
+    match result {
+        Ok(_) | Err(jni::errors::Error::JavaException) => (),
+        _ => panic!("{:?}", result),
+    }
+}
+
 /*
  * Class:     org_apache_kafka_common_header_internals_RecordHeaders
  * Method:    add
@@ -24,7 +76,6 @@ pub extern "system" fn Java_org_apache_kafka_common_header_internals_RecordHeade
             .expect("Failed to load the target class");
 
         let error_msg = env.new_string("Header cannot be null.").unwrap();
-
         env.call_static_method(
             class,
             "requireNonNull",
@@ -32,13 +83,12 @@ pub extern "system" fn Java_org_apache_kafka_common_header_internals_RecordHeade
             &[JValue::Object(header), JValue::Object(error_msg.into())],
         )?;
 
-        let headers = env.get_field(obj, "headers", "Ljava/util/List;")?.l()?;
-        env.call_method(
-            headers,
-            "add",
-            "(Ljava/lang/Object;)Z",
-            &[JValue::Object(header)],
-        )?;
+        let header = record_header::clone_from_java(env, header)?;
+
+        let ptr = env.get_field(obj, "rustPointer", "J")?.j()?;
+        let mut record_headers = unsafe { Box::from_raw(ptr as *mut RecordHeaders) };
+        record_headers.push(header);
+        let _ptr = Box::into_raw(record_headers);
         Ok(())
     }();
 
@@ -64,22 +114,19 @@ pub extern "system" fn Java_org_apache_kafka_common_header_internals_RecordHeade
     value: jbyteArray,
 ) -> jobject {
     let result = || -> jni::errors::Result<()> {
-        let class = env
-            .find_class("org/apache/kafka/common/header/internals/RecordHeader")
-            .expect("Failed to load the target class");
+        let key: String = env.get_string(key.into())?.into();
+        let value = if value.is_null() {
+            vec![]
+        } else {
+            env.convert_byte_array(value).unwrap()
+        };
+        let header = RecordHeader::new(key, value);
 
-        let header = env.new_object(
-            class,
-            "(Ljava/lang/String;[B)V",
-            &[JValue::Object(key.into()), JValue::Object(value.into())],
-        )?;
+        let ptr = env.get_field(obj, "rustPointer", "J")?.j()?;
+        let mut record_headers = unsafe { Box::from_raw(ptr as *mut RecordHeaders) };
+        record_headers.push(header);
+        let _ptr = Box::into_raw(record_headers);
 
-        env.call_method(
-            obj,
-            "add",
-            "(Lorg/apache/kafka/common/header/Header;)Lorg/apache/kafka/common/header/Headers;",
-            &[JValue::Object(header)],
-        )?;
         Ok(())
     }();
 
@@ -110,29 +157,17 @@ pub extern "system" fn Java_org_apache_kafka_common_header_internals_RecordHeade
             "(Ljava/lang/String;)V",
             &[JValue::Object(key.into())],
         )?;
-        let iterator = env
-            .call_method(obj, "iterator", "()Ljava/util/Iterator;", &[])?
-            .l()?;
+        let key: String = env.get_string(key.into())?.into();
 
-        while env.call_method(iterator, "hasNext", "()Z", &[])?.z()? {
-            let current_value = env
-                .call_method(iterator, "next", "()Ljava/lang/Object;", &[])?
-                .l()?;
-            let current_key = env
-                .call_method(current_value, "key", "()Ljava/lang/String;", &[])?
-                .l()?;
-            let is_equal = env
-                .call_method(
-                    current_key,
-                    "equals",
-                    "(Ljava/lang/Object;)Z",
-                    &[JValue::Object(key.into())],
-                )?
-                .z()?;
-            if is_equal {
-                env.call_method(iterator, "remove", "()V", &[])?;
-            }
-        }
+        let ptr = env.get_field(obj, "rustPointer", "J")?.j()?;
+        let record_headers = unsafe { Box::from_raw(ptr as *mut RecordHeaders) };
+        let filtered = record_headers
+            .into_iter()
+            .filter(|header| header.key != key)
+            .collect::<RecordHeaders>();
+        let ptr = Box::into_raw(Box::new(filtered));
+        env.set_field(obj, "rustPointer", "J", JValue::Long(ptr as i64))?;
+
         Ok(())
     }();
     match result {
@@ -162,28 +197,19 @@ pub extern "system" fn Java_org_apache_kafka_common_header_internals_RecordHeade
             "(Ljava/lang/String;)V",
             &[JValue::Object(key.into())],
         )?;
-        let headers = env.get_field(obj, "headers", "Ljava/util/List;")?.l()?;
-        let size = env.call_method(headers, "size", "()I", &[])?.i()?;
-        for i in (0..size).rev() {
-            let header = env
-                .call_method(headers, "get", "(I)Ljava/lang/Object;", &[JValue::Int(i)])?
-                .l()?;
-            let current_key = env
-                .call_method(header, "key", "()Ljava/lang/String;", &[])?
-                .l()?;
-            let is_equal = env
-                .call_method(
-                    current_key,
-                    "equals",
-                    "(Ljava/lang/Object;)Z",
-                    &[JValue::Object(key.into())],
-                )?
-                .z()?;
-            if is_equal {
-                return Ok(header);
-            }
-        }
-        Ok(JObject::null())
+
+        let key: String = env.get_string(key.into())?.into();
+        let ptr = env.get_field(obj, "rustPointer", "J")?.j()?;
+        let record_headers = unsafe { Box::from_raw(ptr as *mut RecordHeaders) };
+        let result = record_headers
+            .iter()
+            .rev()
+            .find(|x| x.key == key)
+            .map(|header| clone_to_java(env, header))
+            .transpose()?;
+        let _ptr = Box::into_raw(record_headers);
+
+        Ok(result.map(Into::into).unwrap_or_else(JObject::null))
     }();
     match result {
         Ok(val) => val.into_inner(),
@@ -212,35 +238,24 @@ pub extern "system" fn Java_org_apache_kafka_common_header_internals_RecordHeade
             &[JValue::Object(key.into())],
         )?;
 
-        let iterator = env
-            .call_method(obj, "iterator", "()Ljava/util/Iterator;", &[])?
-            .l()?;
+        let key: String = env.get_string(key.into())?.into();
+        let ptr = env.get_field(obj, "rustPointer", "J")?.j()?;
+        let record_headers = unsafe { Box::from_raw(ptr as *mut RecordHeaders) };
+        let result = record_headers
+            .iter()
+            .filter(|x| x.key == key)
+            .map(|header| clone_to_java(env, header))
+            .collect::<jni::errors::Result<Vec<jobject>>>()?;
+        let result = result.into_iter().map(Into::into).collect::<Vec<JObject>>();
+        let _ptr = Box::into_raw(record_headers);
 
-        let iterator_class = env
-            .find_class(
-                "org/apache/kafka/common/header/internals/RecordHeaders$FilterByKeyIterator",
-            )
-            .expect("Failed to load the target class");
+        let array_list_class = env.find_class("java/util/ArrayList")?;
+        let array = env.new_object(array_list_class, "(I)V", &[(result.len() as i32).into()])?;
+        for object in result {
+            env.call_method(array, "add", "(Ljava/lang/Object;)Z", &[object.into()])?;
+        }
 
-        let filter_iterator = env.new_object(
-            iterator_class,
-            "(Ljava/util/Iterator;Ljava/lang/String;)V",
-            &[iterator.into(), key.into()],
-        )?;
-
-        let rust_lib_class = env
-            .find_class("org/apache/kafka/RustLib")
-            .expect("Failed to load the target class");
-        let iterable = env
-            .call_static_method(
-                rust_lib_class,
-                "iteratorToIterable",
-                "(Ljava/util/Iterator;)Ljava/lang/Iterable;",
-                &[filter_iterator.into()],
-            )?
-            .l()?;
-
-        Ok(iterable)
+        Ok(array)
     }();
     match result {
         Ok(val) => val.into_inner(),
@@ -261,10 +276,24 @@ pub extern "system" fn Java_org_apache_kafka_common_header_internals_RecordHeade
     obj: JObject,
 ) -> jobject {
     let result = || -> jni::errors::Result<_> {
-        let headers = env.get_field(obj, "headers", "Ljava/util/List;")?.l()?;
+        let ptr = env.get_field(obj, "rustPointer", "J")?.j()?;
+        let record_headers = unsafe { Box::from_raw(ptr as *mut RecordHeaders) };
+        let result = record_headers
+            .iter()
+            .map(|header| clone_to_java(env, header))
+            .collect::<jni::errors::Result<Vec<jobject>>>()?;
+        let result = result.into_iter().map(Into::into).collect::<Vec<JObject>>();
+        let _ptr = Box::into_raw(record_headers);
+
+        let array_list_class = env.find_class("java/util/ArrayList")?;
+        let array = env.new_object(array_list_class, "(I)V", &[(result.len() as i32).into()])?;
+        for object in result {
+            env.call_method(array, "add", "(Ljava/lang/Object;)Z", &[object.into()])?;
+        }
         let iterator = env
-            .call_method(headers, "iterator", "()Ljava/util/Iterator;", &[])?
+            .call_method(array, "iterator", "()Ljava/util/Iterator;", &[])?
             .l()?;
+
         Ok(iterator)
     }();
     match result {
@@ -286,51 +315,26 @@ pub extern "system" fn Java_org_apache_kafka_common_header_internals_RecordHeade
     obj: JObject,
 ) -> jobject {
     let result = || -> jni::errors::Result<_> {
-        let headers = env.get_field(obj, "headers", "Ljava/util/List;")?.l()?;
-        let isEmpty = env.call_method(headers, "isEmpty", "()Z", &[])?.z()?;
-        if isEmpty {
-            let record = env.find_class("org/apache/kafka/common/record/Record")?;
-            let ret_val = env
-                .get_static_field(
-                    record,
-                    "EMPTY_HEADERS",
-                    "[Lorg/apache/kafka/common/header/Header;",
-                )?
-                .l()?;
-            Ok(ret_val)
-        } else {
-            let ret_val = env
-                .call_method(headers, "toArray", "()[Ljava/lang/Object;", &[])?
-                .l()?;
-            Ok(ret_val)
+        let ptr = env.get_field(obj, "rustPointer", "J")?.j()?;
+        let record_headers = unsafe { Box::from_raw(ptr as *mut RecordHeaders) };
+        let result = record_headers
+            .iter()
+            .map(|header| clone_to_java(env, header))
+            .collect::<jni::errors::Result<Vec<jobject>>>()?;
+        let result = result.into_iter().map(Into::into).collect::<Vec<JObject>>();
+        let _ptr = Box::into_raw(record_headers);
+
+        let element_class = env.find_class("org/apache/kafka/common/header/Header")?;
+        let array = env.new_object_array(result.len() as i32, element_class, JObject::null())?;
+        for object in result.into_iter().enumerate() {
+            env.set_object_array_element(array, object.0 as i32, object.1)?;
         }
+
+        Ok(array)
     }();
     match result {
-        Ok(val) => val.into_inner(),
+        Ok(val) => val,
         Err(jni::errors::Error::JavaException) => JObject::null().into_inner(),
-        _ => panic!("{:?}", result),
-    }
-}
-/*
- * Class:     org_apache_kafka_common_header_internals_RecordHeaders
- * Method:    checkKey
- * Signature: (Ljava/lang/String;)V
- */
-#[no_mangle]
-#[allow(non_snake_case)]
-pub extern "system" fn Java_org_apache_kafka_common_header_internals_RecordHeaders_checkKey(
-    env: JNIEnv,
-    _obj: JObject,
-    key: jstring,
-) {
-    let result = || -> jni::errors::Result<_> {
-        if key.is_null() {
-            env.throw_new("java/lang/IllegalArgumentException", "key cannot be null.")?;
-        };
-        Ok(())
-    }();
-    match result {
-        Ok(_) | Err(jni::errors::Error::JavaException) => (),
         _ => panic!("{:?}", result),
     }
 }

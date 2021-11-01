@@ -33,7 +33,17 @@ public class RecordHeaders implements Headers {
         RustLib.load();
     }
 
-    private final List<Header> headers;
+    private long rustPointer;
+
+    public native void rustConstructor();
+
+    public native void rustDeconstructor();
+
+    @Override
+    protected void finalize() throws Throwable {
+        rustDeconstructor();
+        super.finalize();
+    }
 
     public RecordHeaders() {
         this((Iterable<Header>) null);
@@ -44,16 +54,10 @@ public class RecordHeaders implements Headers {
     }
 
     public RecordHeaders(Iterable<Header> headers) {
-        //Use efficient copy constructor if possible, fallback to iteration otherwise
-        if (headers == null) {
-            this.headers = new ArrayList<>();
-        } else if (headers instanceof RecordHeaders) {
-            this.headers = new ArrayList<>(((RecordHeaders) headers).headers);
-        } else {
-            this.headers = new ArrayList<>();
+        this.rustConstructor();
+        if (headers != null) {
             for (Header header : headers) {
-                Objects.requireNonNull(header, "Header cannot be null.");
-                this.headers.add(header);
+                this.add(header);
             }
         }
     }
@@ -119,11 +123,10 @@ public class RecordHeaders implements Headers {
 //        return headers.isEmpty() ? Record.EMPTY_HEADERS : headers.toArray(new Header[0]);
 //    }
 
-    private native void checkKey(String key);
-//    private void checkKey(String key) {
-//        if (key == null)
-//            throw new IllegalArgumentException("key cannot be null.");
-//    }
+    private void checkKey(String key) {
+        if (key == null)
+            throw new IllegalArgumentException("key cannot be null.");
+    }
 
     @Override
     public boolean equals(Object o) {
@@ -136,42 +139,19 @@ public class RecordHeaders implements Headers {
 
         RecordHeaders headers1 = (RecordHeaders) o;
 
-        return Objects.equals(headers, headers1.headers);
+        return Arrays.equals(toArray(), headers1.toArray());
     }
 
     @Override
     public int hashCode() {
-        return headers != null ? headers.hashCode() : 0;
+        return Arrays.hashCode(toArray());
     }
 
     @Override
     public String toString() {
         return "RecordHeaders(" +
-                "headers = " + headers +
+                "headers = " + Arrays.toString(toArray()) +
                 ')';
     }
 
-    private static final class FilterByKeyIterator extends AbstractIterator<Header> {
-
-        private final Iterator<Header> original;
-        private final String key;
-
-        private FilterByKeyIterator(Iterator<Header> original, String key) {
-            this.original = original;
-            this.key = key;
-        }
-
-        protected Header makeNext() {
-            while (true) {
-                if (original.hasNext()) {
-                    Header header = original.next();
-                    if (!header.key().equals(key))
-                        continue;
-
-                    return header;
-                }
-                return this.allDone();
-            }
-        }
-    }
 }

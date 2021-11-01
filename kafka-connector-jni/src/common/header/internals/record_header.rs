@@ -1,10 +1,11 @@
 use bytes::Bytes;
 use jni::{
     objects::{JObject, JValue},
-    sys::{jbyteArray, jstring},
+    sys::{jbyteArray, jobject, jstring},
     JNIEnv,
 };
 
+#[derive(Debug, Clone)]
 pub struct RecordHeader {
     pub key: String,
     pub value: Bytes,
@@ -14,6 +15,32 @@ impl RecordHeader {
         let value = value.into();
         RecordHeader { key, value }
     }
+}
+
+const CLASS_NAME: &str = "org/apache/kafka/common/header/internals/RecordHeader";
+// May be slower, but have to clone if we want to avoid Arc<> on each structure in rust
+pub fn clone_from_java(env: JNIEnv, obj: JObject) -> jni::errors::Result<RecordHeader> {
+    let class = env.find_class(CLASS_NAME)?;
+    if !env.is_instance_of(obj, class)? {
+        env.throw_new("java/lang/Exception", "Wrong object class")?;
+        // dbg!("Wrong object class");
+        return Err(jni::errors::Error::JavaException);
+    }
+    let ptr = env.get_field(obj, "rustPointer", "J")?.j()?;
+    let record_header = unsafe { Box::from_raw(ptr as *mut RecordHeader) };
+    let clone = record_header.as_ref().clone();
+    let _ptr = Box::into_raw(record_header);
+    Ok(clone)
+}
+// Clones object to java - making a clone readonly in most cases(java changes won't affect real state)
+// May produce errors in java (testing) logic, however needed if we want to avoid Arc<> on rust structures
+pub fn clone_to_java(env: JNIEnv, header: &RecordHeader) -> jni::errors::Result<jobject> {
+    let class = env.find_class(CLASS_NAME)?;
+    let obj = env.alloc_object(class)?;
+    let copy = Box::new(header.clone());
+    let ptr = Box::into_raw(copy);
+    env.set_field(obj, "rustPointer", "J", JValue::Long(ptr as i64))?;
+    Ok(obj.into_inner())
 }
 
 /*
