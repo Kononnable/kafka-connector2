@@ -32,8 +32,6 @@ pub extern "system" fn Java_org_apache_kafka_common_header_internals_RecordHeade
             &[JValue::Object(header), JValue::Object(error_msg.into())],
         )?;
 
-        env.call_method(obj, "canWrite", "()V", &[])?;
-
         let headers = env.get_field(obj, "headers", "Ljava/util/List;")?.l()?;
         env.call_method(
             headers,
@@ -106,7 +104,6 @@ pub extern "system" fn Java_org_apache_kafka_common_header_internals_RecordHeade
     key: jstring,
 ) -> jobject {
     let result = || -> jni::errors::Result<()> {
-        env.call_method(obj, "canWrite", "()V", &[])?;
         env.call_method(
             obj,
             "checkKey",
@@ -268,35 +265,13 @@ pub extern "system" fn Java_org_apache_kafka_common_header_internals_RecordHeade
         let iterator = env
             .call_method(headers, "iterator", "()Ljava/util/Iterator;", &[])?
             .l()?;
-        let close_aware = env
-            .call_method(
-                obj,
-                "closeAware",
-                "(Ljava/util/Iterator;)Ljava/util/Iterator;",
-                &[iterator.into()],
-            )?
-            .l()?;
-        Ok(close_aware)
+        Ok(iterator)
     }();
     match result {
         Ok(val) => val.into_inner(),
         Err(jni::errors::Error::JavaException) => JObject::null().into_inner(),
         _ => panic!("{:?}", result),
     }
-}
-
-/*
- * Class:     org_apache_kafka_common_header_internals_RecordHeaders
- * Method:    setReadOnly
- * Signature: ()V
- */
-#[no_mangle]
-#[allow(non_snake_case)]
-pub extern "system" fn Java_org_apache_kafka_common_header_internals_RecordHeaders_setReadOnly(
-    env: JNIEnv,
-    obj: JObject,
-) {
-    env.set_field(obj, "isReadOnly", "Z", true.into()).unwrap();
 }
 
 /*
@@ -351,34 +326,6 @@ pub extern "system" fn Java_org_apache_kafka_common_header_internals_RecordHeade
     let result = || -> jni::errors::Result<_> {
         if key.is_null() {
             env.throw_new("java/lang/IllegalArgumentException", "key cannot be null.")?;
-        };
-        Ok(())
-    }();
-    match result {
-        Ok(_) | Err(jni::errors::Error::JavaException) => (),
-        _ => panic!("{:?}", result),
-    }
-}
-
-/*
- * Class:     org_apache_kafka_common_header_internals_RecordHeaders
- * Method:    canWrite
- * Signature: ()V
- */
-#[no_mangle]
-#[allow(non_snake_case)]
-pub extern "system" fn Java_org_apache_kafka_common_header_internals_RecordHeaders_canWrite(
-    env: JNIEnv,
-    obj: JObject,
-) {
-    let result = || -> jni::errors::Result<_> {
-        let is_readonly = env.get_field(obj, "isReadOnly", "Z")?.z()?;
-
-        if is_readonly {
-            env.throw_new(
-                "java/lang/IllegalStateException",
-                "RecordHeaders has been closed.",
-            )?;
         };
         Ok(())
     }();

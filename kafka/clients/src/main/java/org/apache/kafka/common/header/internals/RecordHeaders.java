@@ -34,7 +34,6 @@ public class RecordHeaders implements Headers {
     }
 
     private final List<Header> headers;
-    private volatile boolean isReadOnly;
 
     public RecordHeaders() {
         this((Iterable<Header>) null);
@@ -115,11 +114,6 @@ public class RecordHeaders implements Headers {
 //        return closeAware(headers.iterator());
 //    }
 
-    public native void setReadOnly();
-//            public void setReadOnly() {
-//        this.isReadOnly = true;
-//    }
-
     public native Header[] toArray();
 //    public Header[] toArray() {
 //        return headers.isEmpty() ? Record.EMPTY_HEADERS : headers.toArray(new Header[0]);
@@ -130,31 +124,6 @@ public class RecordHeaders implements Headers {
 //        if (key == null)
 //            throw new IllegalArgumentException("key cannot be null.");
 //    }
-
-    private native void canWrite();
-//    private void canWrite() {
-//        if (isReadOnly)
-//            throw new IllegalStateException("RecordHeaders has been closed.");
-//    }
-
-    private Iterator<Header> closeAware(final Iterator<Header> original) {
-        return new Iterator<Header>() {
-            @Override
-            public boolean hasNext() {
-                return original.hasNext();
-            }
-
-            public Header next() {
-                return original.next();
-            }
-
-            @Override
-            public void remove() {
-                canWrite();
-                original.remove();
-            }
-        };
-    }
 
     @Override
     public boolean equals(Object o) {
@@ -178,9 +147,8 @@ public class RecordHeaders implements Headers {
     @Override
     public String toString() {
         return "RecordHeaders(" +
-               "headers = " + headers +
-               ", isReadOnly = " + isReadOnly +
-               ')';
+                "headers = " + headers +
+                ')';
     }
 
     private static final class FilterByKeyIterator extends AbstractIterator<Header> {

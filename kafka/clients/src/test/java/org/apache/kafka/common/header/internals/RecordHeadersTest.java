@@ -72,7 +72,7 @@ public class RecordHeadersTest {
         assertEquals(1, getCount(headers));
 
         headers.add(new RecordHeader("key3", "value3".getBytes()));
-        
+
         assertNull(headers.lastHeader("key"));
 
         assertHeader("key2", "value2", headers.lastHeader("key2"));
@@ -128,44 +128,6 @@ public class RecordHeadersTest {
     }
 
     @Test
-    public void testReadOnly() throws IOException {
-        RecordHeaders headers = new RecordHeaders();
-        headers.add(new RecordHeader("key", "value".getBytes()));
-        Iterator<Header> headerIteratorBeforeClose = headers.iterator();
-        headers.setReadOnly();
-        try {
-            headers.add(new RecordHeader("key", "value".getBytes()));
-            fail("IllegalStateException expected as headers are closed");
-        } catch (IllegalStateException ise) {
-            //expected  
-        }
-
-        try {
-            headers.remove("key");
-            fail("IllegalStateException expected as headers are closed");
-        } catch (IllegalStateException ise) {
-            //expected  
-        }
-
-        try {
-            Iterator<Header> headerIterator = headers.iterator();
-            headerIterator.next();
-            headerIterator.remove();
-            fail("IllegalStateException expected as headers are closed");
-        } catch (IllegalStateException ise) {
-            //expected  
-        }
-        
-        try {
-            headerIteratorBeforeClose.next();
-            headerIteratorBeforeClose.remove();
-            fail("IllegalStateException expected as headers are closed");
-        } catch (IllegalStateException ise) {
-            //expected  
-        }
-    }
-
-    @Test
     public void testHeaders() throws IOException {
         RecordHeaders headers = new RecordHeaders();
         headers.add(new RecordHeader("key", "value".getBytes()));
@@ -193,7 +155,6 @@ public class RecordHeadersTest {
     public void testNew() throws IOException {
         RecordHeaders headers = new RecordHeaders();
         headers.add(new RecordHeader("key", "value".getBytes()));
-        headers.setReadOnly();
 
         RecordHeaders newHeaders = new RecordHeaders(headers);
         newHeaders.add(new RecordHeader("key", "value2".getBytes()));
@@ -227,7 +188,7 @@ public class RecordHeadersTest {
         }
         return count;
     }
-    
+
     static void assertHeader(String key, String value, Header actual) {
         assertEquals(key, actual.key());
         assertTrue(Arrays.equals(value.getBytes(), actual.value()));
