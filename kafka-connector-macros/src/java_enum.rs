@@ -30,21 +30,21 @@ pub fn java_enum_impl(input: TokenStream) -> TokenStream {
     let fields_to_jobject = generate_fields_to_jobject(&input.data, &enum_ident, &class_name);
 
     let expanded = quote! {
-        impl #impl_generics crate::FromJObject for #enum_ident #ty_generics #where_clause {
-            type EnumType = #enum_ident;
-            fn from_jobject(env: jni::JNIEnv, obj: jni::objects::JObject)-> jni::errors::Result<#enum_ident> {
+        impl #impl_generics crate::CloneToFromJava for #enum_ident #ty_generics #where_clause {
+            fn clone_to_java<'a>(&self, env: jni::JNIEnv<'a>) -> jni::errors::Result<jni::objects::JValue<'a>> {
+                let class = env.find_class(#class_name)?;
+                let obj = match self {
+                    #fields_to_jobject
+                };
+                Ok(JValue::Object(obj))
+            }
+
+            fn clone_from_java(env: jni::JNIEnv, obj: jni::objects::JValue)-> jni::errors::Result<Self> {
+                let obj = obj.l()?;
                 let class = env.find_class(#class_name)?;
                 assert!(env.is_instance_of(obj, class)?, "Wrong object class");
                 #fields_from_jobject
                 panic!("Unknown enum value")
-            }
-        }
-        impl #impl_generics crate::ToJObject for #enum_ident #ty_generics #where_clause {
-            fn to_jobject(&self, env: jni::JNIEnv) -> jni::errors::Result<jni::sys::jobject> {
-                let class = env.find_class(#class_name)?;
-                match self {
-                    #fields_to_jobject
-                }
             }
         }
     };
@@ -109,14 +109,13 @@ fn generate_fields_to_jobject(
                     .map(remove_first_and_last_characters)
                     .unwrap_or_else(|| panic!("No java_variant attribute on variant {}", v_name));
                 quote_spanned! { variant.span() =>
-                    #enum_name::#name => Ok(env
+                    #enum_name::#name => env
                         .get_static_field(
                             class,
                             #java_variant,
                             #class,
                         )?
-                        .l()?
-                        .into_inner()),
+                        .l()?,
                 }
             });
             quote! {

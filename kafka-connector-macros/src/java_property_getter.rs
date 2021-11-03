@@ -2,16 +2,17 @@ use proc_macro::TokenStream;
 use proc_macro2::{Ident, Span};
 use quote::quote;
 
-use crate::utils::{parse_jni_method_comment, JniMethodMetadata};
+use crate::utils::{parse_jni_like_definition, parse_jni_method_comment, JniMethodMetadata};
 pub fn java_property_getter_impl(input: TokenStream) -> TokenStream {
+    let macro_args = parse_jni_like_definition(input);
     let JniMethodMetadata {
-        class,
+        class_underscore_notation: class,
         method,
         value_getter,
         java_return_type,
         rust_return_type,
         ..
-    } = parse_jni_method_comment(input);
+    } = parse_jni_method_comment(&macro_args);
 
     let function_name = Ident::new(&format!("Java_{}_{}", class, method), Span::call_site());
     let rust_return_type = Ident::new(&rust_return_type, Span::call_site());

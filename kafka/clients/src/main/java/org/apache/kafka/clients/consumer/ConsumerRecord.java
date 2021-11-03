@@ -25,8 +25,8 @@ import org.apache.kafka.common.record.TimestampType;
 import java.util.Optional;
 
 /**
- * A key/value pair to be received from Kafka. This also consists of a topic name and 
- * a partition number from which the record is being received, an offset that points 
+ * A key/value pair to be received from Kafka. This also consists of a topic name and
+ * a partition number from which the record is being received, an offset that points
  * to the record in a Kafka partition, and a timestamp as marked by the corresponding ProducerRecord.
  */
 public class ConsumerRecord<K, V> {
@@ -34,39 +34,45 @@ public class ConsumerRecord<K, V> {
     static {
         RustLib.load();
     }
-    
+
     public static final long NO_TIMESTAMP = RecordBatch.NO_TIMESTAMP;
     public static final int NULL_SIZE = -1;
 
-    /**
-     * @deprecated checksums are no longer exposed by this class, this constant will be removed in Apache Kafka 4.0
-     *             (deprecated since 3.0).S
-     */
-    @Deprecated
-    public static final int NULL_CHECKSUM = -1;
 
-    private final String topic;
-    private final int partition;
-    private final long offset;
-    private final long timestamp;
-    private final TimestampType timestampType;
-    private final int serializedKeySize;
-    private final int serializedValueSize;
-    private final Headers headers;
-    private final K key;
-    private final V value;
-    private final Optional<Integer> leaderEpoch;
+    private long rustPointer;
+
+    public native void rustConstructor(
+            String topic,
+            int partition,
+            long offset,
+            long timestamp,
+            TimestampType timestampType,
+            int serializedKeySize,
+            int serializedValueSize,
+            K key,
+            V value,
+            Headers headers,
+            Optional<Integer> leaderEpoch
+    );
+
+    public native void rustDeconstructor();
+
+    @Override
+    protected void finalize() throws Throwable {
+        rustDeconstructor();
+        super.finalize();
+    }
 
     /**
      * Creates a record to be received from a specified topic and partition (provided for
      * compatibility with Kafka 0.9 before the message format supported timestamps and before
      * serialized metadata were exposed).
      *
-     * @param topic The topic this record is received from
+     * @param topic     The topic this record is received from
      * @param partition The partition of the topic this record is received from
-     * @param offset The offset of this record in the corresponding Kafka partition
-     * @param key The key of the record, if one exists (null is allowed)
-     * @param value The record contents
+     * @param offset    The offset of this record in the corresponding Kafka partition
+     * @param key       The key of the record, if one exists (null is allowed)
+     * @param value     The record contents
      */
     public ConsumerRecord(String topic,
                           int partition,
@@ -74,23 +80,23 @@ public class ConsumerRecord<K, V> {
                           K key,
                           V value) {
         this(topic, partition, offset, NO_TIMESTAMP, TimestampType.NO_TIMESTAMP_TYPE, NULL_SIZE, NULL_SIZE, key, value,
-            new RecordHeaders(), Optional.empty());
+                new RecordHeaders(), Optional.empty());
     }
 
     /**
      * Creates a record to be received from a specified topic and partition
      *
-     * @param topic The topic this record is received from
-     * @param partition The partition of the topic this record is received from
-     * @param offset The offset of this record in the corresponding Kafka partition
-     * @param timestamp The timestamp of the record.
-     * @param timestampType The timestamp type
-     * @param serializedKeySize The length of the serialized key
+     * @param topic               The topic this record is received from
+     * @param partition           The partition of the topic this record is received from
+     * @param offset              The offset of this record in the corresponding Kafka partition
+     * @param timestamp           The timestamp of the record.
+     * @param timestampType       The timestamp type
+     * @param serializedKeySize   The length of the serialized key
      * @param serializedValueSize The length of the serialized value
-     * @param key The key of the record, if one exists (null is allowed)
-     * @param value The record contents
-     * @param headers The headers of the record
-     * @param leaderEpoch Optional leader epoch of the record (may be empty for legacy record formats)
+     * @param key                 The key of the record, if one exists (null is allowed)
+     * @param value               The record contents
+     * @param headers             The headers of the record
+     * @param leaderEpoch         Optional leader epoch of the record (may be empty for legacy record formats)
      */
     public ConsumerRecord(String topic,
                           int partition,
@@ -108,35 +114,35 @@ public class ConsumerRecord<K, V> {
         if (headers == null)
             throw new IllegalArgumentException("Headers cannot be null");
 
-        this.topic = topic;
-        this.partition = partition;
-        this.offset = offset;
-        this.timestamp = timestamp;
-        this.timestampType = timestampType;
-        this.serializedKeySize = serializedKeySize;
-        this.serializedValueSize = serializedValueSize;
-        this.key = key;
-        this.value = value;
-        this.headers = headers;
-        this.leaderEpoch = leaderEpoch;
+//        rustConstructor();
+        rustConstructor(topic,
+                partition,
+                offset,
+                timestamp,
+                timestampType,
+                serializedKeySize,
+                serializedValueSize,
+                key,
+                value,
+                headers,
+                leaderEpoch);
     }
 
     /**
      * Creates a record to be received from a specified topic and partition (provided for
      * compatibility with Kafka 0.10 before the message format supported headers).
      *
-     * @param topic The topic this record is received from
-     * @param partition The partition of the topic this record is received from
-     * @param offset The offset of this record in the corresponding Kafka partition
-     * @param timestamp The timestamp of the record.
-     * @param timestampType The timestamp type
-     * @param serializedKeySize The length of the serialized key
+     * @param topic               The topic this record is received from
+     * @param partition           The partition of the topic this record is received from
+     * @param offset              The offset of this record in the corresponding Kafka partition
+     * @param timestamp           The timestamp of the record.
+     * @param timestampType       The timestamp type
+     * @param serializedKeySize   The length of the serialized key
      * @param serializedValueSize The length of the serialized value
-     * @param key The key of the record, if one exists (null is allowed)
-     * @param value The record contents
-     *
+     * @param key                 The key of the record, if one exists (null is allowed)
+     * @param value               The record contents
      * @deprecated use one of the constructors without a `checksum` parameter. This constructor will be removed in
-     *             Apache Kafka 4.0 (deprecated since 3.0).
+     * Apache Kafka 4.0 (deprecated since 3.0).
      */
     @Deprecated
     public ConsumerRecord(String topic,
@@ -156,19 +162,18 @@ public class ConsumerRecord<K, V> {
     /**
      * Creates a record to be received from a specified topic and partition
      *
-     * @param topic The topic this record is received from
-     * @param partition The partition of the topic this record is received from
-     * @param offset The offset of this record in the corresponding Kafka partition
-     * @param timestamp The timestamp of the record.
-     * @param timestampType The timestamp type
-     * @param serializedKeySize The length of the serialized key
+     * @param topic               The topic this record is received from
+     * @param partition           The partition of the topic this record is received from
+     * @param offset              The offset of this record in the corresponding Kafka partition
+     * @param timestamp           The timestamp of the record.
+     * @param timestampType       The timestamp type
+     * @param serializedKeySize   The length of the serialized key
      * @param serializedValueSize The length of the serialized value
-     * @param key The key of the record, if one exists (null is allowed)
-     * @param value The record contents
-     * @param headers The headers of the record.
-     *
+     * @param key                 The key of the record, if one exists (null is allowed)
+     * @param value               The record contents
+     * @param headers             The headers of the record.
      * @deprecated use one of the constructors without a `checksum` parameter. This constructor will be removed in
-     *             Apache Kafka 4.0 (deprecated since 3.0).
+     * Apache Kafka 4.0 (deprecated since 3.0).
      */
     @Deprecated
     public ConsumerRecord(String topic,
@@ -189,20 +194,19 @@ public class ConsumerRecord<K, V> {
     /**
      * Creates a record to be received from a specified topic and partition
      *
-     * @param topic The topic this record is received from
-     * @param partition The partition of the topic this record is received from
-     * @param offset The offset of this record in the corresponding Kafka partition
-     * @param timestamp The timestamp of the record.
-     * @param timestampType The timestamp type
-     * @param serializedKeySize The length of the serialized key
+     * @param topic               The topic this record is received from
+     * @param partition           The partition of the topic this record is received from
+     * @param offset              The offset of this record in the corresponding Kafka partition
+     * @param timestamp           The timestamp of the record.
+     * @param timestampType       The timestamp type
+     * @param serializedKeySize   The length of the serialized key
      * @param serializedValueSize The length of the serialized value
-     * @param key The key of the record, if one exists (null is allowed)
-     * @param value The record contents
-     * @param headers The headers of the record
-     * @param leaderEpoch Optional leader epoch of the record (may be empty for legacy record formats)
-     *
+     * @param key                 The key of the record, if one exists (null is allowed)
+     * @param value               The record contents
+     * @param headers             The headers of the record
+     * @param leaderEpoch         Optional leader epoch of the record (may be empty for legacy record formats)
      * @deprecated use one of the constructors without a `checksum` parameter. This constructor will be removed in
-     *             Apache Kafka 4.0 (deprecated since 3.0).
+     * Apache Kafka 4.0 (deprecated since 3.0).
      */
     @Deprecated
     public ConsumerRecord(String topic,
@@ -218,7 +222,7 @@ public class ConsumerRecord<K, V> {
                           Headers headers,
                           Optional<Integer> leaderEpoch) {
         this(topic, partition, offset, timestamp, timestampType, serializedKeySize, serializedValueSize, key, value, headers,
-            leaderEpoch);
+                leaderEpoch);
     }
 
     /**
@@ -271,7 +275,7 @@ public class ConsumerRecord<K, V> {
      * The size of the serialized, uncompressed value in bytes. If value is null, the
      * returned size is -1.
      */
-    public native  int serializedValueSize();
+    public native int serializedValueSize();
 
     /**
      * Get the leader epoch for the record if available
@@ -282,15 +286,15 @@ public class ConsumerRecord<K, V> {
 
     @Override
     public String toString() {
-        return "ConsumerRecord(topic = " + topic
-               + ", partition = " + partition
-               + ", leaderEpoch = " + leaderEpoch.orElse(null)
-               + ", offset = " + offset
-               + ", " + timestampType + " = " + timestamp
-               + ", serialized key size = "  + serializedKeySize
-               + ", serialized value size = " + serializedValueSize
-               + ", headers = " + headers
-               + ", key = " + key
-               + ", value = " + value + ")";
+        return "ConsumerRecord(topic = " + topic()
+                + ", partition = " + partition()
+                + ", leaderEpoch = " + leaderEpoch().orElse(null)
+                + ", offset = " + offset()
+                + ", " + timestampType() + " = " + timestamp()
+                + ", serialized key size = " + serializedKeySize()
+                + ", serialized value size = " + serializedValueSize()
+                + ", headers = " + headers()
+                + ", key = " + key()
+                + ", value = " + value() + ")";
     }
 }

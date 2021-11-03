@@ -1,4 +1,8 @@
-use std::panic;
+use crate::{clone_to_from_java_obj, CloneToFromJava};
+use std::{
+    ops::{Deref, DerefMut},
+    panic,
+};
 
 use jni::{
     objects::{JObject, JValue},
@@ -6,16 +10,33 @@ use jni::{
     JNIEnv,
 };
 
-use crate::common::header::internals::record_header::{self, clone_to_java};
-
 use super::record_header::RecordHeader;
 
-pub type RecordHeaders = Vec<RecordHeader>;
+#[derive(Default, Clone)]
+pub struct RecordHeaders(Vec<RecordHeader>);
+impl Deref for RecordHeaders {
+    type Target = Vec<RecordHeader>;
+
+    fn deref(&self) -> &Self::Target {
+        &self.0
+    }
+}
+
+impl DerefMut for RecordHeaders {
+    fn deref_mut(&mut self) -> &mut Self::Target {
+        &mut self.0
+    }
+}
+
+clone_to_from_java_obj!(
+    RecordHeaders,
+    "org/apache/kafka/common/header/internals/RecordHeaders"
+);
 
 /*
- * Class:     org_apache_kafka_common_header_internals_RecordHeader
+ * Class:     org_apache_kafka_common_header_internals_RecordHeaders
  * Method:    rustConstructor
- * Signature: (Ljava/lang/String;[B)V
+ * Signature: ()V
  */
 #[no_mangle]
 #[allow(non_snake_case)]
@@ -24,7 +45,7 @@ pub extern "system" fn Java_org_apache_kafka_common_header_internals_RecordHeade
     obj: JObject,
 ) {
     let result = || -> jni::errors::Result<_> {
-        let record_headers = Box::new(RecordHeaders::new());
+        let record_headers = Box::new(RecordHeaders::default());
         let ptr = Box::into_raw(record_headers);
         env.set_field(obj, "rustPointer", "J", JValue::Long(ptr as i64))?;
 
@@ -36,7 +57,7 @@ pub extern "system" fn Java_org_apache_kafka_common_header_internals_RecordHeade
     }
 }
 /*
- * Class:     org_apache_kafka_common_header_internals_RecordHeader
+ * Class:     org_apache_kafka_common_header_internals_RecordHeaders
  * Method:    rustDeconstructor
  * Signature: ()V
  */
@@ -83,7 +104,7 @@ pub extern "system" fn Java_org_apache_kafka_common_header_internals_RecordHeade
             &[JValue::Object(header), JValue::Object(error_msg.into())],
         )?;
 
-        let header = record_header::clone_from_java(env, header)?;
+        let header = RecordHeader::clone_from_java(env, header.into())?;
 
         let ptr = env.get_field(obj, "rustPointer", "J")?.j()?;
         let mut record_headers = unsafe { Box::from_raw(ptr as *mut RecordHeaders) };
@@ -162,9 +183,11 @@ pub extern "system" fn Java_org_apache_kafka_common_header_internals_RecordHeade
         let ptr = env.get_field(obj, "rustPointer", "J")?.j()?;
         let record_headers = unsafe { Box::from_raw(ptr as *mut RecordHeaders) };
         let filtered = record_headers
+            .0
             .into_iter()
             .filter(|header| header.key != key)
-            .collect::<RecordHeaders>();
+            .collect::<Vec<_>>();
+        let filtered = RecordHeaders(filtered);
         let ptr = Box::into_raw(Box::new(filtered));
         env.set_field(obj, "rustPointer", "J", JValue::Long(ptr as i64))?;
 
@@ -205,11 +228,13 @@ pub extern "system" fn Java_org_apache_kafka_common_header_internals_RecordHeade
             .iter()
             .rev()
             .find(|x| x.key == key)
-            .map(|header| clone_to_java(env, header))
+            .map(|header| header.clone_to_java(env))
+            .transpose()?
+            .map(JValue::l)
             .transpose()?;
         let _ptr = Box::into_raw(record_headers);
 
-        Ok(result.map(Into::into).unwrap_or_else(JObject::null))
+        Ok(result.unwrap_or_else(JObject::null))
     }();
     match result {
         Ok(val) => val.into_inner(),
@@ -244,8 +269,11 @@ pub extern "system" fn Java_org_apache_kafka_common_header_internals_RecordHeade
         let result = record_headers
             .iter()
             .filter(|x| x.key == key)
-            .map(|header| clone_to_java(env, header))
-            .collect::<jni::errors::Result<Vec<jobject>>>()?;
+            .map(|header| header.clone_to_java(env))
+            .collect::<jni::errors::Result<Vec<_>>>()?
+            .into_iter()
+            .map(JValue::l)
+            .collect::<jni::errors::Result<Vec<_>>>()?;
         let result = result.into_iter().map(Into::into).collect::<Vec<JObject>>();
         let _ptr = Box::into_raw(record_headers);
 
@@ -280,8 +308,11 @@ pub extern "system" fn Java_org_apache_kafka_common_header_internals_RecordHeade
         let record_headers = unsafe { Box::from_raw(ptr as *mut RecordHeaders) };
         let result = record_headers
             .iter()
-            .map(|header| clone_to_java(env, header))
-            .collect::<jni::errors::Result<Vec<jobject>>>()?;
+            .map(|header| header.clone_to_java(env))
+            .collect::<jni::errors::Result<Vec<_>>>()?
+            .into_iter()
+            .map(JValue::l)
+            .collect::<jni::errors::Result<Vec<_>>>()?;
         let result = result.into_iter().map(Into::into).collect::<Vec<JObject>>();
         let _ptr = Box::into_raw(record_headers);
 
@@ -319,8 +350,11 @@ pub extern "system" fn Java_org_apache_kafka_common_header_internals_RecordHeade
         let record_headers = unsafe { Box::from_raw(ptr as *mut RecordHeaders) };
         let result = record_headers
             .iter()
-            .map(|header| clone_to_java(env, header))
-            .collect::<jni::errors::Result<Vec<jobject>>>()?;
+            .map(|header| header.clone_to_java(env))
+            .collect::<jni::errors::Result<Vec<_>>>()?
+            .into_iter()
+            .map(JValue::l)
+            .collect::<jni::errors::Result<Vec<_>>>()?;
         let result = result.into_iter().map(Into::into).collect::<Vec<JObject>>();
         let _ptr = Box::into_raw(record_headers);
 
