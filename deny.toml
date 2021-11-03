@@ -1,0 +1,17 @@
+[licenses]
+allow = [
+  "MIT",
+  "Apache-2.0",
+]
+copyleft = "deny"
+default = "deny"
+unlicensed = "deny"
+
+[bans]
+multiple-versions = "allow"
+wildcards = "deny"
+
+[sources]
+allow-git = []
+unknown-git = "deny"
+unknown-registry = "deny"
