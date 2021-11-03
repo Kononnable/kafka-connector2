@@ -21,19 +21,12 @@ pub fn parse_jni_method_comment(macro_args: &HashMap<String, String>) -> JniMeth
         .to_owned();
     let signature = macro_args.get("Signature").expect("No Signature value");
 
-    let s: String = signature.chars().skip(1).collect();
-    let mut parts = s.split(')');
+    let (parameters, java_return_type) = parse_signature(signature);
 
-    let args = parts.next().unwrap();
-    let parameters = vec![];
-    if !args.is_empty() {
-        todo!();
-    }
-
-    let java_return_type = parts.next().unwrap().to_string();
     let value_getter = java_return_type
         .chars()
         .next()
+        .map(|ch| if ch == '[' { 'l' } else { ch })
         .unwrap()
         .to_lowercase()
         .to_string();
@@ -41,6 +34,7 @@ pub fn parse_jni_method_comment(macro_args: &HashMap<String, String>) -> JniMeth
     let rust_return_type = match java_return_type.as_str() {
         "J" => "jlong",
         "I" => "jint",
+        "[]B" => "jbyteArray",
         "Ljava/lang/String" => "jstring",
         _ if java_return_type.starts_with('L') => "jobject",
         _ => todo!("Unknown return type"),
@@ -58,16 +52,27 @@ pub fn parse_jni_method_comment(macro_args: &HashMap<String, String>) -> JniMeth
     }
 }
 
+fn parse_signature(signature: &str) -> (Vec<String>, String) {
+    let str: String = signature.chars().skip(1).collect();
+    let (args, return_type) = str.split_once(')').unwrap();
+    let parameters = vec![];
+    if !args.is_empty() {
+        todo!();
+    }
+    let java_return_type = return_type.to_owned();
+    (parameters, java_return_type)
+}
+
 pub fn parse_jni_like_definition(input: TokenStream) -> HashMap<String, String> {
     input
         .into_iter()
-        .fold(vec![], |mut acc, x| {
-            match x {
+        .fold(vec![], |mut acc, tt| {
+            match tt {
                 TokenTree::Punct(punct) if punct.as_char() == '*' => {
                     acc.push(vec![]);
                 }
                 _ => {
-                    acc.last_mut().unwrap().push(x);
+                    acc.last_mut().unwrap().push(tt);
                 }
             }
             acc
@@ -75,7 +80,7 @@ pub fn parse_jni_like_definition(input: TokenStream) -> HashMap<String, String> 
         .into_iter()
         .map(|x| {
             x.into_iter()
-                .map(|z| z.to_string())
+                .map(|tt| tt.to_string())
                 .collect::<Vec<_>>()
                 .join("")
                 .split_once(':')

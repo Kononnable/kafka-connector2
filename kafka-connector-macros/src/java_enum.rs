@@ -1,16 +1,8 @@
 use proc_macro::TokenStream;
 use proc_macro2::Ident;
 use quote::{quote, quote_spanned};
-use syn::{
-    parse_macro_input, parse_quote, spanned::Spanned, Data, DeriveInput, GenericParam, Generics,
-};
+use syn::{parse_macro_input, spanned::Spanned, Data, DeriveInput};
 
-fn remove_first_and_last_characters(input: String) -> String {
-    let mut chars = input.chars();
-    chars.next();
-    chars.next_back();
-    chars.collect()
-}
 pub fn java_enum_impl(input: TokenStream) -> TokenStream {
     let input = parse_macro_input!(input as DeriveInput);
     let enum_ident = input.ident;
@@ -18,19 +10,18 @@ pub fn java_enum_impl(input: TokenStream) -> TokenStream {
     let class_name = input
         .attrs
         .iter()
-        .find(|a| a.path.segments.last().unwrap().ident == "java_class")
-        .map(|x| x.tokens.clone().into_iter().last().unwrap().to_string())
+        .find(|attr| attr.path.segments.last().unwrap().ident == "java_class")
+        .map(|attr| attr.tokens.clone().into_iter().last().unwrap().to_string())
         .map(remove_first_and_last_characters)
         .expect("No java_class attribute found");
 
-    let generics = add_trait_bounds(input.generics);
-    let (impl_generics, ty_generics, where_clause) = generics.split_for_impl();
+    let (impl_generics, ty_generics, where_clause) = input.generics.split_for_impl();
 
     let fields_from_jobject = generate_fields_from_jobject(&input.data, &enum_ident, &class_name);
     let fields_to_jobject = generate_fields_to_jobject(&input.data, &enum_ident, &class_name);
 
     let expanded = quote! {
-        impl #impl_generics crate::CloneToFromJava for #enum_ident #ty_generics #where_clause {
+        impl #impl_generics crate::clone_to_from_java::CloneToFromJava for #enum_ident #ty_generics #where_clause {
             fn clone_to_java<'a>(&self, env: jni::JNIEnv<'a>) -> jni::errors::Result<jni::objects::JValue<'a>> {
                 let class = env.find_class(#class_name)?;
                 let obj = match self {
@@ -65,8 +56,8 @@ fn generate_fields_from_jobject(
                 let java_variant = variant
                     .attrs
                     .iter()
-                    .find(|a| a.path.segments.last().unwrap().ident == "java_variant")
-                    .map(|x| x.tokens.clone().into_iter().last().unwrap().to_string())
+                    .find(|attr| attr.path.segments.last().unwrap().ident == "java_variant")
+                    .map(|attr| attr.tokens.clone().into_iter().last().unwrap().to_string())
                     .map(remove_first_and_last_characters)
                     .unwrap_or_else(|| panic!("No java_variant attribute on variant {}", v_name));
                 quote_spanned! { variant.span() =>
@@ -126,11 +117,9 @@ fn generate_fields_to_jobject(
     }
 }
 
-pub fn add_trait_bounds(mut generics: Generics) -> Generics {
-    for param in &mut generics.params {
-        if let GenericParam::Type(ref mut type_param) = *param {
-            type_param.bounds.push(parse_quote!(FromBytes));
-        }
-    }
-    generics
+fn remove_first_and_last_characters(input: String) -> String {
+    let mut chars = input.chars();
+    chars.next();
+    chars.next_back();
+    chars.collect()
 }

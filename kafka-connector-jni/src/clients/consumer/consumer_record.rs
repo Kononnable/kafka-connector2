@@ -6,10 +6,10 @@ use jni::{
 use kafka_connector_macros::rust_property_getter;
 
 use crate::{
+    clone_to_from_java::CloneToFromJava,
     common::{
         header::internals::record_headers::RecordHeaders, record::timestamp_type::TimestampType,
     },
-    CloneToFromJava,
 };
 
 pub struct ConsumerRecord<K, V> {
@@ -80,6 +80,7 @@ pub extern "system" fn Java_org_apache_kafka_clients_consumer_ConsumerRecord_rus
         _ => panic!("{:?}", result),
     }
 }
+
 /*
  * Class:     org_apache_kafka_clients_consumer_ConsumerRecord
  * Method:    rustDeconstructor
@@ -93,8 +94,7 @@ pub extern "system" fn Java_org_apache_kafka_clients_consumer_ConsumerRecord_rus
 ) {
     let result = || -> jni::errors::Result<_> {
         let ptr = env.get_field(obj, "rustPointer", "J")?.j()?;
-        let _record_headers =
-            unsafe { Box::from_raw(ptr as *mut ConsumerRecord<GlobalRef, GlobalRef>) };
+        let _obj = unsafe { Box::from_raw(ptr as *mut ConsumerRecord<GlobalRef, GlobalRef>) };
 
         Ok(())
     }();

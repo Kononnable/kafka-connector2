@@ -8,6 +8,7 @@ mod java_property_getter;
 mod rust_property_getter;
 mod utils;
 
+/// If Signature includes arrays(e.g. `[B`) delimiter must be closed to be parsed by rust correctly(`[]B`)
 #[proc_macro]
 pub fn java_property_getter(input: TokenStream) -> TokenStream {
     java_property_getter_impl(input)
@@ -18,6 +19,7 @@ pub fn java_enum(input: TokenStream) -> TokenStream {
     java_enum_impl(input)
 }
 
+/// If Signature includes arrays(e.g. `[B`) delimiter must be closed to be parsed by rust correctly(`[]B`)
 #[proc_macro]
 pub fn rust_property_getter(input: TokenStream) -> TokenStream {
     rust_property_getter_impl(input)

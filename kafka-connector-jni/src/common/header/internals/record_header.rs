@@ -1,10 +1,11 @@
-use crate::clone_to_from_java_obj;
+use crate::clone_to_from_java::clone_to_from_java_for_struct;
 use bytes::Bytes;
 use jni::{
     objects::{JObject, JValue},
     sys::{jbyteArray, jstring},
     JNIEnv,
 };
+use kafka_connector_macros::rust_property_getter;
 
 #[derive(Debug, Clone)]
 pub struct RecordHeader {
@@ -18,7 +19,7 @@ impl RecordHeader {
     }
 }
 
-clone_to_from_java_obj!(
+clone_to_from_java_for_struct!(
     RecordHeader,
     "org/apache/kafka/common/header/internals/RecordHeader"
 );
@@ -54,6 +55,7 @@ pub extern "system" fn Java_org_apache_kafka_common_header_internals_RecordHeade
         _ => panic!("{:?}", result),
     }
 }
+
 /*
  * Class:     org_apache_kafka_common_header_internals_RecordHeader
  * Method:    rustDeconstructor
@@ -67,7 +69,7 @@ pub extern "system" fn Java_org_apache_kafka_common_header_internals_RecordHeade
 ) {
     let result = || -> jni::errors::Result<_> {
         let ptr = env.get_field(obj, "rustPointer", "J")?.j()?;
-        let _record_header = unsafe { Box::from_raw(ptr as *mut RecordHeader) };
+        let _obj = unsafe { Box::from_raw(ptr as *mut RecordHeader) };
 
         Ok(())
     }();
@@ -77,54 +79,16 @@ pub extern "system" fn Java_org_apache_kafka_common_header_internals_RecordHeade
     }
 }
 
-/*
+rust_property_getter!(
+ * Struct:    RecordHeader
  * Class:     org_apache_kafka_common_header_internals_RecordHeader
  * Method:    key
  * Signature: ()Ljava/lang/String;
- */
+);
 
-#[no_mangle]
-#[allow(non_snake_case)]
-pub extern "system" fn Java_org_apache_kafka_common_header_internals_RecordHeader_key(
-    env: JNIEnv,
-    obj: JObject,
-) -> jstring {
-    let result = || -> jni::errors::Result<_> {
-        let ptr = env.get_field(obj, "rustPointer", "J")?.j()?;
-        let record_header = unsafe { Box::from_raw(ptr as *mut RecordHeader) };
-        let key = record_header.key.clone();
-        let _ptr = Box::into_raw(record_header);
-        let key = env.new_string(key)?.into_inner();
-        Ok(key)
-    }();
-    match result {
-        Ok(val) => val,
-        Err(jni::errors::Error::JavaException) => JObject::null().into_inner(),
-        _ => panic!("{:?}", result),
-    }
-}
-/*
+rust_property_getter!(
+ * Struct:    RecordHeader
  * Class:     org_apache_kafka_common_header_internals_RecordHeader
  * Method:    value
- * Signature: ()[B
- */
-#[no_mangle]
-#[allow(non_snake_case)]
-pub extern "system" fn Java_org_apache_kafka_common_header_internals_RecordHeader_value(
-    env: JNIEnv,
-    obj: JObject,
-) -> jbyteArray {
-    let result = || -> jni::errors::Result<_> {
-        let ptr = env.get_field(obj, "rustPointer", "J")?.j()?;
-        let record_header = unsafe { Box::from_raw(ptr as *mut RecordHeader) };
-        let value = record_header.value.clone();
-        let _ptr = Box::into_raw(record_header);
-        let values = env.byte_array_from_slice(value.as_ref())?;
-        Ok(values)
-    }();
-    match result {
-        Ok(val) => val,
-        Err(jni::errors::Error::JavaException) => JObject::null().into_inner(),
-        _ => panic!("{:?}", result),
-    }
-}
+ * Signature: ()[]B
+);
