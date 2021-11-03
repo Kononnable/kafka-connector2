@@ -20,11 +20,11 @@ impl CloneToFromJava for String {
 }
 
 impl CloneToFromJava for i32 {
-    fn clone_to_java<'a>(&self, env: JNIEnv<'a>) -> jni::errors::Result<JValue<'a>> {
+    fn clone_to_java<'a>(&self, _env: JNIEnv<'a>) -> jni::errors::Result<JValue<'a>> {
         Ok(JValue::Int(*self))
     }
 
-    fn clone_from_java(env: JNIEnv, obj: JValue) -> jni::errors::Result<Self>
+    fn clone_from_java(_env: JNIEnv, obj: JValue) -> jni::errors::Result<Self>
     where
         Self: Sized,
     {
@@ -33,11 +33,11 @@ impl CloneToFromJava for i32 {
 }
 
 impl CloneToFromJava for i64 {
-    fn clone_to_java<'a>(&self, env: JNIEnv<'a>) -> jni::errors::Result<JValue<'a>> {
+    fn clone_to_java<'a>(&self, _env: JNIEnv<'a>) -> jni::errors::Result<JValue<'a>> {
         Ok(JValue::Long(*self))
     }
 
-    fn clone_from_java(env: JNIEnv, obj: JValue) -> jni::errors::Result<Self>
+    fn clone_from_java(_env: JNIEnv, obj: JValue) -> jni::errors::Result<Self>
     where
         Self: Sized,
     {
@@ -93,7 +93,7 @@ impl CloneToFromJava for Option<i32> {
 // TODO: Make a type alias/struct, JavaGenericParameter?
 // TODO: Refactor
 impl CloneToFromJava for GlobalRef {
-    fn clone_to_java<'a>(&self, env: JNIEnv<'a>) -> jni::errors::Result<JValue<'a>> {
+    fn clone_to_java<'a>(&self, _env: JNIEnv<'a>) -> jni::errors::Result<JValue<'a>> {
         let x = self.clone();
         let y = x.as_obj();
         let z = y.into_inner();

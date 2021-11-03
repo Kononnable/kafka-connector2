@@ -1,6 +1,5 @@
 [workspace]
 members = [
-  "kafka-connector",
   "kafka-connector-jni",
   "kafka-connector-macros",
 ]

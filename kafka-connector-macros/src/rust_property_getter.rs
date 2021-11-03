@@ -1,10 +1,7 @@
-use std::collections::HashMap;
-
 use convert_case::{Case, Casing};
-use proc_macro::{TokenStream, TokenTree};
-use proc_macro2::{Group, Ident, Punct, Span};
-use quote::{quote, quote_spanned, ToTokens};
-use syn::parse_quote;
+use proc_macro::TokenStream;
+use proc_macro2::{Ident, Span};
+use quote::{quote, ToTokens};
 
 use crate::utils::{parse_jni_like_definition, parse_jni_method_comment, JniMethodMetadata};
 pub fn rust_property_getter_impl(input: TokenStream) -> TokenStream {

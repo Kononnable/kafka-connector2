@@ -1,4 +1,4 @@
-use std::{collections::HashMap, io::Stdin};
+use std::collections::HashMap;
 
 use proc_macro::{TokenStream, TokenTree};
 
