@@ -1,6 +1,6 @@
 [package]
 authors = ["kononnable <kononnable@gmail.com>"]
-edition = "2018"
+edition = "2021"
 name = "kafka-connector-macros"
 version = "0.1.0"
 
