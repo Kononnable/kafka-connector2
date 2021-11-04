@@ -27,7 +27,7 @@ pub fn java_enum_impl(input: TokenStream) -> TokenStream {
                 let obj = match self {
                     #fields_to_jobject
                 };
-                Ok(JValue::Object(obj))
+                Ok(jni::objects::JValue::Object(obj))
             }
 
             fn clone_from_java(env: jni::JNIEnv, obj: jni::objects::JValue)-> jni::errors::Result<Self> {

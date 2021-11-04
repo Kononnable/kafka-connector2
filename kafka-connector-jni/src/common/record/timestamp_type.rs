@@ -1,4 +1,3 @@
-use jni::objects::JValue;
 use kafka_connector_macros::JavaEnum;
 
 #[derive(Clone, Copy, Debug, PartialEq, Eq, JavaEnum)]
