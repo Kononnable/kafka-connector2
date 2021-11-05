@@ -1,4 +1,7 @@
+use std::{collections::HashMap, hash::Hash};
+
 use bytes::Bytes;
+use indexmap::{IndexMap, IndexSet};
 use jni::{
     objects::{GlobalRef, JValue},
     JNIEnv,
@@ -53,7 +56,11 @@ impl CloneToFromJava for String {
     where
         Self: Sized,
     {
-        env.get_string(obj.l()?.into()).map(Into::into)
+        let obj = obj.l()?;
+        if obj.is_null() {
+            return Ok("".to_owned());
+        }
+        env.get_string(obj.into()).map(Into::into)
     }
 }
 
@@ -155,5 +162,137 @@ impl CloneToFromJava for Bytes {
     {
         let o = obj.l()?.into_inner();
         env.convert_byte_array(o).map(Bytes::from)
+    }
+}
+
+impl<K, V> CloneToFromJava for HashMap<K, V>
+where
+    K: CloneToFromJava + Eq + Hash,
+    V: CloneToFromJava,
+{
+    fn clone_to_java<'a>(&self, env: JNIEnv<'a>) -> jni::errors::Result<JValue<'a>> {
+        let class = env.find_class("java/util/HashMap")?;
+        let hash_map = env.new_object(class, "()V", &[])?;
+        for entry in self {
+            let key = K::clone_to_java(entry.0, env)?;
+            let value = V::clone_to_java(entry.1, env)?;
+            env.call_method(
+                hash_map,
+                "put",
+                "(Ljava/lang/Object;Ljava/lang/Object;)Ljava/lang/Object;",
+                &[key, value],
+            )?;
+        }
+
+        Ok(JValue::Object(hash_map))
+    }
+
+    fn clone_from_java(env: JNIEnv, obj: JValue) -> jni::errors::Result<Self>
+    where
+        Self: Sized,
+    {
+        let mut hash_map = HashMap::new();
+        let entry_set = env
+            .call_method(obj.l()?, "entrySet", "()Ljava/util/Set;", &[])?
+            .l()?;
+        let array = env
+            .call_method(entry_set, "toArray", "()[Ljava/lang/Object;", &[])?
+            .l()?
+            .into_inner();
+        let length = env.get_array_length(array)?;
+        for i in 0..length {
+            let entry = env.get_object_array_element(array, i)?;
+            let key = env.call_method(entry, "getKey", "()Ljava/lang/Object;", &[])?;
+            let key = K::clone_from_java(env, key)?;
+            let value = env.call_method(entry, "getValue", "()Ljava/lang/Object;", &[])?;
+            let value = V::clone_from_java(env, value)?;
+            hash_map.insert(key, value);
+        }
+
+        Ok(hash_map)
+    }
+}
+
+impl<K, V> CloneToFromJava for IndexMap<K, V>
+where
+    K: CloneToFromJava + Eq + Hash,
+    V: CloneToFromJava,
+{
+    fn clone_to_java<'a>(&self, env: JNIEnv<'a>) -> jni::errors::Result<JValue<'a>> {
+        let class = env.find_class("java/util/LinkedHashMap")?;
+        let hash_map = env.new_object(class, "()V", &[])?;
+        for entry in self {
+            let key = K::clone_to_java(entry.0, env)?;
+            let value = V::clone_to_java(entry.1, env)?;
+            env.call_method(
+                hash_map,
+                "put",
+                "(Ljava/lang/Object;Ljava/lang/Object;)Ljava/lang/Object;",
+                &[key, value],
+            )?;
+        }
+
+        Ok(JValue::Object(hash_map))
+    }
+
+    fn clone_from_java(env: JNIEnv, obj: JValue) -> jni::errors::Result<Self>
+    where
+        Self: Sized,
+    {
+        let mut hash_map = IndexMap::new();
+        let entry_set = env
+            .call_method(obj.l()?, "entrySet", "()Ljava/util/Set;", &[])?
+            .l()?;
+        let array = env
+            .call_method(entry_set, "toArray", "()[Ljava/lang/Object;", &[])?
+            .l()?
+            .into_inner();
+        let length = env.get_array_length(array)?;
+        for i in 0..length {
+            let entry = env.get_object_array_element(array, i)?;
+            let key = env.call_method(entry, "getKey", "()Ljava/lang/Object;", &[])?;
+            let key = K::clone_from_java(env, key)?;
+            let value = env.call_method(entry, "getValue", "()Ljava/lang/Object;", &[])?;
+            let value = V::clone_from_java(env, value)?;
+            hash_map.insert(key, value);
+        }
+
+        Ok(hash_map)
+    }
+}
+
+impl<K> CloneToFromJava for IndexSet<K>
+where
+    K: CloneToFromJava + Eq + Hash,
+{
+    fn clone_to_java<'a>(&self, env: JNIEnv<'a>) -> jni::errors::Result<JValue<'a>> {
+        let class = env.find_class("java/util/LinkedHashSet")?;
+        let hash_set = env.new_object(class, "()V", &[])?;
+        for key in self {
+            let key = K::clone_to_java(key, env)?;
+            env.call_method(hash_set, "add", "(Ljava/lang/Object;)Z", &[key])?;
+        }
+
+        Ok(JValue::Object(hash_set))
+    }
+
+    fn clone_from_java(env: JNIEnv, obj: JValue) -> jni::errors::Result<Self>
+    where
+        Self: Sized,
+    {
+        let mut hash_set = IndexSet::new();
+
+        let array = env
+            .call_method(obj.l()?, "toArray", "()[Ljava/lang/Object;", &[])?
+            .l()?
+            .into_inner();
+        let length = env.get_array_length(array)?;
+        for i in 0..length {
+            let key = env.get_object_array_element(array, i)?;
+            let key = K::clone_from_java(env, JValue::Object(key))?;
+            hash_set.insert(key);
+        }
+
+        Ok(hash_set)
     }
 }

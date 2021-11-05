@@ -16,10 +16,9 @@
  */
 package org.apache.kafka.common;
 
-import java.util.Collections;
-import java.util.LinkedHashSet;
-import java.util.Objects;
-import java.util.Set;
+import org.apache.kafka.RustLib;
+
+import java.util.*;
 
 /**
  * A template for a MetricName. It contains a name, group, and description, as
@@ -29,34 +28,42 @@ import java.util.Set;
  * is provided, so that the mBean names can be compared and sorted lexicographically.
  */
 public class MetricNameTemplate {
-    private final String name;
-    private final String group;
-    private final String description;
-    private LinkedHashSet<String> tags;
+    static {
+        RustLib.load();
+    }
+
+    private long rustPointer;
+
+    public native void rustConstructor(String name, String group, String description, Set<String> tags);
+
+    public native void rustDeconstructor();
+
+    @Override
+    protected void finalize() throws Throwable {
+        rustDeconstructor();
+        super.finalize();
+    }
 
     /**
      * Create a new template. Note that the order of the tags will be preserved if the supplied
      * {@code tagsNames} set has an order.
      *
-     * @param name the name of the metric; may not be null
-     * @param group the name of the group; may not be null
+     * @param name        the name of the metric; may not be null
+     * @param group       the name of the group; may not be null
      * @param description the description of the metric; may not be null
-     * @param tagsNames the set of metric tag names, which can/should be a set that maintains order; may not be null
+     * @param tagsNames   the set of metric tag names, which can/should be a set that maintains order; may not be null
      */
     public MetricNameTemplate(String name, String group, String description, Set<String> tagsNames) {
-        this.name = Objects.requireNonNull(name);
-        this.group = Objects.requireNonNull(group);
-        this.description = Objects.requireNonNull(description);
-        this.tags = new LinkedHashSet<>(Objects.requireNonNull(tagsNames));
+        rustConstructor(name, group, description, tagsNames);
     }
 
     /**
      * Create a new template. Note that the order of the tags will be preserved.
      *
-     * @param name the name of the metric; may not be null
-     * @param group the name of the group; may not be null
+     * @param name        the name of the metric; may not be null
+     * @param group       the name of the group; may not be null
      * @param description the description of the metric; may not be null
-     * @param tagsNames the names of the metric tags in the preferred order; none of the tag names should be null
+     * @param tagsNames   the names of the metric tags in the preferred order; none of the tag names should be null
      */
     public MetricNameTemplate(String name, String group, String description, String... tagsNames) {
         this(name, group, description, getTags(tagsNames));
@@ -75,40 +82,44 @@ public class MetricNameTemplate {
      *
      * @return the metric name; never null
      */
-    public String name() {
-        return this.name;
-    }
+    public native String name();
+//    public String name() {
+//        return this.name;
+//    }
 
     /**
      * Get the name of the group.
      *
      * @return the group name; never null
      */
-    public String group() {
-        return this.group;
-    }
+    public native String group();
+//    public String group() {
+//        return this.group;
+//    }
 
     /**
      * Get the description of the metric.
      *
      * @return the metric description; never null
      */
-    public String description() {
-        return this.description;
-    }
+    public native String description();
+//    public String description() {
+//        return this.description;
+//    }
 
     /**
      * Get the set of tag names for the metric.
      *
      * @return the ordered set of tag names; never null but possibly empty
      */
-    public Set<String> tags() {
-        return tags;
-    }
+    public native Set<String> tags();
+//    public Set<String> tags() {
+//        return tags;
+//    }
 
     @Override
     public int hashCode() {
-        return Objects.hash(name, group, tags);
+        return Objects.hash(name(), group(), tags());
     }
 
     @Override
@@ -118,12 +129,12 @@ public class MetricNameTemplate {
         if (o == null || getClass() != o.getClass())
             return false;
         MetricNameTemplate other = (MetricNameTemplate) o;
-        return Objects.equals(name, other.name) && Objects.equals(group, other.group) &&
-                Objects.equals(tags, other.tags);
+        return Objects.equals(name(), other.name()) && Objects.equals(group(), other.group()) &&
+                Objects.equals(tags(), other.tags());
     }
 
     @Override
     public String toString() {
-        return String.format("name=%s, group=%s, tags=%s", name, group, tags);
+        return String.format("name=%s, group=%s, tags=%s", name(), group(), tags());
     }
 }

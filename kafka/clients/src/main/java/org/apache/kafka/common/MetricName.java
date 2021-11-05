@@ -16,6 +16,10 @@
  */
 package org.apache.kafka.common;
 
+import org.apache.kafka.RustLib;
+import org.apache.kafka.common.utils.Utils;
+
+import java.nio.ByteBuffer;
 import java.util.Map;
 import java.util.Objects;
 
@@ -33,7 +37,7 @@ import java.util.Objects;
  * <p>
  * Ex: standard JMX MBean can be constructed like <b>domainName:type=group,key1=val1,key2=val2</b>
  * <p>
- *
+ * <p>
  * Usage looks something like this:
  * <pre>{@code
  * // set up metrics:
@@ -61,12 +65,22 @@ import java.util.Objects;
  * }</pre>
  */
 public final class MetricName {
+    static {
+        RustLib.load();
+    }
 
-    private final String name;
-    private final String group;
-    private final String description;
-    private Map<String, String> tags;
-    private int hash = 0;
+    private long rustPointer;
+
+    public native void rustConstructor(String name, String group, String description, Map<String, String> tags);
+
+    public native void rustDeconstructor();
+
+    @Override
+    protected void finalize() throws Throwable {
+        rustDeconstructor();
+        super.finalize();
+    }
+
 
     /**
      * Please create MetricName by method {@link org.apache.kafka.common.metrics.Metrics#metricName(String, String, String, Map)}
@@ -77,38 +91,36 @@ public final class MetricName {
      * @param tags        additional key/value attributes of the metric
      */
     public MetricName(String name, String group, String description, Map<String, String> tags) {
-        this.name = Objects.requireNonNull(name);
-        this.group = Objects.requireNonNull(group);
-        this.description = Objects.requireNonNull(description);
-        this.tags = Objects.requireNonNull(tags);
+        rustConstructor(name, group, description, tags);
     }
 
-    public String name() {
-        return this.name;
-    }
+    public native String name();
+//    public String name() {
+//        return this.name;
+//    }
 
-    public String group() {
-        return this.group;
-    }
+    public native String group();
+//    public String group() {
+//        return this.group;
+//    }
 
-    public Map<String, String> tags() {
-        return this.tags;
-    }
+    public native Map<String, String> tags();
+//    public Map<String, String> tags() {
+//        return this.tags;
+//    }
 
-    public String description() {
-        return this.description;
-    }
+    public native String description();
+//    public String description() {
+//        return this.description;
+//    }
 
     @Override
     public int hashCode() {
-        if (hash != 0)
-            return hash;
         final int prime = 31;
         int result = 1;
-        result = prime * result + group.hashCode();
-        result = prime * result + name.hashCode();
-        result = prime * result + tags.hashCode();
-        this.hash = result;
+        result = prime * result + group().hashCode();
+        result = prime * result + name().hashCode();
+        result = prime * result + tags().hashCode();
         return result;
     }
 
@@ -121,12 +133,12 @@ public final class MetricName {
         if (getClass() != obj.getClass())
             return false;
         MetricName other = (MetricName) obj;
-        return group.equals(other.group) && name.equals(other.name) && tags.equals(other.tags);
+        return group().equals(other.group()) && name().equals(other.name()) && tags().equals(other.tags());
     }
 
     @Override
     public String toString() {
-        return "MetricName [name=" + name + ", group=" + group + ", description="
-                + description + ", tags=" + tags + "]";
+        return "MetricName [name=" + name() + ", group=" + group() + ", description="
+                + description() + ", tags=" + tags() + "]";
     }
 }

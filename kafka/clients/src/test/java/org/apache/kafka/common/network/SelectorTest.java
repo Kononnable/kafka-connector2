@@ -44,15 +44,8 @@ import java.nio.ByteBuffer;
 import java.nio.channels.SelectionKey;
 import java.nio.channels.ServerSocketChannel;
 import java.nio.channels.SocketChannel;
-import java.util.Collection;
-import java.util.Collections;
-import java.util.HashMap;
-import java.util.HashSet;
-import java.util.List;
-import java.util.Map;
-import java.util.Optional;
-import java.util.Random;
-import java.util.Set;
+import java.text.SimpleDateFormat;
+import java.util.*;
 import java.util.concurrent.atomic.AtomicBoolean;
 import java.util.concurrent.atomic.AtomicInteger;
 import java.util.function.Supplier;
@@ -185,7 +178,7 @@ public class SelectorTest {
     @Test
     public void testNoRouteToHost() {
         assertThrows(IOException.class,
-            () -> selector.connect("0", new InetSocketAddress("some.invalid.hostname.foo.bar.local", server.port), BUFFER_SIZE, BUFFER_SIZE));
+                () -> selector.connect("0", new InetSocketAddress("some.invalid.hostname.foo.bar.local", server.port), BUFFER_SIZE, BUFFER_SIZE));
     }
 
     /**
@@ -264,17 +257,17 @@ public class SelectorTest {
             assertEquals(0, cipherMetrics(metrics).size());
         } else {
             TestUtils.waitForCondition(() -> cipherMetrics(metrics).size() == 1,
-                "Waiting for cipher metrics to be created.");
+                    "Waiting for cipher metrics to be created.");
             assertEquals(Integer.valueOf(5), cipherMetrics(metrics).get(0).metricValue());
         }
     }
 
     static List<KafkaMetric> cipherMetrics(Metrics metrics) {
         return metrics.metrics().entrySet().stream().
-            filter(e -> e.getKey().description().
-                contains("The number of connections with this SSL cipher and protocol.")).
-            map(e -> e.getValue()).
-            collect(Collectors.toList());
+                filter(e -> e.getKey().description().
+                        contains("The number of connections with this SSL cipher and protocol.")).
+                map(e -> e.getValue()).
+                collect(Collectors.toList());
     }
 
     /**
@@ -392,7 +385,7 @@ public class SelectorTest {
             selector.poll(5);
         assertEquals(1, selector.completedReceives().size(), "We should have only one response");
         assertEquals("0", selector.completedReceives().iterator().next().source(),
-            "The response should not be from the muted node");
+                "The response should not be from the muted node");
 
         selector.unmute("1");
         do {
@@ -407,11 +400,13 @@ public class SelectorTest {
         AtomicInteger closedChannelsCount = new AtomicInteger(0);
         ChannelBuilder channelBuilder = new PlaintextChannelBuilder(null) {
             private int channelIndex = 0;
+
             @Override
             KafkaChannel buildChannel(String id, TransportLayer transportLayer, Supplier<Authenticator> authenticatorCreator,
                                       int maxReceiveSize, MemoryPool memoryPool, ChannelMetadataRegistry metadataRegistry) {
                 return new KafkaChannel(id, transportLayer, authenticatorCreator, maxReceiveSize, memoryPool, metadataRegistry) {
                     private final int index = channelIndex++;
+
                     @Override
                     public void close() throws IOException {
                         closedChannelsCount.getAndIncrement();
@@ -434,9 +429,10 @@ public class SelectorTest {
         ChannelBuilder channelBuilder = new PlaintextChannelBuilder(null) {
             @Override
             public KafkaChannel buildChannel(String id, SelectionKey key, int maxReceiveSize,
-                    MemoryPool memoryPool, ChannelMetadataRegistry metadataRegistry) throws KafkaException {
+                                             MemoryPool memoryPool, ChannelMetadataRegistry metadataRegistry) throws KafkaException {
                 throw new RuntimeException("Test exception");
             }
+
             @Override
             public void close() {
             }
@@ -454,6 +450,9 @@ public class SelectorTest {
     public void testCloseOldestConnection() throws Exception {
         String id = "0";
         blockingConnect(id);
+        // not really deterministic way of testing
+        // adding another pool to make sure queue is empty
+        selector.poll(0);
 
         time.sleep(6000); // The max idle time is 5000ms
         selector.poll(0);
@@ -690,7 +689,7 @@ public class SelectorTest {
         selector.close();
         MemoryPool pool = new SimpleMemoryPool(900, 900, false, null);
         selector = new Selector(NetworkReceive.UNLIMITED, 5000, metrics, time, "MetricGroup",
-            new HashMap<String, String>(), true, false, channelBuilder, pool, new LogContext());
+                new HashMap<String, String>(), true, false, channelBuilder, pool, new LogContext());
 
         try (ServerSocketChannel ss = ServerSocketChannel.open()) {
             ss.bind(new InetSocketAddress(0));
@@ -847,7 +846,7 @@ public class SelectorTest {
     public void testConnectionsByClientMetric() throws Exception {
         String node = "0";
         Map<String, String> unknownNameAndVersion = softwareNameAndVersionTags(
-            ClientInformation.UNKNOWN_NAME_OR_VERSION, ClientInformation.UNKNOWN_NAME_OR_VERSION);
+                ClientInformation.UNKNOWN_NAME_OR_VERSION, ClientInformation.UNKNOWN_NAME_OR_VERSION);
         Map<String, String> knownNameAndVersion = softwareNameAndVersionTags("A", "B");
 
         try (ServerSocketChannel ss = ServerSocketChannel.open()) {
@@ -862,16 +861,16 @@ public class SelectorTest {
             // Metric with unknown / unknown should be there
             selector.register(node, channel);
             assertEquals(1,
-                getMetric("connections", unknownNameAndVersion).metricValue());
+                    getMetric("connections", unknownNameAndVersion).metricValue());
             assertEquals(ClientInformation.EMPTY,
-                selector.channel(node).channelMetadataRegistry().clientInformation());
+                    selector.channel(node).channelMetadataRegistry().clientInformation());
 
             // Metric with unknown / unknown should not be there, metric with A / B should be there
             ClientInformation clientInformation = new ClientInformation("A", "B");
             selector.channel(node).channelMetadataRegistry()
-                .registerClientInformation(clientInformation);
+                    .registerClientInformation(clientInformation);
             assertEquals(clientInformation,
-                selector.channel(node).channelMetadataRegistry().clientInformation());
+                    selector.channel(node).channelMetadataRegistry().clientInformation());
             assertEquals(0, getMetric("connections", unknownNameAndVersion).metricValue());
             assertEquals(1, getMetric("connections", knownNameAndVersion).metricValue());
 
@@ -890,9 +889,9 @@ public class SelectorTest {
 
     private KafkaMetric getMetric(String name, Map<String, String> tags) throws Exception {
         Optional<Map.Entry<MetricName, KafkaMetric>> metric = metrics.metrics().entrySet().stream()
-            .filter(entry ->
-                entry.getKey().name().equals(name) && entry.getKey().tags().equals(tags))
-            .findFirst();
+                .filter(entry ->
+                        entry.getKey().name().equals(name) && entry.getKey().tags().equals(tags))
+                .findFirst();
         if (!metric.isPresent())
             throw new Exception(String.format("Could not find metric called %s with tags %s", name, tags.toString()));
 
@@ -910,7 +909,7 @@ public class SelectorTest {
         assertNotNull(selector.lowestPriorityChannel());
         for (int i = conns - 1; i >= 0; i--) {
             if (i != 2)
-              assertEquals("", blockingRequest(String.valueOf(i), ""));
+                assertEquals("", blockingRequest(String.valueOf(i), ""));
             time.sleep(10);
         }
         assertEquals("2", selector.lowestPriorityChannel().id());
