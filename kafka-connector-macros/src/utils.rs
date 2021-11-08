@@ -34,6 +34,8 @@ pub fn parse_jni_method_comment(macro_args: &HashMap<String, String>) -> JniMeth
     let rust_return_type = match java_return_type.as_str() {
         "J" => "jlong",
         "I" => "jint",
+        "Z" => "jboolean",
+        "D" => "jdouble",
         "[]B" => "jbyteArray",
         "Ljava/lang/String" => "jstring",
         _ if java_return_type.starts_with('L') => "jobject",

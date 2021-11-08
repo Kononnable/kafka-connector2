@@ -16,17 +16,34 @@
  */
 package org.apache.kafka.common.metrics;
 
+import org.apache.kafka.RustLib;
+
+import java.util.Map;
+
 /**
  * An upper or lower bound for metrics
  */
 public final class Quota {
 
-    private final boolean upper;
-    private final double bound;
+    static {
+        RustLib.load();
+    }
+
+    private long rustPointer;
+
+    public native void rustConstructor(double bound, boolean upper);
+
+    public native void rustDeconstructor();
+
+    @Override
+    protected void finalize() throws Throwable {
+        rustDeconstructor();
+        super.finalize();
+    }
+
 
     public Quota(double bound, boolean upper) {
-        this.bound = bound;
-        this.upper = upper;
+        rustConstructor(bound, upper);
     }
 
     public static Quota upperBound(double upperBound) {
@@ -37,24 +54,27 @@ public final class Quota {
         return new Quota(lowerBound, false);
     }
 
-    public boolean isUpperBound() {
-        return this.upper;
-    }
+    public native boolean isUpperBound();
+//    public boolean isUpperBound() {
+//        return this.upper;
+//    }
 
-    public double bound() {
-        return this.bound;
-    }
+    public native double bound();
+//    public double bound() {
+//        return this.bound;
+//    }
 
-    public boolean acceptable(double value) {
-        return (upper && value <= bound) || (!upper && value >= bound);
-    }
+    public native boolean acceptable(double value);
+//    public boolean acceptable(double value) {
+//        return (upper && value <= bound) || (!upper && value >= bound);
+//    }
 
     @Override
     public int hashCode() {
         final int prime = 31;
         int result = 1;
-        result = prime * result + (int) this.bound;
-        result = prime * result + (this.upper ? 1 : 0);
+        result = prime * result + (int) this.bound();
+        result = prime * result + (this.isUpperBound() ? 1 : 0);
         return result;
     }
 
@@ -65,11 +85,11 @@ public final class Quota {
         if (!(obj instanceof Quota))
             return false;
         Quota that = (Quota) obj;
-        return (that.bound == this.bound) && (that.upper == this.upper);
+        return (that.bound() == this.bound()) && (that.isUpperBound() == this.isUpperBound());
     }
 
     @Override
     public String toString() {
-        return (upper ? "upper=" : "lower=") + bound;
+        return (isUpperBound() ? "upper=" : "lower=") + bound();
     }
 }

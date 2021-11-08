@@ -55,7 +55,7 @@ pub fn rust_property_getter_impl(input: TokenStream) -> TokenStream {
             };
 
             match result() {
-                Ok(v) => v,
+                Ok(v) => v.into(), // into() because of jboolean which is alias for u8 not bool
                 Err(jni::errors::Error::JavaException) => #default,
                 _ => panic!(),
             }

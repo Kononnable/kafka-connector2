@@ -90,6 +90,32 @@ impl CloneToFromJava for i64 {
     }
 }
 
+impl CloneToFromJava for bool {
+    fn clone_to_java<'a>(&self, _env: JNIEnv<'a>) -> jni::errors::Result<JValue<'a>> {
+        Ok(JValue::Bool((*self) as u8))
+    }
+
+    fn clone_from_java(_env: JNIEnv, obj: JValue) -> jni::errors::Result<Self>
+    where
+        Self: Sized,
+    {
+        obj.z()
+    }
+}
+
+impl CloneToFromJava for f64 {
+    fn clone_to_java<'a>(&self, _env: JNIEnv<'a>) -> jni::errors::Result<JValue<'a>> {
+        Ok(JValue::Double(*self))
+    }
+
+    fn clone_from_java(_env: JNIEnv, obj: JValue) -> jni::errors::Result<Self>
+    where
+        Self: Sized,
+    {
+        obj.d()
+    }
+}
+
 impl CloneToFromJava for Option<i32> {
     fn clone_to_java<'a>(&self, env: JNIEnv<'a>) -> jni::errors::Result<JValue<'a>> {
         let optional_class = env
