@@ -43,6 +43,7 @@ import org.apache.kafka.common.message.EndTxnResponseData;
 import org.apache.kafka.common.message.InitProducerIdResponseData;
 import org.apache.kafka.common.message.TxnOffsetCommitRequestData;
 import org.apache.kafka.common.metrics.Sensor;
+import org.apache.kafka.common.metrics.SensorRecordingLevel;
 import org.apache.kafka.common.metrics.stats.Avg;
 import org.apache.kafka.common.network.Selectable;
 import org.apache.kafka.common.protocol.ApiKeys;
@@ -815,12 +816,12 @@ public class KafkaProducerTest {
         Properties props = new Properties();
         props.put(ProducerConfig.BOOTSTRAP_SERVERS_CONFIG, "localhost:9000");
         try (KafkaProducer<byte[], byte[]> producer = new KafkaProducer<>(props, new ByteArraySerializer(), new ByteArraySerializer())) {
-            assertEquals(Sensor.RecordingLevel.INFO, producer.metrics.config().recordLevel());
+            assertEquals(SensorRecordingLevel.INFO, producer.metrics.config().recordLevel());
         }
 
         props.put(ProducerConfig.METRICS_RECORDING_LEVEL_CONFIG, "DEBUG");
         try (KafkaProducer<byte[], byte[]> producer = new KafkaProducer<>(props, new ByteArraySerializer(), new ByteArraySerializer())) {
-            assertEquals(Sensor.RecordingLevel.DEBUG, producer.metrics.config().recordLevel());
+            assertEquals(SensorRecordingLevel.DEBUG, producer.metrics.config().recordLevel());
         }
     }
 

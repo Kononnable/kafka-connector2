@@ -17,12 +17,7 @@
 package org.apache.kafka.streams.state.internals;
 
 import org.apache.kafka.common.MetricName;
-import org.apache.kafka.common.metrics.JmxReporter;
-import org.apache.kafka.common.metrics.KafkaMetric;
-import org.apache.kafka.common.metrics.KafkaMetricsContext;
-import org.apache.kafka.common.metrics.Metrics;
-import org.apache.kafka.common.metrics.MetricsContext;
-import org.apache.kafka.common.metrics.Sensor;
+import org.apache.kafka.common.metrics.*;
 import org.apache.kafka.common.serialization.Deserializer;
 import org.apache.kafka.common.serialization.Serde;
 import org.apache.kafka.common.serialization.Serdes;
@@ -108,24 +103,24 @@ public class MeteredKeyValueStoreTest {
     public void before() {
         final Time mockTime = new MockTime();
         metered = new MeteredKeyValueStore<>(
-            inner,
-            STORE_TYPE,
-            mockTime,
-            Serdes.String(),
-            Serdes.String()
+                inner,
+                STORE_TYPE,
+                mockTime,
+                Serdes.String(),
+                Serdes.String()
         );
-        metrics.config().recordLevel(Sensor.RecordingLevel.DEBUG);
+        metrics.config().recordLevel(SensorRecordingLevel.DEBUG);
         expect(context.applicationId()).andStubReturn(APPLICATION_ID);
         expect(context.metrics()).andStubReturn(
-            new StreamsMetricsImpl(metrics, "test", StreamsConfig.METRICS_LATEST, mockTime)
+                new StreamsMetricsImpl(metrics, "test", StreamsConfig.METRICS_LATEST, mockTime)
         );
         expect(context.taskId()).andStubReturn(taskId);
         expect(context.changelogFor(STORE_NAME)).andStubReturn(CHANGELOG_TOPIC);
         expect(inner.name()).andStubReturn(STORE_NAME);
         tags = mkMap(
-            mkEntry(THREAD_ID_TAG_KEY, threadId),
-            mkEntry("task-id", taskId.toString()),
-            mkEntry(STORE_TYPE + "-state-id", STORE_NAME)
+                mkEntry(THREAD_ID_TAG_KEY, threadId),
+                mkEntry("task-id", taskId.toString()),
+                mkEntry(STORE_TYPE + "-state-id", STORE_NAME)
         );
     }
 
@@ -139,11 +134,11 @@ public class MeteredKeyValueStoreTest {
     public void shouldDelegateDeprecatedInit() {
         final KeyValueStore<Bytes, byte[]> inner = mock(KeyValueStore.class);
         final MeteredKeyValueStore<String, String> outer = new MeteredKeyValueStore<>(
-            inner,
-            STORE_TYPE,
-            new MockTime(),
-            Serdes.String(),
-            Serdes.String()
+                inner,
+                STORE_TYPE,
+                new MockTime(),
+                Serdes.String(),
+                Serdes.String()
         );
         expect(inner.name()).andStubReturn("store");
         inner.init((ProcessorContext) context, outer);
@@ -157,11 +152,11 @@ public class MeteredKeyValueStoreTest {
     public void shouldDelegateInit() {
         final KeyValueStore<Bytes, byte[]> inner = mock(KeyValueStore.class);
         final MeteredKeyValueStore<String, String> outer = new MeteredKeyValueStore<>(
-            inner,
-            STORE_TYPE,
-            new MockTime(),
-            Serdes.String(),
-            Serdes.String()
+                inner,
+                STORE_TYPE,
+                new MockTime(),
+                Serdes.String(),
+                Serdes.String()
         );
         expect(inner.name()).andStubReturn("store");
         inner.init((StateStoreContext) context, outer);
@@ -198,11 +193,11 @@ public class MeteredKeyValueStoreTest {
         expect(inner.get(KEY_BYTES)).andStubReturn(VALUE_BYTES);
         replay(inner, context, keySerializer, keySerde, valueDeserializer, valueSerializer, valueSerde);
         metered = new MeteredKeyValueStore<>(
-            inner,
-            STORE_TYPE,
-            new MockTime(),
-            keySerde,
-            valueSerde
+                inner,
+                STORE_TYPE,
+                new MockTime(),
+                keySerde,
+                valueSerde
         );
         metered.init((StateStoreContext) context, metered);
 
@@ -221,13 +216,13 @@ public class MeteredKeyValueStoreTest {
 
         metrics.addReporter(reporter);
         assertTrue(reporter.containsMbean(String.format(
-            "kafka.streams:type=%s,%s=%s,task-id=%s,%s-state-id=%s",
-            STORE_LEVEL_GROUP,
-            THREAD_ID_TAG_KEY,
-            threadId,
-            taskId.toString(),
-            STORE_TYPE,
-            STORE_NAME
+                "kafka.streams:type=%s,%s=%s,task-id=%s,%s-state-id=%s",
+                STORE_LEVEL_GROUP,
+                THREAD_ID_TAG_KEY,
+                threadId,
+                taskId.toString(),
+                STORE_TYPE,
+                STORE_NAME
         )));
     }
 
@@ -310,7 +305,7 @@ public class MeteredKeyValueStoreTest {
     @Test
     public void shouldGetRangeFromInnerStoreAndRecordRangeMetric() {
         expect(inner.range(KEY_BYTES, KEY_BYTES))
-            .andReturn(new KeyValueIteratorStub<>(Collections.singletonList(BYTE_KEY_VALUE_PAIR).iterator()));
+                .andReturn(new KeyValueIteratorStub<>(Collections.singletonList(BYTE_KEY_VALUE_PAIR).iterator()));
         init();
 
         final KeyValueIterator<String, String> iterator = metered.range(KEY, KEY);
@@ -351,7 +346,8 @@ public class MeteredKeyValueStoreTest {
         verify(inner);
     }
 
-    private interface CachedKeyValueStore extends KeyValueStore<Bytes, byte[]>, CachedStateStore<byte[], byte[]> { }
+    private interface CachedKeyValueStore extends KeyValueStore<Bytes, byte[]>, CachedStateStore<byte[], byte[]> {
+    }
 
     @SuppressWarnings("unchecked")
     @Test
@@ -362,11 +358,11 @@ public class MeteredKeyValueStoreTest {
         replay(cachedKeyValueStore);
 
         metered = new MeteredKeyValueStore<>(
-            cachedKeyValueStore,
-            STORE_TYPE,
-            new MockTime(),
-            Serdes.String(),
-            Serdes.String()
+                cachedKeyValueStore,
+                STORE_TYPE,
+                new MockTime(),
+                Serdes.String(),
+                Serdes.String()
         );
         assertTrue(metered.setFlushListener(null, false));
 
@@ -466,7 +462,7 @@ public class MeteredKeyValueStoreTest {
     public void shouldGetRecordsWithPrefixKey() {
         final StringSerializer stringSerializer = new StringSerializer();
         expect(inner.prefixScan(KEY, stringSerializer))
-            .andReturn(new KeyValueIteratorStub<>(Collections.singletonList(BYTE_KEY_VALUE_PAIR).iterator()));
+                .andReturn(new KeyValueIteratorStub<>(Collections.singletonList(BYTE_KEY_VALUE_PAIR).iterator()));
         init();
 
         final KeyValueIterator<String, String> iterator = metered.prefixScan(KEY, stringSerializer);
@@ -488,9 +484,9 @@ public class MeteredKeyValueStoreTest {
 
     private List<MetricName> storeMetrics() {
         return metrics.metrics()
-                      .keySet()
-                      .stream()
-                      .filter(name -> name.group().equals(STORE_LEVEL_GROUP) && name.tags().equals(tags))
-                      .collect(Collectors.toList());
+                .keySet()
+                .stream()
+                .filter(name -> name.group().equals(STORE_LEVEL_GROUP) && name.tags().equals(tags))
+                .collect(Collectors.toList());
     }
 }

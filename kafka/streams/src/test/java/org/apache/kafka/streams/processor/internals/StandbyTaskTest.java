@@ -24,6 +24,7 @@ import org.apache.kafka.common.errors.TimeoutException;
 import org.apache.kafka.common.metrics.KafkaMetric;
 import org.apache.kafka.common.metrics.Metrics;
 import org.apache.kafka.common.metrics.Sensor;
+import org.apache.kafka.common.metrics.SensorRecordingLevel;
 import org.apache.kafka.common.metrics.stats.CumulativeSum;
 import org.apache.kafka.common.serialization.IntegerSerializer;
 import org.apache.kafka.common.utils.LogContext;
@@ -90,11 +91,11 @@ public class StandbyTaskTest {
     private final MockKeyValueStore store2 = (MockKeyValueStore) new MockKeyValueStoreBuilder(storeName2, true).build();
 
     private final ProcessorTopology topology = ProcessorTopologyFactories.withLocalStores(
-        asList(store1, store2),
-        mkMap(mkEntry(storeName1, storeChangelogTopicName1), mkEntry(storeName2, storeChangelogTopicName2))
+            asList(store1, store2),
+            mkMap(mkEntry(storeName1, storeChangelogTopicName1), mkEntry(storeName2, storeChangelogTopicName2))
     );
     private final StreamsMetricsImpl streamsMetrics =
-        new StreamsMetricsImpl(new Metrics(), threadName, StreamsConfig.METRICS_LATEST, new MockTime());
+            new StreamsMetricsImpl(new Metrics(), threadName, StreamsConfig.METRICS_LATEST, new MockTime());
 
     private File baseDir;
     private StreamsConfig config;
@@ -103,17 +104,17 @@ public class StandbyTaskTest {
 
     private StreamsConfig createConfig(final File baseDir) throws IOException {
         return new StreamsConfig(mkProperties(mkMap(
-            mkEntry(StreamsConfig.APPLICATION_ID_CONFIG, applicationId),
-            mkEntry(StreamsConfig.BOOTSTRAP_SERVERS_CONFIG, "localhost:2171"),
-            mkEntry(StreamsConfig.BUFFERED_RECORDS_PER_PARTITION_CONFIG, "3"),
-            mkEntry(StreamsConfig.STATE_DIR_CONFIG, baseDir.getCanonicalPath()),
-            mkEntry(StreamsConfig.DEFAULT_TIMESTAMP_EXTRACTOR_CLASS_CONFIG, MockTimestampExtractor.class.getName())
+                mkEntry(StreamsConfig.APPLICATION_ID_CONFIG, applicationId),
+                mkEntry(StreamsConfig.BOOTSTRAP_SERVERS_CONFIG, "localhost:2171"),
+                mkEntry(StreamsConfig.BUFFERED_RECORDS_PER_PARTITION_CONFIG, "3"),
+                mkEntry(StreamsConfig.STATE_DIR_CONFIG, baseDir.getCanonicalPath()),
+                mkEntry(StreamsConfig.DEFAULT_TIMESTAMP_EXTRACTOR_CLASS_CONFIG, MockTimestampExtractor.class.getName())
         )));
     }
 
     private final MockRestoreConsumer<Integer, Integer> restoreStateConsumer = new MockRestoreConsumer<>(
-        new IntegerSerializer(),
-        new IntegerSerializer()
+            new IntegerSerializer(),
+            new IntegerSerializer()
     );
 
     @Mock(type = MockType.NICE)
@@ -126,15 +127,15 @@ public class StandbyTaskTest {
 
         restoreStateConsumer.reset();
         restoreStateConsumer.updatePartitions(storeChangelogTopicName1, asList(
-            new PartitionInfo(storeChangelogTopicName1, 0, Node.noNode(), new Node[0], new Node[0]),
-            new PartitionInfo(storeChangelogTopicName1, 1, Node.noNode(), new Node[0], new Node[0]),
-            new PartitionInfo(storeChangelogTopicName1, 2, Node.noNode(), new Node[0], new Node[0])
+                new PartitionInfo(storeChangelogTopicName1, 0, Node.noNode(), new Node[0], new Node[0]),
+                new PartitionInfo(storeChangelogTopicName1, 1, Node.noNode(), new Node[0], new Node[0]),
+                new PartitionInfo(storeChangelogTopicName1, 2, Node.noNode(), new Node[0], new Node[0])
         ));
 
         restoreStateConsumer.updatePartitions(storeChangelogTopicName2, asList(
-            new PartitionInfo(storeChangelogTopicName2, 0, Node.noNode(), new Node[0], new Node[0]),
-            new PartitionInfo(storeChangelogTopicName2, 1, Node.noNode(), new Node[0], new Node[0]),
-            new PartitionInfo(storeChangelogTopicName2, 2, Node.noNode(), new Node[0], new Node[0])
+                new PartitionInfo(storeChangelogTopicName2, 0, Node.noNode(), new Node[0], new Node[0]),
+                new PartitionInfo(storeChangelogTopicName2, 1, Node.noNode(), new Node[0], new Node[0]),
+                new PartitionInfo(storeChangelogTopicName2, 2, Node.noNode(), new Node[0], new Node[0])
         ));
         baseDir = TestUtils.tempDirectory();
         config = createConfig(baseDir);
@@ -328,8 +329,8 @@ public class StandbyTaskTest {
     public void shouldOnlyNeedCommitWhenChangelogOffsetChanged() {
         EasyMock.expect(stateManager.changelogPartitions()).andReturn(Collections.singleton(partition)).anyTimes();
         EasyMock.expect(stateManager.changelogOffsets())
-            .andReturn(Collections.singletonMap(partition, 50L))
-            .andReturn(Collections.singletonMap(partition, 10100L)).anyTimes();
+                .andReturn(Collections.singletonMap(partition, 50L))
+                .andReturn(Collections.singletonMap(partition, 10100L)).anyTimes();
         stateManager.flush();
         EasyMock.expectLastCall();
         stateManager.checkpoint();
@@ -378,7 +379,7 @@ public class StandbyTaskTest {
     @Test
     public void shouldThrowOnCloseCleanCheckpointError() {
         EasyMock.expect(stateManager.changelogOffsets())
-            .andReturn(Collections.singletonMap(partition, 50L));
+                .andReturn(Collections.singletonMap(partition, 50L));
         stateManager.checkpoint();
         EasyMock.expectLastCall().andThrow(new RuntimeException("KABOOM!")).anyTimes();
         EasyMock.expect(stateManager.changelogPartitions()).andReturn(Collections.emptySet()).anyTimes();
@@ -470,9 +471,9 @@ public class StandbyTaskTest {
         final MetricName metricName = setupCloseTaskMetric();
 
         config = new StreamsConfig(mkProperties(mkMap(
-            mkEntry(StreamsConfig.APPLICATION_ID_CONFIG, applicationId),
-            mkEntry(StreamsConfig.BOOTSTRAP_SERVERS_CONFIG, "localhost:2171"),
-            mkEntry(StreamsConfig.PROCESSING_GUARANTEE_CONFIG, StreamsConfig.EXACTLY_ONCE)
+                mkEntry(StreamsConfig.APPLICATION_ID_CONFIG, applicationId),
+                mkEntry(StreamsConfig.BOOTSTRAP_SERVERS_CONFIG, "localhost:2171"),
+                mkEntry(StreamsConfig.PROCESSING_GUARANTEE_CONFIG, StreamsConfig.EXACTLY_ONCE)
         )));
 
         task = createStandbyTask();
@@ -500,9 +501,9 @@ public class StandbyTaskTest {
         final MetricName metricName = setupCloseTaskMetric();
 
         config = new StreamsConfig(mkProperties(mkMap(
-            mkEntry(StreamsConfig.APPLICATION_ID_CONFIG, applicationId),
-            mkEntry(StreamsConfig.BOOTSTRAP_SERVERS_CONFIG, "localhost:2171"),
-            mkEntry(StreamsConfig.PROCESSING_GUARANTEE_CONFIG, StreamsConfig.EXACTLY_ONCE_V2)
+                mkEntry(StreamsConfig.APPLICATION_ID_CONFIG, applicationId),
+                mkEntry(StreamsConfig.BOOTSTRAP_SERVERS_CONFIG, "localhost:2171"),
+                mkEntry(StreamsConfig.PROCESSING_GUARANTEE_CONFIG, StreamsConfig.EXACTLY_ONCE_V2)
         )));
 
         task = createStandbyTask();
@@ -570,8 +571,8 @@ public class StandbyTaskTest {
         task.maybeInitTaskTimeoutOrThrow(Duration.ofMinutes(5).toMillis(), null);
 
         assertThrows(
-            TimeoutException.class,
-            () -> task.maybeInitTaskTimeoutOrThrow(Duration.ofMinutes(5).plus(Duration.ofMillis(1L)).toMillis(), null)
+                TimeoutException.class,
+                () -> task.maybeInitTaskTimeoutOrThrow(Duration.ofMinutes(5).plus(Duration.ofMillis(1L)).toMillis(), null)
         );
     }
 
@@ -589,34 +590,34 @@ public class StandbyTaskTest {
     private StandbyTask createStandbyTask() {
 
         final ThreadCache cache = new ThreadCache(
-            new LogContext(String.format("stream-thread [%s] ", Thread.currentThread().getName())),
-            0,
-            streamsMetrics
+                new LogContext(String.format("stream-thread [%s] ", Thread.currentThread().getName())),
+                0,
+                streamsMetrics
         );
 
         final InternalProcessorContext context = new ProcessorContextImpl(
-            taskId,
-            config,
-            stateManager,
-            streamsMetrics,
-            cache
+                taskId,
+                config,
+                stateManager,
+                streamsMetrics,
+                cache
         );
 
         return new StandbyTask(
-            taskId,
-            Collections.singleton(partition),
-            topology,
-            config,
-            streamsMetrics,
-            stateManager,
-            stateDirectory,
-            cache,
-            context);
+                taskId,
+                Collections.singleton(partition),
+                topology,
+                config,
+                streamsMetrics,
+                stateManager,
+                stateDirectory,
+                cache,
+                context);
     }
 
     private MetricName setupCloseTaskMetric() {
         final MetricName metricName = new MetricName("name", "group", "description", Collections.emptyMap());
-        final Sensor sensor = streamsMetrics.threadLevelSensor(threadId, "task-closed", Sensor.RecordingLevel.INFO);
+        final Sensor sensor = streamsMetrics.threadLevelSensor(threadId, "task-closed", SensorRecordingLevel.INFO);
         sensor.add(metricName, new CumulativeSum());
         return metricName;
     }

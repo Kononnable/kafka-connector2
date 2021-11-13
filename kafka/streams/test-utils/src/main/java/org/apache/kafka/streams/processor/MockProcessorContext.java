@@ -20,6 +20,7 @@ import org.apache.kafka.common.header.Headers;
 import org.apache.kafka.common.metrics.MetricConfig;
 import org.apache.kafka.common.metrics.Metrics;
 import org.apache.kafka.common.metrics.Sensor;
+import org.apache.kafka.common.metrics.SensorRecordingLevel;
 import org.apache.kafka.common.serialization.Serde;
 import org.apache.kafka.common.utils.Time;
 import org.apache.kafka.streams.KeyValue;
@@ -170,10 +171,10 @@ public class MockProcessorContext implements ProcessorContext, RecordCollector.S
         @Override
         public String toString() {
             return "CapturedForward{" +
-                "childName='" + childName + '\'' +
-                ", timestamp=" + timestamp +
-                ", keyValue=" + keyValue +
-                '}';
+                    "childName='" + childName + '\'' +
+                    ", timestamp=" + timestamp +
+                    ", keyValue=" + keyValue +
+                    '}';
         }
     }
 
@@ -189,14 +190,14 @@ public class MockProcessorContext implements ProcessorContext, RecordCollector.S
     public MockProcessorContext() {
         //noinspection DoubleBraceInitialization
         this(
-            new Properties() {
-                {
-                    put(StreamsConfig.APPLICATION_ID_CONFIG, "");
-                    put(StreamsConfig.BOOTSTRAP_SERVERS_CONFIG, "");
-                }
-            },
-            new TaskId(0, 0),
-            null);
+                new Properties() {
+                    {
+                        put(StreamsConfig.APPLICATION_ID_CONFIG, "");
+                        put(StreamsConfig.BOOTSTRAP_SERVERS_CONFIG, "");
+                    }
+                },
+                new TaskId(0, 0),
+                null);
     }
 
     /**
@@ -230,13 +231,13 @@ public class MockProcessorContext implements ProcessorContext, RecordCollector.S
         this.config = streamsConfig;
         this.stateDir = stateDir;
         final MetricConfig metricConfig = new MetricConfig();
-        metricConfig.recordLevel(Sensor.RecordingLevel.DEBUG);
+        metricConfig.recordLevel(SensorRecordingLevel.DEBUG);
         final String threadId = Thread.currentThread().getName();
         this.metrics = new StreamsMetricsImpl(
-            new Metrics(metricConfig),
-            threadId,
-            streamsConfig.getString(StreamsConfig.BUILT_IN_METRICS_VERSION_CONFIG),
-            Time.SYSTEM
+                new Metrics(metricConfig),
+                threadId,
+                streamsConfig.getString(StreamsConfig.BUILT_IN_METRICS_VERSION_CONFIG),
+                Time.SYSTEM
         );
         TaskMetrics.droppedRecordsSensor(threadId, taskId.toString(), metrics);
     }
@@ -497,10 +498,10 @@ public class MockProcessorContext implements ProcessorContext, RecordCollector.S
     @Override
     public <K, V> void forward(final K key, final V value, final To to) {
         capturedForwards.add(
-            new CapturedForward(
-                to.timestamp == -1 ? to.withTimestamp(recordTimestamp == null ? -1 : recordTimestamp) : to,
-                new KeyValue<>(key, value)
-            )
+                new CapturedForward(
+                        to.timestamp == -1 ? to.withTimestamp(recordTimestamp == null ? -1 : recordTimestamp) : to,
+                        new KeyValue<>(key, value)
+                )
         );
     }
 
@@ -571,9 +572,9 @@ public class MockProcessorContext implements ProcessorContext, RecordCollector.S
         // Rather than risk a mysterious ClassCastException during unit tests, throw an explanatory exception.
 
         throw new UnsupportedOperationException(
-            "MockProcessorContext does not provide record collection. " +
-                "For processor unit tests, use an in-memory state store with change-logging disabled. " +
-                "Alternatively, use the TopologyTestDriver for testing processor/store/topology integration."
+                "MockProcessorContext does not provide record collection. " +
+                        "For processor unit tests, use an in-memory state store with change-logging disabled. " +
+                        "Alternatively, use the TopologyTestDriver for testing processor/store/topology integration."
         );
     }
 }

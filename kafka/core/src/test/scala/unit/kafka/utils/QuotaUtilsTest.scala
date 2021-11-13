@@ -6,7 +6,7 @@
  * (the "License"); you may not use this file except in compliance with
  * the License.  You may obtain a copy of the License at
  *
- *    http://www.apache.org/licenses/LICENSE-2.0
+ * http://www.apache.org/licenses/LICENSE-2.0
  *
  * Unless required by applicable law or agreed to in writing, software
  * distributed under the License is distributed on an "AS IS" BASIS,
@@ -115,7 +115,7 @@ class QuotaUtilsTest {
   // the `metric` passed into the returned QuotaViolationException will return windowSize = 'numSamples' - 1
   private def quotaViolationException(observedValue: Double, quota: Double, numSamples: Int): QuotaViolationException = {
     val metricConfig = new MetricConfig()
-      .timeWindow(sampleWindowSec, TimeUnit.SECONDS)
+      .timeWindowMs(TimeUnit.MILLISECONDS.convert(sampleWindowSec, TimeUnit.SECONDS))
       .samples(numSamples)
       .quota(new Quota(quota, true))
     val metric = new KafkaMetric(new Object(), metricName, new Rate(), metricConfig, time)

@@ -17,10 +17,8 @@
 package kafka.server
 
 import java.util.Collections
-import java.util.concurrent.TimeUnit
-
 import org.apache.kafka.clients.CommonClientConfigs
-import org.apache.kafka.common.metrics.{JmxReporter, KafkaMetricsContext, MetricConfig, Metrics, MetricsReporter, Sensor}
+import org.apache.kafka.common.metrics.{JmxReporter, KafkaMetricsContext, MetricConfig, Metrics, MetricsReporter, SensorRecordingLevel}
 import org.apache.kafka.common.utils.Time
 import org.apache.kafka.metadata.VersionRange
 
@@ -28,7 +26,9 @@ import scala.jdk.CollectionConverters._
 
 trait Server {
   def startup(): Unit
+
   def shutdown(): Unit
+
   def awaitShutdown(): Unit
 }
 
@@ -39,37 +39,37 @@ object Server {
   val NodeIdLabel: String = "kafka.node.id"
 
   def initializeMetrics(
-    config: KafkaConfig,
-    time: Time,
-    clusterId: String
-  ): Metrics = {
+                         config: KafkaConfig,
+                         time: Time,
+                         clusterId: String
+                       ): Metrics = {
     val metricsContext = createKafkaMetricsContext(config, clusterId)
     buildMetrics(config, time, metricsContext)
   }
 
   private def buildMetrics(
-    config: KafkaConfig,
-    time: Time,
-    metricsContext: KafkaMetricsContext
-  ): Metrics = {
+                            config: KafkaConfig,
+                            time: Time,
+                            metricsContext: KafkaMetricsContext
+                          ): Metrics = {
     val defaultReporters = initializeDefaultReporters(config)
     val metricConfig = buildMetricsConfig(config)
     new Metrics(metricConfig, defaultReporters, time, true, metricsContext)
   }
 
   def buildMetricsConfig(
-    kafkaConfig: KafkaConfig
-  ): MetricConfig = {
+                          kafkaConfig: KafkaConfig
+                        ): MetricConfig = {
     new MetricConfig()
       .samples(kafkaConfig.metricNumSamples)
-      .recordLevel(Sensor.RecordingLevel.forName(kafkaConfig.metricRecordingLevel))
-      .timeWindow(kafkaConfig.metricSampleWindowMs, TimeUnit.MILLISECONDS)
+      .recordLevel(SensorRecordingLevel.forName(kafkaConfig.metricRecordingLevel))
+      .timeWindowMs(kafkaConfig.metricSampleWindowMs)
   }
 
   private[server] def createKafkaMetricsContext(
-    config: KafkaConfig,
-    clusterId: String
-  ): KafkaMetricsContext = {
+                                                 config: KafkaConfig,
+                                                 clusterId: String
+                                               ): KafkaMetricsContext = {
     val contextLabels = new java.util.HashMap[String, Object]
     contextLabels.put(ClusterIdLabel, clusterId)
 
@@ -84,8 +84,8 @@ object Server {
   }
 
   private def initializeDefaultReporters(
-    config: KafkaConfig
-  ): java.util.List[MetricsReporter] = {
+                                          config: KafkaConfig
+                                        ): java.util.List[MetricsReporter] = {
     val jmxReporter = new JmxReporter()
     jmxReporter.configure(config.originals)
 
@@ -95,9 +95,13 @@ object Server {
   }
 
   sealed trait ProcessStatus
+
   case object SHUTDOWN extends ProcessStatus
+
   case object STARTING extends ProcessStatus
+
   case object STARTED extends ProcessStatus
+
   case object SHUTTING_DOWN extends ProcessStatus
 
   val SUPPORTED_FEATURES = Collections.

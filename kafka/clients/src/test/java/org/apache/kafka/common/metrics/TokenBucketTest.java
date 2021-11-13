@@ -19,6 +19,7 @@ package org.apache.kafka.common.metrics;
 import static org.junit.jupiter.api.Assertions.assertEquals;
 
 import java.util.concurrent.TimeUnit;
+
 import org.apache.kafka.common.metrics.stats.TokenBucket;
 import org.apache.kafka.common.utils.MockTime;
 import org.apache.kafka.common.utils.Time;
@@ -38,9 +39,9 @@ public class TokenBucketTest {
         // Rate  = 5 unit / sec
         // Burst = 2 * 10 = 20 units
         MetricConfig config = new MetricConfig()
-            .quota(Quota.upperBound(5))
-            .timeWindow(2, TimeUnit.SECONDS)
-            .samples(10);
+                .quota(Quota.upperBound(5))
+                .timeWindowMs(TimeUnit.MILLISECONDS.convert(2, TimeUnit.SECONDS))
+                .samples(10);
 
         TokenBucket tk = new TokenBucket();
 
@@ -67,9 +68,9 @@ public class TokenBucketTest {
         // Rate  = 5 unit / sec
         // Burst = 2 * 10 = 20 units
         MetricConfig config = new MetricConfig()
-            .quota(Quota.upperBound(5))
-            .timeWindow(2, TimeUnit.SECONDS)
-            .samples(10);
+                .quota(Quota.upperBound(5))
+                .timeWindowMs(TimeUnit.MILLISECONDS.convert(2, TimeUnit.SECONDS))
+                .samples(10);
 
         TokenBucket tk = new TokenBucket();
 

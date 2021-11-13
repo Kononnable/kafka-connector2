@@ -40,13 +40,14 @@ import java.util.concurrent.CountDownLatch;
 import java.util.concurrent.TimeUnit;
 import java.util.function.Supplier;
 
-import static org.apache.kafka.common.metrics.Sensor.RecordingLevel.DEBUG;
+import static org.apache.kafka.common.metrics.SensorRecordingLevel.DEBUG;
 import static org.apache.kafka.test.TestUtils.DEFAULT_MAX_WAIT_MS;
 import static org.hamcrest.CoreMatchers.equalTo;
 import static org.hamcrest.MatcherAssert.assertThat;
 
 public final class StreamsTestUtils {
-    private StreamsTestUtils() {}
+    private StreamsTestUtils() {
+    }
 
     public static Properties getStreamsConfig(final String applicationId,
                                               final String bootstrapServers,
@@ -94,9 +95,9 @@ public final class StreamsTestUtils {
 
     public static Properties getStreamsConfig(final String applicationId, final Properties additional) {
         return getStreamsConfig(
-            applicationId,
-            "localhost:9091",
-            additional);
+                applicationId,
+                "localhost:9091",
+                additional);
     }
 
     public static Properties getStreamsConfig() {
@@ -118,9 +119,9 @@ public final class StreamsTestUtils {
 
         kafkaStreams.start();
         assertThat(
-            "KafkaStreams did not transit to RUNNING state within " + timeoutMs + " milli seconds.",
-            countDownLatch.await(timeoutMs, TimeUnit.MILLISECONDS),
-            equalTo(true)
+                "KafkaStreams did not transit to RUNNING state within " + timeoutMs + " milli seconds.",
+                countDownLatch.await(timeoutMs, TimeUnit.MILLISECONDS),
+                equalTo(true)
         );
     }
 
@@ -179,10 +180,10 @@ public final class StreamsTestUtils {
                     metric = entry.getValue();
                 } else {
                     throw new IllegalStateException(
-                        "Found two metrics with name=[" + name + "]: \n" +
-                            metric.metricName().toString() +
-                            " AND \n" +
-                            entry.getKey().toString()
+                            "Found two metrics with name=[" + name + "]: \n" +
+                                    metric.metricName().toString() +
+                                    " AND \n" +
+                                    entry.getKey().toString()
                     );
                 }
             }
@@ -212,10 +213,10 @@ public final class StreamsTestUtils {
                         metric = entry.getValue();
                     } else {
                         throw new IllegalStateException(
-                            "Found two metrics with name=[" + name + "] and tags=[" + filterTags + "]: \n" +
-                                metric.metricName().toString() +
-                                " AND \n" +
-                                entry.getKey().toString()
+                                "Found two metrics with name=[" + name + "] and tags=[" + filterTags + "]: \n" +
+                                        metric.metricName().toString() +
+                                        " AND \n" +
+                                        entry.getKey().toString()
                         );
                     }
                 }
@@ -238,6 +239,7 @@ public final class StreamsTestUtils {
 
     /**
      * Used to keep tests simple, and ignore calls from {@link org.apache.kafka.streams.internals.ApiUtils#checkSupplier(Supplier)} )}.
+     *
      * @return true if the stack context is within a {@link org.apache.kafka.streams.internals.ApiUtils#checkSupplier(Supplier)} )} call
      */
     public static boolean isCheckSupplierCall() {

@@ -22,7 +22,7 @@ import org.apache.kafka.common.metrics.KafkaMetric;
 import org.apache.kafka.common.metrics.MetricConfig;
 import org.apache.kafka.common.metrics.Metrics;
 import org.apache.kafka.common.metrics.Sensor;
-import org.apache.kafka.common.metrics.Sensor.RecordingLevel;
+import org.apache.kafka.common.metrics.SensorRecordingLevel;
 import org.apache.kafka.common.metrics.stats.Rate;
 import org.apache.kafka.common.utils.MockTime;
 import org.apache.kafka.common.utils.Time;
@@ -45,7 +45,6 @@ import java.util.Arrays;
 import java.util.Collections;
 import java.util.List;
 import java.util.Map;
-import java.util.concurrent.TimeUnit;
 
 import static org.apache.kafka.common.utils.Utils.mkEntry;
 import static org.apache.kafka.common.utils.Utils.mkMap;
@@ -108,9 +107,9 @@ public class StreamsMetricsImplTest {
     private final static String STORE_NAME1 = "store1";
     private final static String STORE_NAME2 = "store2";
     private final static Map<String, String> STORE_LEVEL_TAG_MAP = mkMap(
-        mkEntry(THREAD_ID_TAG, Thread.currentThread().getName()),
-        mkEntry(TASK_ID_TAG, TASK_ID1),
-        mkEntry(SCOPE_NAME + STORE_ID_TAG, STORE_NAME1)
+            mkEntry(THREAD_ID_TAG, Thread.currentThread().getName()),
+            mkEntry(TASK_ID_TAG, TASK_ID1),
+            mkEntry(SCOPE_NAME + STORE_ID_TAG, STORE_NAME1)
     );
     private final static String RECORD_CACHE_ID_TAG = "record-cache-id";
     private final static String ENTITY_NAME = "test-entity";
@@ -119,7 +118,7 @@ public class StreamsMetricsImplTest {
     private final static String CUSTOM_TAG_VALUE1 = "test-value1";
     private final static String CUSTOM_TAG_KEY2 = "test-key2";
     private final static String CUSTOM_TAG_VALUE2 = "test-value2";
-    private final static RecordingLevel INFO_RECORDING_LEVEL = RecordingLevel.INFO;
+    private final static SensorRecordingLevel INFO_RECORDING_LEVEL = SensorRecordingLevel.INFO;
     private final static String DESCRIPTION1 = "description number one";
     private final static String DESCRIPTION2 = "description number two";
     private final static String DESCRIPTION3 = "description number three";
@@ -132,9 +131,9 @@ public class StreamsMetricsImplTest {
     private final Map<String, String> tags = mkMap(mkEntry("tag", "value"));
     private final Map<String, String> clientLevelTags = mkMap(mkEntry(CLIENT_ID_TAG, CLIENT_ID));
     private final MetricName metricName1 =
-        new MetricName(METRIC_NAME1, CLIENT_LEVEL_GROUP, DESCRIPTION1, clientLevelTags);
+            new MetricName(METRIC_NAME1, CLIENT_LEVEL_GROUP, DESCRIPTION1, clientLevelTags);
     private final MetricName metricName2 =
-        new MetricName(METRIC_NAME1, CLIENT_LEVEL_GROUP, DESCRIPTION2, clientLevelTags);
+            new MetricName(METRIC_NAME1, CLIENT_LEVEL_GROUP, DESCRIPTION2, clientLevelTags);
     private final MockTime time = new MockTime(0);
     private final StreamsMetricsImpl streamsMetrics = new StreamsMetricsImpl(metrics, CLIENT_ID, VERSION, time);
 
@@ -147,14 +146,14 @@ public class StreamsMetricsImplTest {
                 if (argument instanceof MetricConfig) {
                     final MetricConfig otherMetricConfig = (MetricConfig) argument;
                     final boolean equalsComparisons =
-                        (otherMetricConfig.quota() == metricConfig.quota() ||
-                        otherMetricConfig.quota().equals(metricConfig.quota())) &&
-                        otherMetricConfig.tags().equals(metricConfig.tags());
+                            (otherMetricConfig.quota() == metricConfig.quota() ||
+                                    otherMetricConfig.quota().equals(metricConfig.quota())) &&
+                                    otherMetricConfig.tags().equals(metricConfig.tags());
                     if (otherMetricConfig.eventWindow() == metricConfig.eventWindow() &&
-                        otherMetricConfig.recordLevel() == metricConfig.recordLevel() &&
-                        equalsComparisons &&
-                        otherMetricConfig.samples() == metricConfig.samples() &&
-                        otherMetricConfig.timeWindowMs() == metricConfig.timeWindowMs()) {
+                            otherMetricConfig.recordLevel() == metricConfig.recordLevel() &&
+                            equalsComparisons &&
+                            otherMetricConfig.samples() == metricConfig.samples() &&
+                            otherMetricConfig.timeWindowMs() == metricConfig.timeWindowMs()) {
 
                         return true;
                     } else {
@@ -195,11 +194,11 @@ public class StreamsMetricsImplTest {
         final Capture<String> sensorKeys = newCapture(CaptureType.ALL);
         final Sensor[] parents = {};
         expect(metrics.sensor(capture(sensorKeys), eq(INFO_RECORDING_LEVEL), parents))
-            .andStubReturn(sensor);
+                .andStubReturn(sensor);
         expect(metrics.metricName(METRIC_NAME1, CLIENT_LEVEL_GROUP, DESCRIPTION1, clientLevelTags))
-            .andReturn(metricName1);
+                .andReturn(metricName1);
         expect(metrics.metricName(METRIC_NAME2, CLIENT_LEVEL_GROUP, DESCRIPTION2, clientLevelTags))
-            .andReturn(metricName2);
+                .andReturn(metricName2);
         replay(metrics);
         streamsMetrics.addClientLevelImmutableMetric(METRIC_NAME1, DESCRIPTION1, INFO_RECORDING_LEVEL, "value");
         streamsMetrics.addClientLevelImmutableMetric(METRIC_NAME2, DESCRIPTION2, INFO_RECORDING_LEVEL, "value");
@@ -213,37 +212,37 @@ public class StreamsMetricsImplTest {
         streamsMetrics.storeLevelSensor(TASK_ID1, STORE_NAME1, SENSOR_NAME_2, INFO_RECORDING_LEVEL);
         streamsMetrics.storeLevelSensor(TASK_ID1, STORE_NAME2, SENSOR_NAME_1, INFO_RECORDING_LEVEL);
         streamsMetrics.addStoreLevelMutableMetric(
-            TASK_ID1,
-            SCOPE_NAME,
-            STORE_NAME1,
-            METRIC_NAME1,
-            DESCRIPTION1,
-            INFO_RECORDING_LEVEL,
-            VALUE_PROVIDER
+                TASK_ID1,
+                SCOPE_NAME,
+                STORE_NAME1,
+                METRIC_NAME1,
+                DESCRIPTION1,
+                INFO_RECORDING_LEVEL,
+                VALUE_PROVIDER
         );
         streamsMetrics.addStoreLevelMutableMetric(
-            TASK_ID1,
-            SCOPE_NAME,
-            STORE_NAME1,
-            METRIC_NAME2,
-            DESCRIPTION2,
-            INFO_RECORDING_LEVEL,
-            VALUE_PROVIDER
+                TASK_ID1,
+                SCOPE_NAME,
+                STORE_NAME1,
+                METRIC_NAME2,
+                DESCRIPTION2,
+                INFO_RECORDING_LEVEL,
+                VALUE_PROVIDER
         );
         streamsMetrics.addStoreLevelMutableMetric(
-            TASK_ID1,
-            SCOPE_NAME,
-            STORE_NAME2,
-            METRIC_NAME1,
-            DESCRIPTION1,
-            INFO_RECORDING_LEVEL,
-            VALUE_PROVIDER
+                TASK_ID1,
+                SCOPE_NAME,
+                STORE_NAME2,
+                METRIC_NAME1,
+                DESCRIPTION1,
+                INFO_RECORDING_LEVEL,
+                VALUE_PROVIDER
         );
         return sensorKeys;
     }
 
     private Capture<String> setupGetNewSensorTest(final Metrics metrics,
-                                                  final RecordingLevel recordingLevel) {
+                                                  final SensorRecordingLevel recordingLevel) {
         final Capture<String> sensorKey = newCapture(CaptureType.ALL);
         expect(metrics.getSensor(capture(sensorKey))).andStubReturn(null);
         final Sensor[] parents = {};
@@ -260,7 +259,7 @@ public class StreamsMetricsImplTest {
     @Test
     public void shouldGetNewThreadLevelSensor() {
         final Metrics metrics = mock(Metrics.class);
-        final RecordingLevel recordingLevel = RecordingLevel.INFO;
+        final SensorRecordingLevel recordingLevel = SensorRecordingLevel.INFO;
         setupGetNewSensorTest(metrics, recordingLevel);
         final StreamsMetricsImpl streamsMetrics = new StreamsMetricsImpl(metrics, CLIENT_ID, VERSION, time);
 
@@ -273,7 +272,7 @@ public class StreamsMetricsImplTest {
     @Test
     public void shouldGetExistingThreadLevelSensor() {
         final Metrics metrics = mock(Metrics.class);
-        final RecordingLevel recordingLevel = RecordingLevel.INFO;
+        final SensorRecordingLevel recordingLevel = SensorRecordingLevel.INFO;
         setupGetExistingSensorTest(metrics);
         final StreamsMetricsImpl streamsMetrics = new StreamsMetricsImpl(metrics, CLIENT_ID, VERSION, time);
 
@@ -286,15 +285,15 @@ public class StreamsMetricsImplTest {
     @Test
     public void shouldGetNewTaskLevelSensor() {
         final Metrics metrics = mock(Metrics.class);
-        final RecordingLevel recordingLevel = RecordingLevel.INFO;
+        final SensorRecordingLevel recordingLevel = SensorRecordingLevel.INFO;
         setupGetNewSensorTest(metrics, recordingLevel);
         final StreamsMetricsImpl streamsMetrics = new StreamsMetricsImpl(metrics, CLIENT_ID, VERSION, time);
 
         final Sensor actualSensor = streamsMetrics.taskLevelSensor(
-            THREAD_ID1,
-            TASK_ID1,
-            SENSOR_NAME_1,
-            recordingLevel
+                THREAD_ID1,
+                TASK_ID1,
+                SENSOR_NAME_1,
+                recordingLevel
         );
 
         verify(metrics);
@@ -304,15 +303,15 @@ public class StreamsMetricsImplTest {
     @Test
     public void shouldGetExistingTaskLevelSensor() {
         final Metrics metrics = mock(Metrics.class);
-        final RecordingLevel recordingLevel = RecordingLevel.INFO;
+        final SensorRecordingLevel recordingLevel = SensorRecordingLevel.INFO;
         setupGetExistingSensorTest(metrics);
         final StreamsMetricsImpl streamsMetrics = new StreamsMetricsImpl(metrics, CLIENT_ID, VERSION, time);
 
         final Sensor actualSensor = streamsMetrics.taskLevelSensor(
-            THREAD_ID1,
-            TASK_ID1,
-            SENSOR_NAME_1,
-            recordingLevel
+                THREAD_ID1,
+                TASK_ID1,
+                SENSOR_NAME_1,
+                recordingLevel
         );
 
         verify(metrics);
@@ -322,15 +321,15 @@ public class StreamsMetricsImplTest {
     @Test
     public void shouldGetNewStoreLevelSensorIfNoneExists() {
         final Metrics metrics = mock(Metrics.class);
-        final RecordingLevel recordingLevel = RecordingLevel.INFO;
+        final SensorRecordingLevel recordingLevel = SensorRecordingLevel.INFO;
         final Capture<String> sensorKeys = setupGetNewSensorTest(metrics, recordingLevel);
         final StreamsMetricsImpl streamsMetrics = new StreamsMetricsImpl(metrics, CLIENT_ID, VERSION, time);
 
         final Sensor actualSensor = streamsMetrics.storeLevelSensor(
-            TASK_ID1,
-            STORE_NAME1,
-            SENSOR_NAME_1,
-            recordingLevel
+                TASK_ID1,
+                STORE_NAME1,
+                SENSOR_NAME_1,
+                recordingLevel
         );
 
         verify(metrics);
@@ -341,15 +340,15 @@ public class StreamsMetricsImplTest {
     @Test
     public void shouldGetExistingStoreLevelSensor() {
         final Metrics metrics = mock(Metrics.class);
-        final RecordingLevel recordingLevel = RecordingLevel.INFO;
+        final SensorRecordingLevel recordingLevel = SensorRecordingLevel.INFO;
         setupGetExistingSensorTest(metrics);
         final StreamsMetricsImpl streamsMetrics = new StreamsMetricsImpl(metrics, CLIENT_ID, VERSION, time);
 
         final Sensor actualSensor = streamsMetrics.storeLevelSensor(
-            TASK_ID1,
-            STORE_NAME1,
-            SENSOR_NAME_1,
-            recordingLevel
+                TASK_ID1,
+                STORE_NAME1,
+                SENSOR_NAME_1,
+                recordingLevel
         );
 
         verify(metrics);
@@ -400,7 +399,7 @@ public class StreamsMetricsImplTest {
 
         streamsMetrics.storeLevelSensor(TASK_ID1, STORE_NAME1, SENSOR_NAME_1, INFO_RECORDING_LEVEL);
         final Thread otherThread =
-            new Thread(() -> streamsMetrics.storeLevelSensor(TASK_ID1, STORE_NAME1, SENSOR_NAME_1, INFO_RECORDING_LEVEL));
+                new Thread(() -> streamsMetrics.storeLevelSensor(TASK_ID1, STORE_NAME1, SENSOR_NAME_1, INFO_RECORDING_LEVEL));
         otherThread.start();
         otherThread.join();
 
@@ -430,23 +429,23 @@ public class StreamsMetricsImplTest {
     public void shouldAddNewStoreLevelMutableMetric() {
         final Metrics metrics = mock(Metrics.class);
         final MetricName metricName =
-            new MetricName(METRIC_NAME1, STATE_STORE_LEVEL_GROUP, DESCRIPTION1, STORE_LEVEL_TAG_MAP);
+                new MetricName(METRIC_NAME1, STATE_STORE_LEVEL_GROUP, DESCRIPTION1, STORE_LEVEL_TAG_MAP);
         final MetricConfig metricConfig = new MetricConfig().recordLevel(INFO_RECORDING_LEVEL);
         expect(metrics.metricName(METRIC_NAME1, STATE_STORE_LEVEL_GROUP, DESCRIPTION1, STORE_LEVEL_TAG_MAP))
-            .andReturn(metricName);
+                .andReturn(metricName);
         expect(metrics.metric(metricName)).andReturn(null);
         metrics.addMetric(eq(metricName), eqMetricConfig(metricConfig), eq(VALUE_PROVIDER));
         replay(metrics);
         final StreamsMetricsImpl streamsMetrics = new StreamsMetricsImpl(metrics, CLIENT_ID, VERSION, time);
 
         streamsMetrics.addStoreLevelMutableMetric(
-            TASK_ID1,
-            SCOPE_NAME,
-            STORE_NAME1,
-            METRIC_NAME1,
-            DESCRIPTION1,
-            INFO_RECORDING_LEVEL,
-            VALUE_PROVIDER
+                TASK_ID1,
+                SCOPE_NAME,
+                STORE_NAME1,
+                METRIC_NAME1,
+                DESCRIPTION1,
+                INFO_RECORDING_LEVEL,
+                VALUE_PROVIDER
         );
 
         verify(metrics);
@@ -456,21 +455,21 @@ public class StreamsMetricsImplTest {
     public void shouldNotAddStoreLevelMutableMetricIfAlreadyExists() {
         final Metrics metrics = mock(Metrics.class);
         final MetricName metricName =
-            new MetricName(METRIC_NAME1, STATE_STORE_LEVEL_GROUP, DESCRIPTION1, STORE_LEVEL_TAG_MAP);
+                new MetricName(METRIC_NAME1, STATE_STORE_LEVEL_GROUP, DESCRIPTION1, STORE_LEVEL_TAG_MAP);
         expect(metrics.metricName(METRIC_NAME1, STATE_STORE_LEVEL_GROUP, DESCRIPTION1, STORE_LEVEL_TAG_MAP))
-            .andReturn(metricName);
+                .andReturn(metricName);
         expect(metrics.metric(metricName)).andReturn(mock(KafkaMetric.class));
         replay(metrics);
         final StreamsMetricsImpl streamsMetrics = new StreamsMetricsImpl(metrics, CLIENT_ID, VERSION, time);
 
         streamsMetrics.addStoreLevelMutableMetric(
-            TASK_ID1,
-            SCOPE_NAME,
-            STORE_NAME1,
-            METRIC_NAME1,
-            DESCRIPTION1,
-            INFO_RECORDING_LEVEL,
-            VALUE_PROVIDER
+                TASK_ID1,
+                SCOPE_NAME,
+                STORE_NAME1,
+                METRIC_NAME1,
+                DESCRIPTION1,
+                INFO_RECORDING_LEVEL,
+                VALUE_PROVIDER
         );
 
         verify(metrics);
@@ -481,13 +480,13 @@ public class StreamsMetricsImplTest {
         final Metrics metrics = niceMock(Metrics.class);
         final StreamsMetricsImpl streamsMetrics = new StreamsMetricsImpl(metrics, CLIENT_ID, VERSION, time);
         final MetricName metricName1 =
-            new MetricName(METRIC_NAME1, STATE_STORE_LEVEL_GROUP, DESCRIPTION1, STORE_LEVEL_TAG_MAP);
+                new MetricName(METRIC_NAME1, STATE_STORE_LEVEL_GROUP, DESCRIPTION1, STORE_LEVEL_TAG_MAP);
         final MetricName metricName2 =
-            new MetricName(METRIC_NAME2, STATE_STORE_LEVEL_GROUP, DESCRIPTION2, STORE_LEVEL_TAG_MAP);
+                new MetricName(METRIC_NAME2, STATE_STORE_LEVEL_GROUP, DESCRIPTION2, STORE_LEVEL_TAG_MAP);
         expect(metrics.metricName(METRIC_NAME1, STATE_STORE_LEVEL_GROUP, DESCRIPTION1, STORE_LEVEL_TAG_MAP))
-            .andReturn(metricName1);
+                .andReturn(metricName1);
         expect(metrics.metricName(METRIC_NAME2, STATE_STORE_LEVEL_GROUP, DESCRIPTION2, STORE_LEVEL_TAG_MAP))
-            .andReturn(metricName2);
+                .andReturn(metricName2);
         final Capture<String> sensorKeys = addSensorsOnAllLevels(metrics, streamsMetrics);
         resetToDefault(metrics);
         metrics.removeSensor(sensorKeys.getValues().get(6));
@@ -504,17 +503,17 @@ public class StreamsMetricsImplTest {
     @Test
     public void shouldGetNewNodeLevelSensor() {
         final Metrics metrics = mock(Metrics.class);
-        final RecordingLevel recordingLevel = RecordingLevel.INFO;
+        final SensorRecordingLevel recordingLevel = SensorRecordingLevel.INFO;
         final String processorNodeName = "processorNodeName";
         setupGetNewSensorTest(metrics, recordingLevel);
         final StreamsMetricsImpl streamsMetrics = new StreamsMetricsImpl(metrics, CLIENT_ID, VERSION, time);
 
         final Sensor actualSensor = streamsMetrics.nodeLevelSensor(
-            THREAD_ID1,
-            TASK_ID1,
-            processorNodeName,
-            SENSOR_NAME_1,
-            recordingLevel
+                THREAD_ID1,
+                TASK_ID1,
+                processorNodeName,
+                SENSOR_NAME_1,
+                recordingLevel
         );
 
         verify(metrics);
@@ -524,17 +523,17 @@ public class StreamsMetricsImplTest {
     @Test
     public void shouldGetExistingNodeLevelSensor() {
         final Metrics metrics = mock(Metrics.class);
-        final RecordingLevel recordingLevel = RecordingLevel.INFO;
+        final SensorRecordingLevel recordingLevel = SensorRecordingLevel.INFO;
         final String processorNodeName = "processorNodeName";
         setupGetExistingSensorTest(metrics);
         final StreamsMetricsImpl streamsMetrics = new StreamsMetricsImpl(metrics, CLIENT_ID, VERSION, time);
 
         final Sensor actualSensor = streamsMetrics.nodeLevelSensor(
-            THREAD_ID1,
-            TASK_ID1,
-            processorNodeName,
-            SENSOR_NAME_1,
-            recordingLevel
+                THREAD_ID1,
+                TASK_ID1,
+                processorNodeName,
+                SENSOR_NAME_1,
+                recordingLevel
         );
 
         verify(metrics);
@@ -544,17 +543,17 @@ public class StreamsMetricsImplTest {
     @Test
     public void shouldGetNewCacheLevelSensor() {
         final Metrics metrics = mock(Metrics.class);
-        final RecordingLevel recordingLevel = RecordingLevel.INFO;
+        final SensorRecordingLevel recordingLevel = SensorRecordingLevel.INFO;
         final String processorCacheName = "processorNodeName";
         setupGetNewSensorTest(metrics, recordingLevel);
         final StreamsMetricsImpl streamsMetrics = new StreamsMetricsImpl(metrics, CLIENT_ID, VERSION, time);
 
         final Sensor actualSensor = streamsMetrics.cacheLevelSensor(
-            THREAD_ID1,
-            TASK_ID1,
-            processorCacheName,
-            SENSOR_NAME_1,
-            recordingLevel
+                THREAD_ID1,
+                TASK_ID1,
+                processorCacheName,
+                SENSOR_NAME_1,
+                recordingLevel
         );
 
         verify(metrics);
@@ -564,16 +563,16 @@ public class StreamsMetricsImplTest {
     @Test
     public void shouldGetExistingCacheLevelSensor() {
         final Metrics metrics = mock(Metrics.class);
-        final RecordingLevel recordingLevel = RecordingLevel.INFO;
+        final SensorRecordingLevel recordingLevel = SensorRecordingLevel.INFO;
         final String processorCacheName = "processorNodeName";
         setupGetExistingSensorTest(metrics);
         final StreamsMetricsImpl streamsMetrics = new StreamsMetricsImpl(metrics, CLIENT_ID, VERSION, time);
 
         final Sensor actualSensor = streamsMetrics.cacheLevelSensor(
-            THREAD_ID1, TASK_ID1,
-            processorCacheName,
-            SENSOR_NAME_1,
-            recordingLevel
+                THREAD_ID1, TASK_ID1,
+                processorCacheName,
+                SENSOR_NAME_1,
+                recordingLevel
         );
 
         verify(metrics);
@@ -583,7 +582,7 @@ public class StreamsMetricsImplTest {
     @Test
     public void shouldGetNewClientLevelSensor() {
         final Metrics metrics = mock(Metrics.class);
-        final RecordingLevel recordingLevel = RecordingLevel.INFO;
+        final SensorRecordingLevel recordingLevel = SensorRecordingLevel.INFO;
         setupGetNewSensorTest(metrics, recordingLevel);
         final StreamsMetricsImpl streamsMetrics = new StreamsMetricsImpl(metrics, CLIENT_ID, VERSION, time);
 
@@ -596,7 +595,7 @@ public class StreamsMetricsImplTest {
     @Test
     public void shouldGetExistingClientLevelSensor() {
         final Metrics metrics = mock(Metrics.class);
-        final RecordingLevel recordingLevel = RecordingLevel.INFO;
+        final SensorRecordingLevel recordingLevel = SensorRecordingLevel.INFO;
         setupGetExistingSensorTest(metrics);
         final StreamsMetricsImpl streamsMetrics = new StreamsMetricsImpl(metrics, CLIENT_ID, VERSION, time);
 
@@ -609,12 +608,12 @@ public class StreamsMetricsImplTest {
     @Test
     public void shouldAddClientLevelImmutableMetric() {
         final Metrics metrics = mock(Metrics.class);
-        final RecordingLevel recordingLevel = RecordingLevel.INFO;
+        final SensorRecordingLevel recordingLevel = SensorRecordingLevel.INFO;
         final MetricConfig metricConfig = new MetricConfig().recordLevel(recordingLevel);
         final String value = "immutable-value";
         final ImmutableMetricValue immutableValue = new ImmutableMetricValue<>(value);
         expect(metrics.metricName(METRIC_NAME1, CLIENT_LEVEL_GROUP, DESCRIPTION1, clientLevelTags))
-            .andReturn(metricName1);
+                .andReturn(metricName1);
         metrics.addMetric(eq(metricName1), eqMetricConfig(metricConfig), eq(immutableValue));
         replay(metrics);
         final StreamsMetricsImpl streamsMetrics = new StreamsMetricsImpl(metrics, CLIENT_ID, VERSION, time);
@@ -627,11 +626,11 @@ public class StreamsMetricsImplTest {
     @Test
     public void shouldAddClientLevelMutableMetric() {
         final Metrics metrics = mock(Metrics.class);
-        final RecordingLevel recordingLevel = RecordingLevel.INFO;
+        final SensorRecordingLevel recordingLevel = SensorRecordingLevel.INFO;
         final MetricConfig metricConfig = new MetricConfig().recordLevel(recordingLevel);
         final Gauge<String> valueProvider = (config, now) -> "mutable-value";
         expect(metrics.metricName(METRIC_NAME1, CLIENT_LEVEL_GROUP, DESCRIPTION1, clientLevelTags))
-            .andReturn(metricName1);
+                .andReturn(metricName1);
         metrics.addMetric(EasyMock.eq(metricName1), eqMetricConfig(metricConfig), eq(valueProvider));
         replay(metrics);
         final StreamsMetricsImpl streamsMetrics = new StreamsMetricsImpl(metrics, CLIENT_ID, VERSION, time);
@@ -702,16 +701,16 @@ public class StreamsMetricsImplTest {
         final String entity = "entity";
         final String operation = "put";
 
-        final Sensor sensor1 = streamsMetrics.addSensor(sensorName, RecordingLevel.DEBUG);
+        final Sensor sensor1 = streamsMetrics.addSensor(sensorName, SensorRecordingLevel.DEBUG);
         streamsMetrics.removeSensor(sensor1);
 
-        final Sensor sensor1a = streamsMetrics.addSensor(sensorName, RecordingLevel.DEBUG, sensor1);
+        final Sensor sensor1a = streamsMetrics.addSensor(sensorName, SensorRecordingLevel.DEBUG, sensor1);
         streamsMetrics.removeSensor(sensor1a);
 
-        final Sensor sensor2 = streamsMetrics.addLatencyRateTotalSensor(scope, entity, operation, RecordingLevel.DEBUG);
+        final Sensor sensor2 = streamsMetrics.addLatencyRateTotalSensor(scope, entity, operation, SensorRecordingLevel.DEBUG);
         streamsMetrics.removeSensor(sensor2);
 
-        final Sensor sensor3 = streamsMetrics.addRateTotalSensor(scope, entity, operation, RecordingLevel.DEBUG);
+        final Sensor sensor3 = streamsMetrics.addRateTotalSensor(scope, entity, operation, SensorRecordingLevel.DEBUG);
         streamsMetrics.removeSensor(sensor3);
 
         assertEquals(Collections.emptyMap(), streamsMetrics.parentSensors());
@@ -732,13 +731,13 @@ public class StreamsMetricsImplTest {
         final String processorNodeName = "processorNodeName";
         final Map<String, String> nodeTags = mkMap(mkEntry("nkey", "value"));
 
-        final Sensor parent1 = metrics.taskLevelSensor(THREAD_ID1, taskName, operation, RecordingLevel.DEBUG);
+        final Sensor parent1 = metrics.taskLevelSensor(THREAD_ID1, taskName, operation, SensorRecordingLevel.DEBUG);
         addAvgAndMaxLatencyToSensor(parent1, PROCESSOR_NODE_LEVEL_GROUP, taskTags, operation);
         addInvocationRateAndCountToSensor(parent1, PROCESSOR_NODE_LEVEL_GROUP, taskTags, operation, "", "");
 
         final int numberOfTaskMetrics = registry.metrics().size();
 
-        final Sensor sensor1 = metrics.nodeLevelSensor(THREAD_ID1, taskName, processorNodeName, operation, RecordingLevel.DEBUG, parent1);
+        final Sensor sensor1 = metrics.nodeLevelSensor(THREAD_ID1, taskName, processorNodeName, operation, SensorRecordingLevel.DEBUG, parent1);
         addAvgAndMaxLatencyToSensor(sensor1, PROCESSOR_NODE_LEVEL_GROUP, nodeTags, operation);
         addInvocationRateAndCountToSensor(sensor1, PROCESSOR_NODE_LEVEL_GROUP, nodeTags, operation, "", "");
 
@@ -748,13 +747,13 @@ public class StreamsMetricsImplTest {
 
         assertThat(registry.metrics().size(), equalTo(numberOfTaskMetrics));
 
-        final Sensor parent2 = metrics.taskLevelSensor(THREAD_ID1, taskName, operation, RecordingLevel.DEBUG);
+        final Sensor parent2 = metrics.taskLevelSensor(THREAD_ID1, taskName, operation, SensorRecordingLevel.DEBUG);
         addAvgAndMaxLatencyToSensor(parent2, PROCESSOR_NODE_LEVEL_GROUP, taskTags, operation);
         addInvocationRateAndCountToSensor(parent2, PROCESSOR_NODE_LEVEL_GROUP, taskTags, operation, "", "");
 
         assertThat(registry.metrics().size(), equalTo(numberOfTaskMetrics));
 
-        final Sensor sensor2 = metrics.nodeLevelSensor(THREAD_ID1, taskName, processorNodeName, operation, RecordingLevel.DEBUG, parent2);
+        final Sensor sensor2 = metrics.nodeLevelSensor(THREAD_ID1, taskName, processorNodeName, operation, SensorRecordingLevel.DEBUG, parent2);
         addAvgAndMaxLatencyToSensor(sensor2, PROCESSOR_NODE_LEVEL_GROUP, nodeTags, operation);
         addInvocationRateAndCountToSensor(sensor2, PROCESSOR_NODE_LEVEL_GROUP, nodeTags, operation, "", "");
 
@@ -777,7 +776,7 @@ public class StreamsMetricsImplTest {
         final String entity = "entity";
         final String operation = "put";
 
-        final Sensor sensor1 = streamsMetrics.addLatencyRateTotalSensor(scope, entity, operation, RecordingLevel.DEBUG);
+        final Sensor sensor1 = streamsMetrics.addLatencyRateTotalSensor(scope, entity, operation, SensorRecordingLevel.DEBUG);
 
         final int meterMetricsCount = 2; // Each Meter is a combination of a Rate and a Total
         final int otherMetricsCount = 2; // Latency-max and Latency-avg
@@ -796,7 +795,7 @@ public class StreamsMetricsImplTest {
         final String entity = "entity";
         final String operation = "put";
 
-        final Sensor sensor1 = streamsMetrics.addRateTotalSensor(scope, entity, operation, RecordingLevel.DEBUG);
+        final Sensor sensor1 = streamsMetrics.addRateTotalSensor(scope, entity, operation, SensorRecordingLevel.DEBUG);
 
         final int meterMetricsCount = 2; // Each Meter is a combination of a Rate and a Total
         // 2 meter metrics plus a common metric that keeps track of total registered metrics in Metrics() constructor
@@ -809,7 +808,7 @@ public class StreamsMetricsImplTest {
     @Test
     public void testTotalMetricDoesntDecrease() {
         final MockTime time = new MockTime(1);
-        final MetricConfig config = new MetricConfig().timeWindow(1, TimeUnit.MILLISECONDS);
+        final MetricConfig config = new MetricConfig().timeWindowMs(1);
         final Metrics metrics = new Metrics(config, time);
         final StreamsMetricsImpl streamsMetrics = new StreamsMetricsImpl(metrics, "", VERSION, time);
 
@@ -818,21 +817,21 @@ public class StreamsMetricsImplTest {
         final String operation = "op";
 
         final Sensor sensor = streamsMetrics.addLatencyRateTotalSensor(
-            scope,
-            entity,
-            operation,
-            RecordingLevel.INFO
+                scope,
+                entity,
+                operation,
+                SensorRecordingLevel.INFO
         );
 
         final double latency = 100.0;
         final MetricName totalMetricName = metrics.metricName(
-            "op-total",
-            "stream-scope-metrics",
-            "",
-            "thread-id",
-            Thread.currentThread().getName(),
-            "scope-id",
-            "entity"
+                "op-total",
+                "stream-scope-metrics",
+                "",
+                "thread-id",
+                Thread.currentThread().getName(),
+                "scope-id",
+                "entity"
         );
 
         final KafkaMetric totalMetric = metrics.metric(totalMetricName);
@@ -847,14 +846,14 @@ public class StreamsMetricsImplTest {
     public void shouldAddLatencyRateTotalSensor() {
         final StreamsMetricsImpl streamsMetrics = new StreamsMetricsImpl(metrics, CLIENT_ID, VERSION, time);
         shouldAddCustomSensor(
-            streamsMetrics.addLatencyRateTotalSensor(SCOPE_NAME, ENTITY_NAME, OPERATION_NAME, RecordingLevel.DEBUG),
-            streamsMetrics,
-            Arrays.asList(
-                OPERATION_NAME + LATENCY_SUFFIX + AVG_SUFFIX,
-                OPERATION_NAME + LATENCY_SUFFIX + MAX_SUFFIX,
-                OPERATION_NAME + TOTAL_SUFFIX,
-                OPERATION_NAME + RATE_SUFFIX
-            )
+                streamsMetrics.addLatencyRateTotalSensor(SCOPE_NAME, ENTITY_NAME, OPERATION_NAME, SensorRecordingLevel.DEBUG),
+                streamsMetrics,
+                Arrays.asList(
+                        OPERATION_NAME + LATENCY_SUFFIX + AVG_SUFFIX,
+                        OPERATION_NAME + LATENCY_SUFFIX + MAX_SUFFIX,
+                        OPERATION_NAME + TOTAL_SUFFIX,
+                        OPERATION_NAME + RATE_SUFFIX
+                )
         );
     }
 
@@ -862,57 +861,57 @@ public class StreamsMetricsImplTest {
     public void shouldAddRateTotalSensor() {
         final StreamsMetricsImpl streamsMetrics = new StreamsMetricsImpl(metrics, CLIENT_ID, VERSION, time);
         shouldAddCustomSensor(
-            streamsMetrics.addRateTotalSensor(SCOPE_NAME, ENTITY_NAME, OPERATION_NAME, RecordingLevel.DEBUG),
-            streamsMetrics,
-            Arrays.asList(OPERATION_NAME + TOTAL_SUFFIX, OPERATION_NAME + RATE_SUFFIX)
+                streamsMetrics.addRateTotalSensor(SCOPE_NAME, ENTITY_NAME, OPERATION_NAME, SensorRecordingLevel.DEBUG),
+                streamsMetrics,
+                Arrays.asList(OPERATION_NAME + TOTAL_SUFFIX, OPERATION_NAME + RATE_SUFFIX)
         );
     }
 
     @Test
     public void shouldAddLatencyRateTotalSensorWithCustomTags() {
         final Sensor sensor = streamsMetrics.addLatencyRateTotalSensor(
-            SCOPE_NAME,
-            ENTITY_NAME,
-            OPERATION_NAME,
-            RecordingLevel.DEBUG,
-            CUSTOM_TAG_KEY1,
-            CUSTOM_TAG_VALUE1,
-            CUSTOM_TAG_KEY2,
-            CUSTOM_TAG_VALUE2
+                SCOPE_NAME,
+                ENTITY_NAME,
+                OPERATION_NAME,
+                SensorRecordingLevel.DEBUG,
+                CUSTOM_TAG_KEY1,
+                CUSTOM_TAG_VALUE1,
+                CUSTOM_TAG_KEY2,
+                CUSTOM_TAG_VALUE2
         );
         final Map<String, String> tags = customTags(streamsMetrics);
         shouldAddCustomSensorWithTags(
-            sensor,
-            Arrays.asList(
-                OPERATION_NAME + LATENCY_SUFFIX + AVG_SUFFIX,
-                OPERATION_NAME + LATENCY_SUFFIX + MAX_SUFFIX,
-                OPERATION_NAME + TOTAL_SUFFIX,
-                OPERATION_NAME + RATE_SUFFIX
-            ),
-            tags
+                sensor,
+                Arrays.asList(
+                        OPERATION_NAME + LATENCY_SUFFIX + AVG_SUFFIX,
+                        OPERATION_NAME + LATENCY_SUFFIX + MAX_SUFFIX,
+                        OPERATION_NAME + TOTAL_SUFFIX,
+                        OPERATION_NAME + RATE_SUFFIX
+                ),
+                tags
         );
     }
 
     @Test
     public void shouldAddRateTotalSensorWithCustomTags() {
         final Sensor sensor = streamsMetrics.addRateTotalSensor(
-            SCOPE_NAME,
-            ENTITY_NAME,
-            OPERATION_NAME,
-            RecordingLevel.DEBUG,
-            CUSTOM_TAG_KEY1,
-            CUSTOM_TAG_VALUE1,
-            CUSTOM_TAG_KEY2,
-            CUSTOM_TAG_VALUE2
+                SCOPE_NAME,
+                ENTITY_NAME,
+                OPERATION_NAME,
+                SensorRecordingLevel.DEBUG,
+                CUSTOM_TAG_KEY1,
+                CUSTOM_TAG_VALUE1,
+                CUSTOM_TAG_KEY2,
+                CUSTOM_TAG_VALUE2
         );
         final Map<String, String> tags = customTags(streamsMetrics);
         shouldAddCustomSensorWithTags(
-            sensor,
-            Arrays.asList(
-                OPERATION_NAME + TOTAL_SUFFIX,
-                OPERATION_NAME + RATE_SUFFIX
-            ),
-            tags
+                sensor,
+                Arrays.asList(
+                        OPERATION_NAME + TOTAL_SUFFIX,
+                        OPERATION_NAME + RATE_SUFFIX
+                ),
+                tags
         );
     }
 
@@ -929,8 +928,8 @@ public class StreamsMetricsImplTest {
         final String group = "stream-" + SCOPE_NAME + "-metrics";
         assertTrue(sensor.hasMetrics());
         assertThat(
-            sensor.name(),
-            is("external." + Thread.currentThread().getName() + ".entity." + ENTITY_NAME + ".s." + OPERATION_NAME)
+                sensor.name(),
+                is("external." + Thread.currentThread().getName() + ".entity." + ENTITY_NAME + ".s." + OPERATION_NAME)
         );
         for (final String name : metricsNames) {
             assertTrue(StreamsTestUtils.containsMetric(metrics, name, group, tags));
@@ -939,11 +938,11 @@ public class StreamsMetricsImplTest {
 
     private Map<String, String> tags(final StreamsMetricsImpl streamsMetrics) {
         return mkMap(
-            mkEntry(
-                streamsMetrics.version() == Version.LATEST ? THREAD_ID_TAG : CLIENT_ID_TAG,
-                Thread.currentThread().getName()
-            ),
-            mkEntry(SCOPE_NAME + "-id", ENTITY_NAME)
+                mkEntry(
+                        streamsMetrics.version() == Version.LATEST ? THREAD_ID_TAG : CLIENT_ID_TAG,
+                        Thread.currentThread().getName()
+                ),
+                mkEntry(SCOPE_NAME + "-id", ENTITY_NAME)
         );
     }
 
@@ -957,13 +956,13 @@ public class StreamsMetricsImplTest {
     @Test
     public void shouldThrowIfLatencyRateTotalSensorIsAddedWithOddTags() {
         final IllegalArgumentException exception = assertThrows(
-            IllegalArgumentException.class,
-            () -> streamsMetrics.addLatencyRateTotalSensor(
-                SCOPE_NAME,
-                ENTITY_NAME,
-                OPERATION_NAME,
-                RecordingLevel.DEBUG,
-                "bad-tag")
+                IllegalArgumentException.class,
+                () -> streamsMetrics.addLatencyRateTotalSensor(
+                        SCOPE_NAME,
+                        ENTITY_NAME,
+                        OPERATION_NAME,
+                        SensorRecordingLevel.DEBUG,
+                        "bad-tag")
         );
         assertThat(exception.getMessage(), is("Tags needs to be specified in key-value pairs"));
     }
@@ -971,13 +970,13 @@ public class StreamsMetricsImplTest {
     @Test
     public void shouldThrowIfRateTotalSensorIsAddedWithOddTags() {
         final IllegalArgumentException exception = assertThrows(
-            IllegalArgumentException.class,
-            () -> streamsMetrics.addRateTotalSensor(
-                SCOPE_NAME,
-                ENTITY_NAME,
-                OPERATION_NAME,
-                RecordingLevel.DEBUG,
-                "bad-tag")
+                IllegalArgumentException.class,
+                () -> streamsMetrics.addRateTotalSensor(
+                        SCOPE_NAME,
+                        ENTITY_NAME,
+                        OPERATION_NAME,
+                        SensorRecordingLevel.DEBUG,
+                        "bad-tag")
         );
         assertThat(exception.getMessage(), is("Tags needs to be specified in key-value pairs"));
     }
@@ -1001,8 +1000,8 @@ public class StreamsMetricsImplTest {
 
         assertThat(tagMap.size(), equalTo(3));
         assertThat(
-            tagMap.get(StreamsMetricsImpl.THREAD_ID_TAG),
-            equalTo(Thread.currentThread().getName()));
+                tagMap.get(StreamsMetricsImpl.THREAD_ID_TAG),
+                equalTo(Thread.currentThread().getName()));
         assertThat(tagMap.get(StreamsMetricsImpl.TASK_ID_TAG), equalTo(taskName));
         assertThat(tagMap.get(storeType + "-" + StreamsMetricsImpl.STORE_ID_TAG), equalTo(storeName));
     }
@@ -1010,7 +1009,7 @@ public class StreamsMetricsImplTest {
     @Test
     public void shouldGetCacheLevelTagMap() {
         final StreamsMetricsImpl streamsMetrics =
-            new StreamsMetricsImpl(metrics, THREAD_ID1, VERSION, time);
+                new StreamsMetricsImpl(metrics, THREAD_ID1, VERSION, time);
         final String taskName = "taskName";
         final String storeName = "storeName";
 
@@ -1018,8 +1017,8 @@ public class StreamsMetricsImplTest {
 
         assertThat(tagMap.size(), equalTo(3));
         assertThat(
-            tagMap.get(StreamsMetricsImpl.THREAD_ID_TAG),
-            equalTo(THREAD_ID1)
+                tagMap.get(StreamsMetricsImpl.THREAD_ID_TAG),
+                equalTo(THREAD_ID1)
         );
         assertThat(tagMap.get(TASK_ID_TAG), equalTo(taskName));
         assertThat(tagMap.get(RECORD_CACHE_ID_TAG), equalTo(storeName));
@@ -1033,8 +1032,8 @@ public class StreamsMetricsImplTest {
 
         assertThat(tagMap.size(), equalTo(1));
         assertThat(
-            tagMap.get(THREAD_ID_TAG),
-            equalTo(THREAD_ID1)
+                tagMap.get(THREAD_ID_TAG),
+                equalTo(THREAD_ID1)
         );
     }
 
@@ -1053,7 +1052,7 @@ public class StreamsMetricsImplTest {
     @Test
     public void shouldAddAmountRateAndSum() {
         StreamsMetricsImpl
-            .addRateOfSumAndSumMetricsToSensor(sensor, group, tags, metricNamePrefix, DESCRIPTION1, DESCRIPTION2);
+                .addRateOfSumAndSumMetricsToSensor(sensor, group, tags, metricNamePrefix, DESCRIPTION1, DESCRIPTION2);
 
         final double valueToRecord1 = 18.0;
         final double valueToRecord2 = 72.0;
@@ -1107,7 +1106,7 @@ public class StreamsMetricsImplTest {
     @Test
     public void shouldAddAvgAndTotalMetricsToSensor() {
         StreamsMetricsImpl
-            .addAvgAndSumMetricsToSensor(sensor, group, tags, metricNamePrefix, DESCRIPTION1, DESCRIPTION2);
+                .addAvgAndSumMetricsToSensor(sensor, group, tags, metricNamePrefix, DESCRIPTION1, DESCRIPTION2);
 
         final double valueToRecord1 = 18.0;
         final double valueToRecord2 = 42.0;
@@ -1121,7 +1120,7 @@ public class StreamsMetricsImplTest {
     @Test
     public void shouldAddAvgAndMinAndMaxMetricsToSensor() {
         StreamsMetricsImpl
-            .addAvgAndMinAndMaxToSensor(sensor, group, tags, metricNamePrefix, DESCRIPTION1, DESCRIPTION2, DESCRIPTION3);
+                .addAvgAndMinAndMaxToSensor(sensor, group, tags, metricNamePrefix, DESCRIPTION1, DESCRIPTION2, DESCRIPTION3);
 
         final double valueToRecord1 = 18.0;
         final double valueToRecord2 = 42.0;
@@ -1135,7 +1134,7 @@ public class StreamsMetricsImplTest {
     @Test
     public void shouldAddMinAndMaxMetricsToSensor() {
         StreamsMetricsImpl
-            .addMinAndMaxToSensor(sensor, group, tags, metricNamePrefix, DESCRIPTION1, DESCRIPTION2);
+                .addMinAndMaxToSensor(sensor, group, tags, metricNamePrefix, DESCRIPTION1, DESCRIPTION2);
 
         final double valueToRecord1 = 18.0;
         final double valueToRecord2 = 42.0;
@@ -1147,8 +1146,8 @@ public class StreamsMetricsImplTest {
     @Test
     public void shouldReturnMetricsVersionCurrent() {
         assertThat(
-            new StreamsMetricsImpl(metrics, THREAD_ID1, StreamsConfig.METRICS_LATEST, time).version(),
-            equalTo(Version.LATEST)
+                new StreamsMetricsImpl(metrics, THREAD_ID1, StreamsConfig.METRICS_LATEST, time).version(),
+                equalTo(Version.LATEST)
         );
     }
 
@@ -1158,14 +1157,14 @@ public class StreamsMetricsImplTest {
                               final double valueToRecord2,
                               final double expectedMetricValue) {
         final KafkaMetric metric = metrics
-            .metric(new MetricName(name, group, description, tags));
+                .metric(new MetricName(name, group, description, tags));
         assertThat(metric, is(notNullValue()));
         assertThat(metric.metricName().description(), equalTo(description));
         sensor.record(valueToRecord1, time.milliseconds());
         sensor.record(valueToRecord2, time.milliseconds());
         assertThat(
-            metric.measurable().measure(new MetricConfig(), time.milliseconds()),
-            equalTo(expectedMetricValue)
+                metric.measurable().measure(new MetricConfig(), time.milliseconds()),
+                equalTo(expectedMetricValue)
         );
     }
 
@@ -1182,7 +1181,8 @@ public class StreamsMetricsImplTest {
         expect(time.nanoseconds()).andReturn(endTime);
         replay(sensor, time);
 
-        StreamsMetricsImpl.maybeMeasureLatency(() -> { }, time, sensor);
+        StreamsMetricsImpl.maybeMeasureLatency(() -> {
+        }, time, sensor);
 
         verify(sensor, time);
     }
@@ -1194,7 +1194,8 @@ public class StreamsMetricsImplTest {
         final Time time = mock(Time.class);
         replay(sensor);
 
-        StreamsMetricsImpl.maybeMeasureLatency(() -> { }, time, sensor);
+        StreamsMetricsImpl.maybeMeasureLatency(() -> {
+        }, time, sensor);
 
         verify(sensor);
     }
@@ -1207,7 +1208,8 @@ public class StreamsMetricsImplTest {
         final Time time = mock(Time.class);
         replay(sensor);
 
-        StreamsMetricsImpl.maybeMeasureLatency(() -> { }, time, sensor);
+        StreamsMetricsImpl.maybeMeasureLatency(() -> {
+        }, time, sensor);
 
         verify(sensor);
     }

@@ -18,6 +18,12 @@ pub fn rust_property_getter_impl(input: TokenStream) -> TokenStream {
         .get("Struct")
         .expect("No Struct value")
         .to_owned();
+    let nullable = macro_args
+        .get("Nullable")
+        .cloned()
+        .unwrap_or_default()
+        .contains("True");
+    let override_function_name = macro_args.get("Function");
 
     let default: Expr = if ["jobject", "jbyteArray"].contains(&rust_return_type.as_str()) {
         syn::parse_str("jni::objects::JObject::null().into_inner()").unwrap()
@@ -26,7 +32,10 @@ pub fn rust_property_getter_impl(input: TokenStream) -> TokenStream {
     };
 
     let struct_name: Type = syn::parse_str(&struct_name).unwrap();
-    let function_name = Ident::new(&format!("Java_{}_{}", class, method), Span::call_site());
+    let function_name = match override_function_name {
+        Some(override_name) => Ident::new(override_name, Span::call_site()),
+        None => Ident::new(&format!("Java_{}_{}", class, method), Span::call_site()),
+    };
     let rust_field_name = Ident::new(&method.to_case(Case::Snake), Span::call_site());
     let rust_return_type = Ident::new(&rust_return_type, Span::call_site());
 
@@ -34,6 +43,20 @@ pub fn rust_property_getter_impl(input: TokenStream) -> TokenStream {
     let getter = match value_getter.as_str() {
         "l" => quote! {ret?.#getter().expect("failed data extraction from field").into_inner()},
         _ => quote! {ret?.#getter().expect("failed data extraction from field")},
+    };
+
+    let val = match nullable {
+        true => quote! {
+            if rust_struct.#rust_field_name.is_some() {
+                crate::clone_to_from_java::CloneToFromJava::clone_to_java(&rust_struct.#rust_field_name.clone().unwrap(),env)
+            }else{
+                Ok(JValue::Object(JObject::null()))
+            }
+
+        },
+        false => {
+            quote! {crate::clone_to_from_java::CloneToFromJava::clone_to_java(&rust_struct.#rust_field_name, env)}
+        }
     };
 
     let expanded = quote! {
@@ -47,7 +70,7 @@ pub fn rust_property_getter_impl(input: TokenStream) -> TokenStream {
             let result = || -> jni::errors::Result<_> {
                 let ptr = env.get_field(obj, "rustPointer", "J")?.j()?;
                 let rust_struct= unsafe { Box::from_raw(ptr as *mut #struct_name) };
-                let ret = crate::clone_to_from_java::CloneToFromJava::clone_to_java(&rust_struct.#rust_field_name, env);
+                let ret = #val;
                 let _ptr = Box::into_raw(rust_struct);
                 let ret = #getter;
 

@@ -17,9 +17,10 @@
 package org.apache.kafka.streams.state.internals.metrics;
 
 import org.apache.kafka.common.metrics.Sensor;
-import org.apache.kafka.common.metrics.Sensor.RecordingLevel;
+import org.apache.kafka.common.metrics.SensorRecordingLevel;
 import org.apache.kafka.streams.processor.internals.metrics.StreamsMetricsImpl;
 import org.junit.Test;
+
 import static org.mockito.Mockito.mock;
 import static org.mockito.Mockito.when;
 
@@ -46,16 +47,16 @@ public class NamedCacheMetricsTest {
     @Test
     public void shouldGetHitRatioSensorWithBuiltInMetricsVersionCurrent() {
         final String hitRatio = "hit-ratio";
-        when(streamsMetrics.cacheLevelSensor(THREAD_ID, TASK_ID, STORE_NAME, hitRatio, RecordingLevel.DEBUG)).thenReturn(expectedSensor);
+        when(streamsMetrics.cacheLevelSensor(THREAD_ID, TASK_ID, STORE_NAME, hitRatio, SensorRecordingLevel.DEBUG)).thenReturn(expectedSensor);
         when(streamsMetrics.cacheLevelTagMap(THREAD_ID, TASK_ID, STORE_NAME)).thenReturn(tagMap);
         StreamsMetricsImpl.addAvgAndMinAndMaxToSensor(
-            expectedSensor,
-            StreamsMetricsImpl.CACHE_LEVEL_GROUP,
-            tagMap,
-            hitRatio,
-            HIT_RATIO_AVG_DESCRIPTION,
-            HIT_RATIO_MIN_DESCRIPTION,
-            HIT_RATIO_MAX_DESCRIPTION);
+                expectedSensor,
+                StreamsMetricsImpl.CACHE_LEVEL_GROUP,
+                tagMap,
+                hitRatio,
+                HIT_RATIO_AVG_DESCRIPTION,
+                HIT_RATIO_MIN_DESCRIPTION,
+                HIT_RATIO_MAX_DESCRIPTION);
 
         final Sensor sensor = NamedCacheMetrics.hitRatioSensor(streamsMetrics, THREAD_ID, TASK_ID, STORE_NAME);
 

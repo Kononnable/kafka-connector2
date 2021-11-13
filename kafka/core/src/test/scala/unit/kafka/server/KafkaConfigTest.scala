@@ -6,7 +6,7 @@
  * (the "License"); you may not use this file except in compliance with
  * the License.  You may obtain a copy of the License at
  *
- *    http://www.apache.org/licenses/LICENSE-2.0
+ * http://www.apache.org/licenses/LICENSE-2.0
  *
  * Unless required by applicable law or agreed to in writing, software
  * distributed under the License is distributed on an "AS IS" BASIS,
@@ -23,7 +23,7 @@ import kafka.log.LogConfig
 import kafka.message._
 import kafka.utils.{CoreUtils, TestUtils}
 import org.apache.kafka.common.config.{ConfigException, TopicConfig}
-import org.apache.kafka.common.metrics.Sensor
+import org.apache.kafka.common.metrics.SensorRecordingLevel
 import org.apache.kafka.common.network.ListenerName
 import org.apache.kafka.common.record.Records
 import org.apache.kafka.common.security.auth.SecurityProtocol
@@ -86,7 +86,7 @@ class KafkaConfigTest {
     props.put(KafkaConfig.LogRetentionTimeHoursProp, "1")
 
     val cfg = KafkaConfig.fromProps(props)
-    assertEquals( 30 * 60L * 1000L, cfg.logRetentionTimeMillis)
+    assertEquals(30 * 60L * 1000L, cfg.logRetentionTimeMillis)
   }
 
   @Test
@@ -96,16 +96,16 @@ class KafkaConfigTest {
     props.put(KafkaConfig.LogRetentionTimeMinutesProp, "10")
 
     val cfg = KafkaConfig.fromProps(props)
-    assertEquals( 30 * 60L * 1000L, cfg.logRetentionTimeMillis)
+    assertEquals(30 * 60L * 1000L, cfg.logRetentionTimeMillis)
   }
 
   @Test
   def testLogRetentionUnlimited(): Unit = {
-    val props1 = TestUtils.createBrokerConfig(0,TestUtils.MockZkConnect, port = 8181)
-    val props2 = TestUtils.createBrokerConfig(0,TestUtils.MockZkConnect, port = 8181)
-    val props3 = TestUtils.createBrokerConfig(0,TestUtils.MockZkConnect, port = 8181)
-    val props4 = TestUtils.createBrokerConfig(0,TestUtils.MockZkConnect, port = 8181)
-    val props5 = TestUtils.createBrokerConfig(0,TestUtils.MockZkConnect, port = 8181)
+    val props1 = TestUtils.createBrokerConfig(0, TestUtils.MockZkConnect, port = 8181)
+    val props2 = TestUtils.createBrokerConfig(0, TestUtils.MockZkConnect, port = 8181)
+    val props3 = TestUtils.createBrokerConfig(0, TestUtils.MockZkConnect, port = 8181)
+    val props4 = TestUtils.createBrokerConfig(0, TestUtils.MockZkConnect, port = 8181)
+    val props5 = TestUtils.createBrokerConfig(0, TestUtils.MockZkConnect, port = 8181)
 
     props1.put("log.retention.ms", "-1")
     props2.put("log.retention.minutes", "-1")
@@ -484,7 +484,7 @@ class KafkaConfigTest {
     props.put(KafkaConfig.LogRollTimeHoursProp, "1")
 
     val cfg = KafkaConfig.fromProps(props)
-    assertEquals( 30 * 60L * 1000L, cfg.logRollTimeMillis)
+    assertEquals(30 * 60L * 1000L, cfg.logRollTimeMillis)
   }
 
   @Test
@@ -492,7 +492,7 @@ class KafkaConfigTest {
     val props = TestUtils.createBrokerConfig(0, TestUtils.MockZkConnect, port = 8181)
 
     val cfg = KafkaConfig.fromProps(props)
-    assertEquals(24 * 7 * 60L * 60L * 1000L, cfg.logRollTimeMillis																									)
+    assertEquals(24 * 7 * 60L * 60L * 1000L, cfg.logRollTimeMillis)
   }
 
   @Test
@@ -593,16 +593,16 @@ class KafkaConfigTest {
         case KafkaConfig.ZkEnableSecureAclsProp => assertPropertyInvalid(baseProperties, name, "not_a_boolean")
         case KafkaConfig.ZkMaxInFlightRequestsProp => assertPropertyInvalid(baseProperties, name, "not_a_number", "0")
         case KafkaConfig.ZkSslClientEnableProp => assertPropertyInvalid(baseProperties, name, "not_a_boolean")
-        case KafkaConfig.ZkClientCnxnSocketProp =>  //ignore string
-        case KafkaConfig.ZkSslKeyStoreLocationProp =>  //ignore string
-        case KafkaConfig.ZkSslKeyStorePasswordProp =>  //ignore string
-        case KafkaConfig.ZkSslKeyStoreTypeProp =>  //ignore string
-        case KafkaConfig.ZkSslTrustStoreLocationProp =>  //ignore string
-        case KafkaConfig.ZkSslTrustStorePasswordProp =>  //ignore string
-        case KafkaConfig.ZkSslTrustStoreTypeProp =>  //ignore string
-        case KafkaConfig.ZkSslProtocolProp =>  //ignore string
-        case KafkaConfig.ZkSslEnabledProtocolsProp =>  //ignore string
-        case KafkaConfig.ZkSslCipherSuitesProp =>  //ignore string
+        case KafkaConfig.ZkClientCnxnSocketProp => //ignore string
+        case KafkaConfig.ZkSslKeyStoreLocationProp => //ignore string
+        case KafkaConfig.ZkSslKeyStorePasswordProp => //ignore string
+        case KafkaConfig.ZkSslKeyStoreTypeProp => //ignore string
+        case KafkaConfig.ZkSslTrustStoreLocationProp => //ignore string
+        case KafkaConfig.ZkSslTrustStorePasswordProp => //ignore string
+        case KafkaConfig.ZkSslTrustStoreTypeProp => //ignore string
+        case KafkaConfig.ZkSslProtocolProp => //ignore string
+        case KafkaConfig.ZkSslEnabledProtocolsProp => //ignore string
+        case KafkaConfig.ZkSslCipherSuitesProp => //ignore string
         case KafkaConfig.ZkSslEndpointIdentificationAlgorithmProp => //ignore string
         case KafkaConfig.ZkSslCrlEnableProp => assertPropertyInvalid(baseProperties, name, "not_a_boolean")
         case KafkaConfig.ZkSslOcspEnableProp => assertPropertyInvalid(baseProperties, name, "not_a_boolean")
@@ -928,7 +928,7 @@ class KafkaConfigTest {
     defaults.put(KafkaConfig.LogFlushSchedulerIntervalMsProp, "123")
     defaults.put(KafkaConfig.OffsetsTopicCompressionCodecProp, SnappyCompressionCodec.codec.toString)
     // For MetricRecordingLevelProp
-    defaults.put(KafkaConfig.MetricRecordingLevelProp, Sensor.RecordingLevel.DEBUG.toString)
+    defaults.put(KafkaConfig.MetricRecordingLevelProp, SensorRecordingLevel.DEBUG.toString)
 
     val config = KafkaConfig.fromProps(defaults)
     assertEquals("127.0.0.1:2181", config.zkConnect)
@@ -944,7 +944,7 @@ class KafkaConfigTest {
     assertEquals(10 * 60L * 1000L * 60, config.logRetentionTimeMillis)
     assertEquals(123L, config.logFlushIntervalMs)
     assertEquals(SnappyCompressionCodec, config.offsetsTopicCompressionCodec)
-    assertEquals(Sensor.RecordingLevel.DEBUG.toString, config.metricRecordingLevel)
+    assertEquals(SensorRecordingLevel.DEBUG.toString, config.metricRecordingLevel)
     assertEquals(false, config.tokenAuthEnabled)
     assertEquals(7 * 24 * 60L * 60L * 1000L, config.delegationTokenMaxLifeMs)
     assertEquals(24 * 60L * 60L * 1000L, config.delegationTokenExpiryTimeMs)
@@ -981,7 +981,7 @@ class KafkaConfigTest {
 
       val buildConfig: Executable = () => KafkaConfig.fromProps(props)
       assertThrows(classOf[Exception], buildConfig,
-      s"Expected exception for property `$name` with invalid value `$value` was not thrown")
+        s"Expected exception for property `$name` with invalid value `$value` was not thrown")
     }
   }
 
@@ -1034,7 +1034,7 @@ class KafkaConfigTest {
       RaftConfig.quorumVoterStringsToNodes(util.Arrays.asList("3000@example.com:9093")).asScala.toSeq)
     assertEquals(Seq(new Node(3000, "example.com", 9093),
       new Node(3001, "example.com", 9094)),
-      RaftConfig.quorumVoterStringsToNodes(util.Arrays.asList("3000@example.com:9093","3001@example.com:9094")).asScala.toSeq)
+      RaftConfig.quorumVoterStringsToNodes(util.Arrays.asList("3000@example.com:9093", "3001@example.com:9094")).asScala.toSeq)
   }
 
   @Test

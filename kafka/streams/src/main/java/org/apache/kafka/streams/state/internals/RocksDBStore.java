@@ -16,7 +16,7 @@
  */
 package org.apache.kafka.streams.state.internals;
 
-import org.apache.kafka.common.metrics.Sensor.RecordingLevel;
+import org.apache.kafka.common.metrics.SensorRecordingLevel;
 import org.apache.kafka.common.serialization.Serializer;
 import org.apache.kafka.common.utils.Bytes;
 import org.apache.kafka.common.utils.Utils;
@@ -160,7 +160,7 @@ public class RocksDBStore implements KeyValueStore<Bytes, byte[]>, BatchWritingS
         fOptions.setWaitForFlush(true);
 
         final Class<RocksDBConfigSetter> configSetterClass =
-            (Class<RocksDBConfigSetter>) configs.get(StreamsConfig.ROCKSDB_CONFIG_SETTER_CLASS_CONFIG);
+                (Class<RocksDBConfigSetter>) configs.get(StreamsConfig.ROCKSDB_CONFIG_SETTER_CLASS_CONFIG);
 
         if (configSetterClass != null) {
             configSetter = Utils.newInstance(configSetterClass);
@@ -191,7 +191,7 @@ public class RocksDBStore implements KeyValueStore<Bytes, byte[]>, BatchWritingS
             userSpecifiedStatistics = true;
         }
         if (!userSpecifiedStatistics &&
-            RecordingLevel.forName((String) configs.get(METRICS_RECORDING_LEVEL_CONFIG)) == RecordingLevel.DEBUG) {
+                SensorRecordingLevel.forName((String) configs.get(METRICS_RECORDING_LEVEL_CONFIG)) == SensorRecordingLevel.DEBUG) {
 
             // metrics recorder will clean up statistics object
             final Statistics statistics = new Statistics();
@@ -207,9 +207,9 @@ public class RocksDBStore implements KeyValueStore<Bytes, byte[]>, BatchWritingS
             metricsRecorder.addValueProviders(name, db, cache, statistics);
         } else if (tableFormatConfig instanceof BlockBasedTableConfig) {
             throw new ProcessorStateException("The used block-based table format configuration does not expose the " +
-                "block cache. Use the BlockBasedTableConfig instance provided by Options#tableFormatConfig() to configure " +
-                "the block-based table format of RocksDB. Do not provide a new instance of BlockBasedTableConfig to " +
-                "the RocksDB options.");
+                    "block cache. Use the BlockBasedTableConfig instance provided by Options#tableFormatConfig() to configure " +
+                    "the block-based table format of RocksDB. Do not provide a new instance of BlockBasedTableConfig to " +
+                    "the RocksDB options.");
         } else {
             metricsRecorder.addValueProviders(name, db, null, statistics);
         }
@@ -218,7 +218,7 @@ public class RocksDBStore implements KeyValueStore<Bytes, byte[]>, BatchWritingS
     void openRocksDB(final DBOptions dbOptions,
                      final ColumnFamilyOptions columnFamilyOptions) {
         final List<ColumnFamilyDescriptor> columnFamilyDescriptors
-            = Collections.singletonList(new ColumnFamilyDescriptor(RocksDB.DEFAULT_COLUMN_FAMILY, columnFamilyOptions));
+                = Collections.singletonList(new ColumnFamilyDescriptor(RocksDB.DEFAULT_COLUMN_FAMILY, columnFamilyOptions));
         final List<ColumnFamilyHandle> columnFamilies = new ArrayList<>(columnFamilyDescriptors.size());
 
         try {
@@ -373,9 +373,9 @@ public class RocksDBStore implements KeyValueStore<Bytes, byte[]>, BatchWritingS
 
         if (from.compareTo(to) > 0) {
             log.warn("Returning empty iterator for fetch with invalid key range: from > to. "
-                + "This may be due to range arguments set in the wrong order, " +
-                "or serdes that don't preserve ordering when lexicographically comparing the serialized bytes. " +
-                "Note that the built-in numerical serdes do not follow this for negative numbers");
+                    + "This may be due to range arguments set in the wrong order, " +
+                    "or serdes that don't preserve ordering when lexicographically comparing the serialized bytes. " +
+                    "Note that the built-in numerical serdes do not follow this for negative numbers");
             return KeyValueIterators.emptyIterator();
         }
 
@@ -603,13 +603,13 @@ public class RocksDBStore implements KeyValueStore<Bytes, byte[]>, BatchWritingS
                                                      final Bytes to,
                                                      final boolean forward) {
             return new RocksDBRangeIterator(
-                name,
-                db.newIterator(columnFamily),
-                openIterators,
-                from,
-                to,
-                forward,
-                true
+                    name,
+                    db.newIterator(columnFamily),
+                    openIterators,
+                    from,
+                    to,
+                    forward,
+                    true
             );
         }
 
@@ -638,13 +638,13 @@ public class RocksDBStore implements KeyValueStore<Bytes, byte[]>, BatchWritingS
         public KeyValueIterator<Bytes, byte[]> prefixScan(final Bytes prefix) {
             final Bytes to = Bytes.increment(prefix);
             return new RocksDBRangeIterator(
-                name,
-                db.newIterator(columnFamily),
-                openIterators,
-                prefix,
-                to,
-                true,
-                false
+                    name,
+                    db.newIterator(columnFamily),
+                    openIterators,
+                    prefix,
+                    to,
+                    true,
+                    false
             );
         }
 

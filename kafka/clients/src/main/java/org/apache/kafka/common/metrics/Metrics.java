@@ -52,7 +52,7 @@ import static java.util.Collections.emptyList;
  * that are recorded by the sensor.
  * <p>
  * Usage looks something like this:
- * 
+ *
  * <pre>
  * // set up metrics:
  * Metrics metrics = new Metrics(); // this is the global repository of metrics and sensors
@@ -61,7 +61,7 @@ import static java.util.Collections.emptyList;
  * sensor.add(metricName, new Avg());
  * metricName = new MetricName(&quot;message-size-max&quot;, &quot;producer-metrics&quot;);
  * sensor.add(metricName, new Max());
- * 
+ *
  * // as messages are sent we record the sizes
  * sensor.record(messageSize);
  * </pre>
@@ -102,9 +102,10 @@ public class Metrics implements Closeable {
     }
 
 
-  /**
+    /**
      * Create a metrics repository with no reporters and the given default config. This config will be used for any
      * metric that doesn't override its own config. Expiration of Sensors is disabled.
+     *
      * @param defaultConfig The default config to use for all metrics that don't override their config
      */
     public Metrics(MetricConfig defaultConfig) {
@@ -114,9 +115,10 @@ public class Metrics implements Closeable {
     /**
      * Create a metrics repository with a default config and the given metric reporters.
      * Expiration of Sensors is disabled.
+     *
      * @param defaultConfig The default config
-     * @param reporters The metrics reporters
-     * @param time The time instance to use with the metrics
+     * @param reporters     The metrics reporters
+     * @param time          The time instance to use with the metrics
      */
     public Metrics(MetricConfig defaultConfig, List<MetricsReporter> reporters, Time time) {
         this(defaultConfig, reporters, time, false);
@@ -125,9 +127,10 @@ public class Metrics implements Closeable {
     /**
      * Create a metrics repository with a default config, metric reporters and metric context
      * Expiration of Sensors is disabled.
-     * @param defaultConfig The default config
-     * @param reporters The metrics reporters
-     * @param time The time instance to use with the metrics
+     *
+     * @param defaultConfig  The default config
+     * @param reporters      The metrics reporters
+     * @param time           The time instance to use with the metrics
      * @param metricsContext The metricsContext to initialize metrics reporter with
      */
     public Metrics(MetricConfig defaultConfig, List<MetricsReporter> reporters, Time time, MetricsContext metricsContext) {
@@ -136,9 +139,10 @@ public class Metrics implements Closeable {
 
     /**
      * Create a metrics repository with a default config, given metric reporters and the ability to expire eligible sensors
-     * @param defaultConfig The default config
-     * @param reporters The metrics reporters
-     * @param time The time instance to use with the metrics
+     *
+     * @param defaultConfig    The default config
+     * @param reporters        The metrics reporters
+     * @param time             The time instance to use with the metrics
      * @param enableExpiration true if the metrics instance can garbage collect inactive sensors, false otherwise
      */
     public Metrics(MetricConfig defaultConfig, List<MetricsReporter> reporters, Time time, boolean enableExpiration) {
@@ -148,11 +152,12 @@ public class Metrics implements Closeable {
     /**
      * Create a metrics repository with a default config, given metric reporters, the ability to expire eligible sensors
      * and MetricContext
-     * @param defaultConfig The default config
-     * @param reporters The metrics reporters
-     * @param time The time instance to use with the metrics
+     *
+     * @param defaultConfig    The default config
+     * @param reporters        The metrics reporters
+     * @param time             The time instance to use with the metrics
      * @param enableExpiration true if the metrics instance can garbage collect inactive sensors, false otherwise
-     * @param metricsContext The metricsContext to initialize metrics reporter with
+     * @param metricsContext   The metricsContext to initialize metrics reporter with
      */
     public Metrics(MetricConfig defaultConfig, List<MetricsReporter> reporters, Time time, boolean enableExpiration,
                    MetricsContext metricsContext) {
@@ -178,7 +183,7 @@ public class Metrics implements Closeable {
         }
 
         addMetric(metricName("count", "kafka-metrics-count", "total number of registered metrics"),
-            (config, now) -> metrics.size());
+                (config, now) -> metrics.size());
     }
 
     /**
@@ -211,8 +216,8 @@ public class Metrics implements Closeable {
     /**
      * Create a MetricName with the given name, group and default tags specified in the metric configuration.
      *
-     * @param name        The name of the metric
-     * @param group       logical group name of the metrics to which this metric belongs
+     * @param name  The name of the metric
+     * @param group logical group name of the metrics to which this metric belongs
      */
     public MetricName metricName(String name, String group) {
         return metricName(name, group, "", new HashMap<>());
@@ -222,10 +227,10 @@ public class Metrics implements Closeable {
      * Create a MetricName with the given name, group, description, and keyValue as tags,  plus default tags specified in the metric
      * configuration. Tag in keyValue takes precedence if the same tag key is specified in the default metric configuration.
      *
-     * @param name          The name of the metric
-     * @param group         logical group name of the metrics to which this metric belongs
-     * @param description   A human-readable description to include in the metric
-     * @param keyValue      additional key/value attributes of the metric (must come in pairs)
+     * @param name        The name of the metric
+     * @param group       logical group name of the metrics to which this metric belongs
+     * @param description A human-readable description to include in the metric
+     * @param keyValue    additional key/value attributes of the metric (must come in pairs)
      */
     public MetricName metricName(String name, String group, String description, String... keyValue) {
         return metricName(name, group, description, MetricsUtils.getTags(keyValue));
@@ -249,20 +254,20 @@ public class Metrics implements Closeable {
      * determine the order of these sections. This order is therefore dependent upon the order of the
      * tags in each {@link MetricNameTemplate}.
      *
-     * @param domain the domain or prefix for the JMX MBean names; may not be null
+     * @param domain     the domain or prefix for the JMX MBean names; may not be null
      * @param allMetrics the collection of all {@link MetricNameTemplate} instances each describing one metric; may not be null
      * @return the string containing the HTML table; never null
      */
     public static String toHtmlTable(String domain, Iterable<MetricNameTemplate> allMetrics) {
         Map<String, Map<String, String>> beansAndAttributes = new TreeMap<>();
-    
+
         try (Metrics metrics = new Metrics()) {
             for (MetricNameTemplate template : allMetrics) {
                 Map<String, String> tags = new LinkedHashMap<>();
                 for (String s : template.tags()) {
                     tags.put(s, "{" + s + "}");
                 }
-    
+
                 MetricName metricName = metrics.metricName(template.name(), template.group(), template.description(), tags);
                 String mBeanName = JmxReporter.getMBeanName(domain, metricName);
                 if (!beansAndAttributes.containsKey(mBeanName)) {
@@ -276,23 +281,23 @@ public class Metrics implements Closeable {
                 }
             }
         }
-        
+
         StringBuilder b = new StringBuilder();
         b.append("<table class=\"data-table\"><tbody>\n");
-    
+
         for (Entry<String, Map<String, String>> e : beansAndAttributes.entrySet()) {
             b.append("<tr>\n");
             b.append("<td colspan=3 class=\"mbeanName\" style=\"background-color:#ccc; font-weight: bold;\">");
             b.append(e.getKey());
             b.append("</td>");
             b.append("</tr>\n");
-            
+
             b.append("<tr>\n");
             b.append("<th style=\"width: 90px\"></th>\n");
             b.append("<th>Attribute name</th>\n");
             b.append("<th>Description</th>\n");
             b.append("</tr>\n");
-            
+
             for (Entry<String, String> e2 : e.getValue().entrySet()) {
                 b.append("<tr>\n");
                 b.append("<td></td>");
@@ -304,12 +309,12 @@ public class Metrics implements Closeable {
                 b.append("</td>");
                 b.append("</tr>\n");
             }
-    
+
         }
         b.append("</tbody></table>");
-    
+
         return b.toString();
-    
+
     }
 
     public MetricConfig config() {
@@ -318,6 +323,7 @@ public class Metrics implements Closeable {
 
     /**
      * Get the sensor with the given name if it exists
+     *
      * @param name The name of the sensor
      * @return Return the sensor or null if no such sensor exists
      */
@@ -328,21 +334,23 @@ public class Metrics implements Closeable {
     /**
      * Get or create a sensor with the given unique name and no parent sensors. This uses
      * a default recording level of INFO.
+     *
      * @param name The sensor name
      * @return The sensor
      */
     public Sensor sensor(String name) {
-        return this.sensor(name, Sensor.RecordingLevel.INFO);
+        return this.sensor(name, SensorRecordingLevel.INFO);
     }
 
     /**
      * Get or create a sensor with the given unique name and no parent sensors and with a given
      * recording level.
-     * @param name The sensor name.
+     *
+     * @param name           The sensor name.
      * @param recordingLevel The recording level.
      * @return The sensor
      */
-    public Sensor sensor(String name, Sensor.RecordingLevel recordingLevel) {
+    public Sensor sensor(String name, SensorRecordingLevel recordingLevel) {
         return sensor(name, null, recordingLevel, (Sensor[]) null);
     }
 
@@ -350,64 +358,69 @@ public class Metrics implements Closeable {
     /**
      * Get or create a sensor with the given unique name and zero or more parent sensors. All parent sensors will
      * receive every value recorded with this sensor. This uses a default recording level of INFO.
-     * @param name The name of the sensor
+     *
+     * @param name    The name of the sensor
      * @param parents The parent sensors
      * @return The sensor that is created
      */
     public Sensor sensor(String name, Sensor... parents) {
-        return this.sensor(name, Sensor.RecordingLevel.INFO, parents);
+        return this.sensor(name, SensorRecordingLevel.INFO, parents);
     }
 
     /**
      * Get or create a sensor with the given unique name and zero or more parent sensors. All parent sensors will
      * receive every value recorded with this sensor.
-     * @param name The name of the sensor.
-     * @param parents The parent sensors.
+     *
+     * @param name           The name of the sensor.
+     * @param parents        The parent sensors.
      * @param recordingLevel The recording level.
      * @return The sensor that is created
      */
-    public Sensor sensor(String name, Sensor.RecordingLevel recordingLevel, Sensor... parents) {
+    public Sensor sensor(String name, SensorRecordingLevel recordingLevel, Sensor... parents) {
         return sensor(name, null, recordingLevel, parents);
     }
 
     /**
      * Get or create a sensor with the given unique name and zero or more parent sensors. All parent sensors will
      * receive every value recorded with this sensor. This uses a default recording level of INFO.
-     * @param name The name of the sensor
-     * @param config A default configuration to use for this sensor for metrics that don't have their own config
+     *
+     * @param name    The name of the sensor
+     * @param config  A default configuration to use for this sensor for metrics that don't have their own config
      * @param parents The parent sensors
      * @return The sensor that is created
      */
     public synchronized Sensor sensor(String name, MetricConfig config, Sensor... parents) {
-        return this.sensor(name, config, Sensor.RecordingLevel.INFO, parents);
+        return this.sensor(name, config, SensorRecordingLevel.INFO, parents);
     }
 
 
     /**
      * Get or create a sensor with the given unique name and zero or more parent sensors. All parent sensors will
      * receive every value recorded with this sensor.
-     * @param name The name of the sensor
-     * @param config A default configuration to use for this sensor for metrics that don't have their own config
+     *
+     * @param name           The name of the sensor
+     * @param config         A default configuration to use for this sensor for metrics that don't have their own config
      * @param recordingLevel The recording level.
-     * @param parents The parent sensors
+     * @param parents        The parent sensors
      * @return The sensor that is created
      */
-    public synchronized Sensor sensor(String name, MetricConfig config, Sensor.RecordingLevel recordingLevel, Sensor... parents) {
+    public synchronized Sensor sensor(String name, MetricConfig config, SensorRecordingLevel recordingLevel, Sensor... parents) {
         return sensor(name, config, Long.MAX_VALUE, recordingLevel, parents);
     }
 
     /**
      * Get or create a sensor with the given unique name and zero or more parent sensors. All parent sensors will
      * receive every value recorded with this sensor.
-     * @param name The name of the sensor
-     * @param config A default configuration to use for this sensor for metrics that don't have their own config
+     *
+     * @param name                                The name of the sensor
+     * @param config                              A default configuration to use for this sensor for metrics that don't have their own config
      * @param inactiveSensorExpirationTimeSeconds If no value if recorded on the Sensor for this duration of time,
-     *                                        it is eligible for removal
-     * @param parents The parent sensors
-     * @param recordingLevel The recording level.
+     *                                            it is eligible for removal
+     * @param parents                             The parent sensors
+     * @param recordingLevel                      The recording level.
      * @return The sensor that is created
      */
-    public synchronized Sensor sensor(String name, MetricConfig config, long inactiveSensorExpirationTimeSeconds, Sensor.RecordingLevel recordingLevel, Sensor... parents) {
+    public synchronized Sensor sensor(String name, MetricConfig config, long inactiveSensorExpirationTimeSeconds, SensorRecordingLevel recordingLevel, Sensor... parents) {
         Sensor s = getSensor(name);
         if (s == null) {
             s = new Sensor(this, name, parents, config == null ? this.config : config, time, inactiveSensorExpirationTimeSeconds, recordingLevel);
@@ -426,15 +439,16 @@ public class Metrics implements Closeable {
     /**
      * Get or create a sensor with the given unique name and zero or more parent sensors. All parent sensors will
      * receive every value recorded with this sensor. This uses a default recording level of INFO.
-     * @param name The name of the sensor
-     * @param config A default configuration to use for this sensor for metrics that don't have their own config
+     *
+     * @param name                                The name of the sensor
+     * @param config                              A default configuration to use for this sensor for metrics that don't have their own config
      * @param inactiveSensorExpirationTimeSeconds If no value if recorded on the Sensor for this duration of time,
-     *                                        it is eligible for removal
-     * @param parents The parent sensors
+     *                                            it is eligible for removal
+     * @param parents                             The parent sensors
      * @return The sensor that is created
      */
     public synchronized Sensor sensor(String name, MetricConfig config, long inactiveSensorExpirationTimeSeconds, Sensor... parents) {
-        return this.sensor(name, config, inactiveSensorExpirationTimeSeconds, Sensor.RecordingLevel.INFO, parents);
+        return this.sensor(name, config, inactiveSensorExpirationTimeSeconds, SensorRecordingLevel.INFO, parents);
     }
 
     /**
@@ -469,7 +483,7 @@ public class Metrics implements Closeable {
     /**
      * Add a metric to monitor an object that implements measurable. This metric won't be associated with any sensor.
      * This is a way to expose existing values as metrics.
-     *
+     * <p>
      * This method is kept for binary compatibility purposes, it has the same behaviour as
      * {@link #addMetric(MetricName, MetricValueProvider)}.
      *
@@ -483,12 +497,12 @@ public class Metrics implements Closeable {
     /**
      * Add a metric to monitor an object that implements Measurable. This metric won't be associated with any sensor.
      * This is a way to expose existing values as metrics.
-     *
+     * <p>
      * This method is kept for binary compatibility purposes, it has the same behaviour as
      * {@link #addMetric(MetricName, MetricConfig, MetricValueProvider)}.
      *
      * @param metricName The name of the metric
-     * @param config The configuration to use when measuring this measurable
+     * @param config     The configuration to use when measuring this measurable
      * @param measurable The measurable that will be measured by this metric
      */
     public void addMetric(MetricName metricName, MetricConfig config, Measurable measurable) {
@@ -500,15 +514,15 @@ public class Metrics implements Closeable {
      * sensor. This is a way to expose existing values as metrics. User is expected to add any additional
      * synchronization to update and access metric values, if required.
      *
-     * @param metricName The name of the metric
+     * @param metricName          The name of the metric
      * @param metricValueProvider The metric value provider associated with this metric
      */
     public void addMetric(MetricName metricName, MetricConfig config, MetricValueProvider<?> metricValueProvider) {
         KafkaMetric m = new KafkaMetric(new Object(),
-                                        Objects.requireNonNull(metricName),
-                                        Objects.requireNonNull(metricValueProvider),
-                                        config == null ? this.config : config,
-                                        time);
+                Objects.requireNonNull(metricName),
+                Objects.requireNonNull(metricValueProvider),
+                config == null ? this.config : config,
+                time);
         registerMetric(m);
     }
 
@@ -517,7 +531,7 @@ public class Metrics implements Closeable {
      * sensor. This is a way to expose existing values as metrics. User is expected to add any additional
      * synchronization to update and access metric values, if required.
      *
-     * @param metricName The name of the metric
+     * @param metricName          The name of the metric
      * @param metricValueProvider The metric value provider associated with this metric
      */
     public void addMetric(MetricName metricName, MetricValueProvider<?> metricValueProvider) {
@@ -631,14 +645,14 @@ public class Metrics implements Closeable {
         // check to make sure that the runtime defined tags contain all the template tags.
         Set<String> runtimeTagKeys = new HashSet<>(tags.keySet());
         runtimeTagKeys.addAll(config().tags().keySet());
-        
+
         Set<String> templateTagKeys = template.tags();
-        
+
         if (!runtimeTagKeys.equals(templateTagKeys)) {
             throw new IllegalArgumentException("For '" + template.name() + "', runtime-defined metric tags do not match the tags in the template. "
                     + "Runtime = " + runtimeTagKeys.toString() + " Template = " + templateTagKeys.toString());
         }
-                
+
         return this.metricName(template.name(), template.group(), template.description(), tags);
     }
 

@@ -40,6 +40,7 @@ import java.util.concurrent.ExecutorService;
 import java.util.concurrent.Executors;
 import java.util.concurrent.Future;
 import java.util.concurrent.TimeUnit;
+
 import org.mockito.Mockito;
 
 import static org.junit.jupiter.api.Assertions.assertEquals;
@@ -51,77 +52,77 @@ import static org.junit.jupiter.api.Assertions.fail;
 
 public class SensorTest {
 
-    private static final MetricConfig INFO_CONFIG = new MetricConfig().recordLevel(Sensor.RecordingLevel.INFO);
-    private static final MetricConfig DEBUG_CONFIG = new MetricConfig().recordLevel(Sensor.RecordingLevel.DEBUG);
-    private static final MetricConfig TRACE_CONFIG = new MetricConfig().recordLevel(Sensor.RecordingLevel.TRACE);
+    private static final MetricConfig INFO_CONFIG = new MetricConfig().recordLevel(SensorRecordingLevel.INFO);
+    private static final MetricConfig DEBUG_CONFIG = new MetricConfig().recordLevel(SensorRecordingLevel.DEBUG);
+    private static final MetricConfig TRACE_CONFIG = new MetricConfig().recordLevel(SensorRecordingLevel.TRACE);
 
     @Test
     public void testRecordLevelEnum() {
-        Sensor.RecordingLevel configLevel = Sensor.RecordingLevel.INFO;
-        assertTrue(Sensor.RecordingLevel.INFO.shouldRecord(configLevel.id));
-        assertFalse(Sensor.RecordingLevel.DEBUG.shouldRecord(configLevel.id));
-        assertFalse(Sensor.RecordingLevel.TRACE.shouldRecord(configLevel.id));
+        SensorRecordingLevel configLevel = SensorRecordingLevel.INFO;
+        assertTrue(SensorRecordingLevel.INFO.shouldRecord(configLevel));
+        assertFalse(SensorRecordingLevel.DEBUG.shouldRecord(configLevel));
+        assertFalse(SensorRecordingLevel.TRACE.shouldRecord(configLevel));
 
-        configLevel = Sensor.RecordingLevel.DEBUG;
-        assertTrue(Sensor.RecordingLevel.INFO.shouldRecord(configLevel.id));
-        assertTrue(Sensor.RecordingLevel.DEBUG.shouldRecord(configLevel.id));
-        assertFalse(Sensor.RecordingLevel.TRACE.shouldRecord(configLevel.id));
+        configLevel = SensorRecordingLevel.DEBUG;
+        assertTrue(SensorRecordingLevel.INFO.shouldRecord(configLevel));
+        assertTrue(SensorRecordingLevel.DEBUG.shouldRecord(configLevel));
+        assertFalse(SensorRecordingLevel.TRACE.shouldRecord(configLevel));
 
-        configLevel = Sensor.RecordingLevel.TRACE;
-        assertTrue(Sensor.RecordingLevel.INFO.shouldRecord(configLevel.id));
-        assertTrue(Sensor.RecordingLevel.DEBUG.shouldRecord(configLevel.id));
-        assertTrue(Sensor.RecordingLevel.TRACE.shouldRecord(configLevel.id));
+        configLevel = SensorRecordingLevel.TRACE;
+        assertTrue(SensorRecordingLevel.INFO.shouldRecord(configLevel));
+        assertTrue(SensorRecordingLevel.DEBUG.shouldRecord(configLevel));
+        assertTrue(SensorRecordingLevel.TRACE.shouldRecord(configLevel));
 
-        assertEquals(Sensor.RecordingLevel.valueOf(Sensor.RecordingLevel.DEBUG.toString()),
-            Sensor.RecordingLevel.DEBUG);
-        assertEquals(Sensor.RecordingLevel.valueOf(Sensor.RecordingLevel.INFO.toString()),
-            Sensor.RecordingLevel.INFO);
-        assertEquals(Sensor.RecordingLevel.valueOf(Sensor.RecordingLevel.TRACE.toString()),
-            Sensor.RecordingLevel.TRACE);
+        assertEquals(SensorRecordingLevel.valueOf(SensorRecordingLevel.DEBUG.toString()),
+                SensorRecordingLevel.DEBUG);
+        assertEquals(SensorRecordingLevel.valueOf(SensorRecordingLevel.INFO.toString()),
+                SensorRecordingLevel.INFO);
+        assertEquals(SensorRecordingLevel.valueOf(SensorRecordingLevel.TRACE.toString()),
+                SensorRecordingLevel.TRACE);
     }
 
     @Test
     public void testShouldRecordForInfoLevelSensor() {
         Sensor infoSensor = new Sensor(null, "infoSensor", null, INFO_CONFIG, new SystemTime(),
-            0, Sensor.RecordingLevel.INFO);
+                0, SensorRecordingLevel.INFO);
         assertTrue(infoSensor.shouldRecord());
 
         infoSensor = new Sensor(null, "infoSensor", null, DEBUG_CONFIG, new SystemTime(),
-            0, Sensor.RecordingLevel.INFO);
+                0, SensorRecordingLevel.INFO);
         assertTrue(infoSensor.shouldRecord());
 
         infoSensor = new Sensor(null, "infoSensor", null, TRACE_CONFIG, new SystemTime(),
-            0, Sensor.RecordingLevel.INFO);
+                0, SensorRecordingLevel.INFO);
         assertTrue(infoSensor.shouldRecord());
     }
 
     @Test
     public void testShouldRecordForDebugLevelSensor() {
         Sensor debugSensor = new Sensor(null, "debugSensor", null, INFO_CONFIG, new SystemTime(),
-            0, Sensor.RecordingLevel.DEBUG);
+                0, SensorRecordingLevel.DEBUG);
         assertFalse(debugSensor.shouldRecord());
 
         debugSensor = new Sensor(null, "debugSensor", null, DEBUG_CONFIG, new SystemTime(),
-             0, Sensor.RecordingLevel.DEBUG);
+                0, SensorRecordingLevel.DEBUG);
         assertTrue(debugSensor.shouldRecord());
 
         debugSensor = new Sensor(null, "debugSensor", null, TRACE_CONFIG, new SystemTime(),
-             0, Sensor.RecordingLevel.DEBUG);
+                0, SensorRecordingLevel.DEBUG);
         assertTrue(debugSensor.shouldRecord());
     }
 
     @Test
     public void testShouldRecordForTraceLevelSensor() {
         Sensor traceSensor = new Sensor(null, "traceSensor", null, INFO_CONFIG, new SystemTime(),
-             0, Sensor.RecordingLevel.TRACE);
+                0, SensorRecordingLevel.TRACE);
         assertFalse(traceSensor.shouldRecord());
 
         traceSensor = new Sensor(null, "traceSensor", null, DEBUG_CONFIG, new SystemTime(),
-             0, Sensor.RecordingLevel.TRACE);
+                0, SensorRecordingLevel.TRACE);
         assertFalse(traceSensor.shouldRecord());
 
         traceSensor = new Sensor(null, "traceSensor", null, TRACE_CONFIG, new SystemTime(),
-             0, Sensor.RecordingLevel.TRACE);
+                0, SensorRecordingLevel.TRACE);
         assertTrue(traceSensor.shouldRecord());
     }
 
@@ -132,7 +133,7 @@ public class SensorTest {
         try (Metrics metrics = new Metrics(config, Arrays.asList(new JmxReporter()), mockTime, true)) {
             long inactiveSensorExpirationTimeSeconds = 60L;
             Sensor sensor = new Sensor(metrics, "sensor", null, config, mockTime,
-                    inactiveSensorExpirationTimeSeconds, Sensor.RecordingLevel.INFO);
+                    inactiveSensorExpirationTimeSeconds, SensorRecordingLevel.INFO);
 
             assertTrue(sensor.add(metrics.metricName("test1", "grp1"), new Avg()));
 
@@ -182,10 +183,10 @@ public class SensorTest {
     @Test
     public void testCheckQuotasInMultiThreads() throws InterruptedException, ExecutionException {
         final Metrics metrics = new Metrics(new MetricConfig().quota(Quota.upperBound(Double.MAX_VALUE))
-            // decreasing the value of time window make SampledStat always record the given value
-            .timeWindow(1, TimeUnit.MILLISECONDS)
-            // increasing the value of samples make SampledStat store more samples
-            .samples(100));
+                // decreasing the value of time window make SampledStat always record the given value
+                .timeWindowMs(1)
+                // increasing the value of samples make SampledStat store more samples
+                .samples(100));
         final Sensor sensor = metrics.sensor("sensor");
 
         assertTrue(sensor.add(metrics.metricName("test-metric", "test-group"), new Rate()));
@@ -236,15 +237,15 @@ public class SensorTest {
         assertFalse(sensor.hasMetrics());
 
         sensor.add(
-            new MetricName("name1", "group1", "description1", Collections.emptyMap()),
-            new WindowedSum()
+                new MetricName("name1", "group1", "description1", Collections.emptyMap()),
+                new WindowedSum()
         );
 
         assertTrue(sensor.hasMetrics());
 
         sensor.add(
-            new MetricName("name2", "group2", "description2", Collections.emptyMap()),
-            new CumulativeCount()
+                new MetricName("name2", "group2", "description2", Collections.emptyMap()),
+                new CumulativeCount()
         );
 
         assertTrue(sensor.hasMetrics());
@@ -255,9 +256,9 @@ public class SensorTest {
         final Time time = new MockTime(0, System.currentTimeMillis(), 0);
         final Metrics metrics = new Metrics(time);
         final Sensor sensor = metrics.sensor("sensor", new MetricConfig()
-            .quota(Quota.upperBound(2))
-            .timeWindow(1, TimeUnit.SECONDS)
-            .samples(11));
+                .quota(Quota.upperBound(2))
+                .timeWindowMs(TimeUnit.MILLISECONDS.convert(1, TimeUnit.SECONDS))
+                .samples(11));
         final MetricName metricName = metrics.metricName("rate", "test-group");
         assertTrue(sensor.add(metricName, new Rate()));
         final KafkaMetric rateMetric = metrics.metric(metricName);
@@ -284,9 +285,9 @@ public class SensorTest {
         final Time time = new MockTime(0, System.currentTimeMillis(), 0);
         final Metrics metrics = new Metrics(time);
         final Sensor sensor = metrics.sensor("sensor", new MetricConfig()
-            .quota(Quota.upperBound(2))
-            .timeWindow(1, TimeUnit.SECONDS)
-            .samples(10));
+                .quota(Quota.upperBound(2))
+                .timeWindowMs(TimeUnit.MILLISECONDS.convert(1, TimeUnit.SECONDS))
+                .samples(10));
         final MetricName metricName = metrics.metricName("credits", "test-group");
         assertTrue(sensor.add(metricName, new TokenBucket()));
         final KafkaMetric tkMetric = metrics.metric(metricName);

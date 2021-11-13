@@ -17,7 +17,7 @@
 package org.apache.kafka.streams.processor.internals.metrics;
 
 import org.apache.kafka.common.metrics.Sensor;
-import org.apache.kafka.common.metrics.Sensor.RecordingLevel;
+import org.apache.kafka.common.metrics.SensorRecordingLevel;
 
 import java.util.Map;
 
@@ -36,7 +36,8 @@ import static org.apache.kafka.streams.processor.internals.metrics.StreamsMetric
 import static org.apache.kafka.streams.processor.internals.metrics.StreamsMetricsImpl.addValueMetricToSensor;
 
 public class ThreadMetrics {
-    private ThreadMetrics() {}
+    private ThreadMetrics() {
+    }
 
     private static final String COMMIT = "commit";
     private static final String POLL = "poll";
@@ -80,94 +81,94 @@ public class ThreadMetrics {
     private static final String SKIP_RECORD_TOTAL_DESCRIPTION = TOTAL_DESCRIPTION + SKIP_RECORDS_DESCRIPTION;
     private static final String SKIP_RECORD_RATE_DESCRIPTION = RATE_DESCRIPTION + SKIP_RECORDS_DESCRIPTION;
     private static final String COMMIT_OVER_TASKS_DESCRIPTION =
-        "calls to commit over all tasks assigned to one stream thread";
+            "calls to commit over all tasks assigned to one stream thread";
     private static final String COMMIT_OVER_TASKS_TOTAL_DESCRIPTION = TOTAL_DESCRIPTION + COMMIT_OVER_TASKS_DESCRIPTION;
     private static final String COMMIT_OVER_TASKS_RATE_DESCRIPTION = RATE_DESCRIPTION + COMMIT_OVER_TASKS_DESCRIPTION;
     private static final String PROCESS_RATIO_DESCRIPTION =
-        "The fraction of time the thread spent on processing active tasks";
+            "The fraction of time the thread spent on processing active tasks";
     private static final String PUNCTUATE_RATIO_DESCRIPTION =
-        "The fraction of time the thread spent on punctuating active tasks";
+            "The fraction of time the thread spent on punctuating active tasks";
     private static final String POLL_RATIO_DESCRIPTION =
-        "The fraction of time the thread spent on polling records from consumer";
+            "The fraction of time the thread spent on polling records from consumer";
     private static final String COMMIT_RATIO_DESCRIPTION =
-        "The fraction of time the thread spent on committing all tasks";
+            "The fraction of time the thread spent on committing all tasks";
 
     public static Sensor createTaskSensor(final String threadId,
                                           final StreamsMetricsImpl streamsMetrics) {
         return invocationRateAndCountSensor(
-            threadId,
-            CREATE_TASK,
-            CREATE_TASK_RATE_DESCRIPTION,
-            CREATE_TASK_TOTAL_DESCRIPTION,
-            RecordingLevel.INFO,
-            streamsMetrics
+                threadId,
+                CREATE_TASK,
+                CREATE_TASK_RATE_DESCRIPTION,
+                CREATE_TASK_TOTAL_DESCRIPTION,
+                SensorRecordingLevel.INFO,
+                streamsMetrics
         );
     }
 
     public static Sensor closeTaskSensor(final String threadId,
                                          final StreamsMetricsImpl streamsMetrics) {
         return invocationRateAndCountSensor(
-            threadId,
-            CLOSE_TASK,
-            CLOSE_TASK_RATE_DESCRIPTION,
-            CLOSE_TASK_TOTAL_DESCRIPTION,
-            RecordingLevel.INFO,
-            streamsMetrics
+                threadId,
+                CLOSE_TASK,
+                CLOSE_TASK_RATE_DESCRIPTION,
+                CLOSE_TASK_TOTAL_DESCRIPTION,
+                SensorRecordingLevel.INFO,
+                streamsMetrics
         );
     }
 
     public static Sensor skipRecordSensor(final String threadId,
                                           final StreamsMetricsImpl streamsMetrics) {
         return invocationRateAndCountSensor(
-            threadId,
-            SKIP_RECORD,
-            SKIP_RECORD_RATE_DESCRIPTION,
-            SKIP_RECORD_TOTAL_DESCRIPTION,
-            RecordingLevel.INFO,
-            streamsMetrics
+                threadId,
+                SKIP_RECORD,
+                SKIP_RECORD_RATE_DESCRIPTION,
+                SKIP_RECORD_TOTAL_DESCRIPTION,
+                SensorRecordingLevel.INFO,
+                streamsMetrics
         );
     }
 
     public static Sensor commitSensor(final String threadId,
                                       final StreamsMetricsImpl streamsMetrics) {
         return invocationRateAndCountAndAvgAndMaxLatencySensor(
-            threadId,
-            COMMIT,
-            COMMIT_RATE_DESCRIPTION,
-            COMMIT_TOTAL_DESCRIPTION,
-            COMMIT_AVG_LATENCY_DESCRIPTION,
-            COMMIT_MAX_LATENCY_DESCRIPTION,
-            Sensor.RecordingLevel.INFO,
-            streamsMetrics
+                threadId,
+                COMMIT,
+                COMMIT_RATE_DESCRIPTION,
+                COMMIT_TOTAL_DESCRIPTION,
+                COMMIT_AVG_LATENCY_DESCRIPTION,
+                COMMIT_MAX_LATENCY_DESCRIPTION,
+                SensorRecordingLevel.INFO,
+                streamsMetrics
         );
     }
 
     public static Sensor pollSensor(final String threadId,
                                     final StreamsMetricsImpl streamsMetrics) {
         return invocationRateAndCountAndAvgAndMaxLatencySensor(
-            threadId,
-            POLL,
-            POLL_RATE_DESCRIPTION,
-            POLL_TOTAL_DESCRIPTION,
-            POLL_AVG_LATENCY_DESCRIPTION,
-            POLL_MAX_LATENCY_DESCRIPTION,
-            Sensor.RecordingLevel.INFO,
-            streamsMetrics
+                threadId,
+                POLL,
+                POLL_RATE_DESCRIPTION,
+                POLL_TOTAL_DESCRIPTION,
+                POLL_AVG_LATENCY_DESCRIPTION,
+                POLL_MAX_LATENCY_DESCRIPTION,
+                SensorRecordingLevel.INFO,
+                streamsMetrics
         );
     }
 
     public static Sensor processLatencySensor(final String threadId,
                                               final StreamsMetricsImpl streamsMetrics) {
         final Sensor sensor =
-            streamsMetrics.threadLevelSensor(threadId, PROCESS + LATENCY_SUFFIX, RecordingLevel.INFO);
+                streamsMetrics.threadLevelSensor(threadId, PROCESS + LATENCY_SUFFIX, SensorRecordingLevel.INFO);
         final Map<String, String> tagMap = streamsMetrics.threadLevelTagMap(threadId);
         addAvgAndMaxToSensor(
-            sensor,
-            THREAD_LEVEL_GROUP,
-            tagMap,
-            PROCESS + LATENCY_SUFFIX,
-            PROCESS_AVG_LATENCY_DESCRIPTION,
-            PROCESS_MAX_LATENCY_DESCRIPTION
+                sensor,
+                THREAD_LEVEL_GROUP,
+                tagMap,
+                PROCESS + LATENCY_SUFFIX,
+                PROCESS_AVG_LATENCY_DESCRIPTION,
+                PROCESS_MAX_LATENCY_DESCRIPTION
         );
         return sensor;
     }
@@ -175,15 +176,15 @@ public class ThreadMetrics {
     public static Sensor pollRecordsSensor(final String threadId,
                                            final StreamsMetricsImpl streamsMetrics) {
         final Sensor sensor =
-            streamsMetrics.threadLevelSensor(threadId, POLL + RECORDS_SUFFIX, RecordingLevel.INFO);
+                streamsMetrics.threadLevelSensor(threadId, POLL + RECORDS_SUFFIX, SensorRecordingLevel.INFO);
         final Map<String, String> tagMap = streamsMetrics.threadLevelTagMap(threadId);
         addAvgAndMaxToSensor(
-            sensor,
-            THREAD_LEVEL_GROUP,
-            tagMap,
-            POLL + RECORDS_SUFFIX,
-            POLL_AVG_RECORDS_DESCRIPTION,
-            POLL_MAX_RECORDS_DESCRIPTION
+                sensor,
+                THREAD_LEVEL_GROUP,
+                tagMap,
+                POLL + RECORDS_SUFFIX,
+                POLL_AVG_RECORDS_DESCRIPTION,
+                POLL_MAX_RECORDS_DESCRIPTION
         );
         return sensor;
     }
@@ -191,15 +192,15 @@ public class ThreadMetrics {
     public static Sensor processRecordsSensor(final String threadId,
                                               final StreamsMetricsImpl streamsMetrics) {
         final Sensor sensor =
-            streamsMetrics.threadLevelSensor(threadId, PROCESS + RECORDS_SUFFIX, RecordingLevel.INFO);
+                streamsMetrics.threadLevelSensor(threadId, PROCESS + RECORDS_SUFFIX, SensorRecordingLevel.INFO);
         final Map<String, String> tagMap = streamsMetrics.threadLevelTagMap(threadId);
         addAvgAndMaxToSensor(
-            sensor,
-            THREAD_LEVEL_GROUP,
-            tagMap,
-            PROCESS + RECORDS_SUFFIX,
-            PROCESS_AVG_RECORDS_DESCRIPTION,
-            PROCESS_MAX_RECORDS_DESCRIPTION
+                sensor,
+                THREAD_LEVEL_GROUP,
+                tagMap,
+                PROCESS + RECORDS_SUFFIX,
+                PROCESS_AVG_RECORDS_DESCRIPTION,
+                PROCESS_MAX_RECORDS_DESCRIPTION
         );
         return sensor;
     }
@@ -207,15 +208,15 @@ public class ThreadMetrics {
     public static Sensor processRateSensor(final String threadId,
                                            final StreamsMetricsImpl streamsMetrics) {
         final Sensor sensor =
-            streamsMetrics.threadLevelSensor(threadId, PROCESS + RATE_SUFFIX, RecordingLevel.INFO);
+                streamsMetrics.threadLevelSensor(threadId, PROCESS + RATE_SUFFIX, SensorRecordingLevel.INFO);
         final Map<String, String> tagMap = streamsMetrics.threadLevelTagMap(threadId);
         addRateOfSumAndSumMetricsToSensor(
-            sensor,
-            THREAD_LEVEL_GROUP,
-            tagMap,
-            PROCESS,
-            PROCESS_RATE_DESCRIPTION,
-            PROCESS_TOTAL_DESCRIPTION
+                sensor,
+                THREAD_LEVEL_GROUP,
+                tagMap,
+                PROCESS,
+                PROCESS_RATE_DESCRIPTION,
+                PROCESS_TOTAL_DESCRIPTION
         );
         return sensor;
     }
@@ -223,29 +224,29 @@ public class ThreadMetrics {
     public static Sensor punctuateSensor(final String threadId,
                                          final StreamsMetricsImpl streamsMetrics) {
         return invocationRateAndCountAndAvgAndMaxLatencySensor(
-            threadId,
-            PUNCTUATE,
-            PUNCTUATE_RATE_DESCRIPTION,
-            PUNCTUATE_TOTAL_DESCRIPTION,
-            PUNCTUATE_AVG_LATENCY_DESCRIPTION,
-            PUNCTUATE_MAX_LATENCY_DESCRIPTION,
-            Sensor.RecordingLevel.INFO,
-            streamsMetrics
+                threadId,
+                PUNCTUATE,
+                PUNCTUATE_RATE_DESCRIPTION,
+                PUNCTUATE_TOTAL_DESCRIPTION,
+                PUNCTUATE_AVG_LATENCY_DESCRIPTION,
+                PUNCTUATE_MAX_LATENCY_DESCRIPTION,
+                SensorRecordingLevel.INFO,
+                streamsMetrics
         );
     }
 
     public static Sensor commitOverTasksSensor(final String threadId,
                                                final StreamsMetricsImpl streamsMetrics) {
         final Sensor commitOverTasksSensor =
-            streamsMetrics.threadLevelSensor(threadId, COMMIT, Sensor.RecordingLevel.DEBUG);
+                streamsMetrics.threadLevelSensor(threadId, COMMIT, SensorRecordingLevel.DEBUG);
         final Map<String, String> tagMap = streamsMetrics.taskLevelTagMap(threadId, ROLLUP_VALUE);
         addInvocationRateAndCountToSensor(
-            commitOverTasksSensor,
-            TASK_LEVEL_GROUP,
-            tagMap,
-            COMMIT,
-            COMMIT_OVER_TASKS_RATE_DESCRIPTION,
-            COMMIT_OVER_TASKS_TOTAL_DESCRIPTION
+                commitOverTasksSensor,
+                TASK_LEVEL_GROUP,
+                tagMap,
+                COMMIT,
+                COMMIT_OVER_TASKS_RATE_DESCRIPTION,
+                COMMIT_OVER_TASKS_TOTAL_DESCRIPTION
         );
         return commitOverTasksSensor;
     }
@@ -253,14 +254,14 @@ public class ThreadMetrics {
     public static Sensor processRatioSensor(final String threadId,
                                             final StreamsMetricsImpl streamsMetrics) {
         final Sensor sensor =
-            streamsMetrics.threadLevelSensor(threadId, PROCESS + RATIO_SUFFIX, Sensor.RecordingLevel.INFO);
+                streamsMetrics.threadLevelSensor(threadId, PROCESS + RATIO_SUFFIX, SensorRecordingLevel.INFO);
         final Map<String, String> tagMap = streamsMetrics.threadLevelTagMap(threadId);
         addValueMetricToSensor(
-            sensor,
-            THREAD_LEVEL_GROUP,
-            tagMap,
-            PROCESS + RATIO_SUFFIX,
-            PROCESS_RATIO_DESCRIPTION
+                sensor,
+                THREAD_LEVEL_GROUP,
+                tagMap,
+                PROCESS + RATIO_SUFFIX,
+                PROCESS_RATIO_DESCRIPTION
         );
         return sensor;
     }
@@ -268,14 +269,14 @@ public class ThreadMetrics {
     public static Sensor punctuateRatioSensor(final String threadId,
                                               final StreamsMetricsImpl streamsMetrics) {
         final Sensor sensor =
-            streamsMetrics.threadLevelSensor(threadId, PUNCTUATE + RATIO_SUFFIX, Sensor.RecordingLevel.INFO);
+                streamsMetrics.threadLevelSensor(threadId, PUNCTUATE + RATIO_SUFFIX, SensorRecordingLevel.INFO);
         final Map<String, String> tagMap = streamsMetrics.threadLevelTagMap(threadId);
         addValueMetricToSensor(
-            sensor,
-            THREAD_LEVEL_GROUP,
-            tagMap,
-            PUNCTUATE + RATIO_SUFFIX,
-            PUNCTUATE_RATIO_DESCRIPTION
+                sensor,
+                THREAD_LEVEL_GROUP,
+                tagMap,
+                PUNCTUATE + RATIO_SUFFIX,
+                PUNCTUATE_RATIO_DESCRIPTION
         );
         return sensor;
     }
@@ -283,14 +284,14 @@ public class ThreadMetrics {
     public static Sensor pollRatioSensor(final String threadId,
                                          final StreamsMetricsImpl streamsMetrics) {
         final Sensor sensor =
-            streamsMetrics.threadLevelSensor(threadId, POLL + RATIO_SUFFIX, Sensor.RecordingLevel.INFO);
+                streamsMetrics.threadLevelSensor(threadId, POLL + RATIO_SUFFIX, SensorRecordingLevel.INFO);
         final Map<String, String> tagMap = streamsMetrics.threadLevelTagMap(threadId);
         addValueMetricToSensor(
-            sensor,
-            THREAD_LEVEL_GROUP,
-            tagMap,
-            POLL + RATIO_SUFFIX,
-            POLL_RATIO_DESCRIPTION
+                sensor,
+                THREAD_LEVEL_GROUP,
+                tagMap,
+                POLL + RATIO_SUFFIX,
+                POLL_RATIO_DESCRIPTION
         );
         return sensor;
     }
@@ -298,14 +299,14 @@ public class ThreadMetrics {
     public static Sensor commitRatioSensor(final String threadId,
                                            final StreamsMetricsImpl streamsMetrics) {
         final Sensor sensor =
-            streamsMetrics.threadLevelSensor(threadId, COMMIT + RATIO_SUFFIX, Sensor.RecordingLevel.INFO);
+                streamsMetrics.threadLevelSensor(threadId, COMMIT + RATIO_SUFFIX, SensorRecordingLevel.INFO);
         final Map<String, String> tagMap = streamsMetrics.threadLevelTagMap(threadId);
         addValueMetricToSensor(
-            sensor,
-            THREAD_LEVEL_GROUP,
-            tagMap,
-            COMMIT + RATIO_SUFFIX,
-            COMMIT_RATIO_DESCRIPTION
+                sensor,
+                THREAD_LEVEL_GROUP,
+                tagMap,
+                COMMIT + RATIO_SUFFIX,
+                COMMIT_RATIO_DESCRIPTION
         );
         return sensor;
     }
@@ -314,16 +315,16 @@ public class ThreadMetrics {
                                                        final String metricName,
                                                        final String descriptionOfRate,
                                                        final String descriptionOfCount,
-                                                       final RecordingLevel recordingLevel,
+                                                       final SensorRecordingLevel recordingLevel,
                                                        final StreamsMetricsImpl streamsMetrics) {
         final Sensor sensor = streamsMetrics.threadLevelSensor(threadId, metricName, recordingLevel);
         addInvocationRateAndCountToSensor(
-            sensor,
-            THREAD_LEVEL_GROUP,
-            streamsMetrics.threadLevelTagMap(threadId),
-            metricName,
-            descriptionOfRate,
-            descriptionOfCount
+                sensor,
+                THREAD_LEVEL_GROUP,
+                streamsMetrics.threadLevelTagMap(threadId),
+                metricName,
+                descriptionOfRate,
+                descriptionOfCount
         );
         return sensor;
     }
@@ -334,25 +335,25 @@ public class ThreadMetrics {
                                                                           final String descriptionOfCount,
                                                                           final String descriptionOfAvg,
                                                                           final String descriptionOfMax,
-                                                                          final RecordingLevel recordingLevel,
+                                                                          final SensorRecordingLevel recordingLevel,
                                                                           final StreamsMetricsImpl streamsMetrics) {
         final Sensor sensor = streamsMetrics.threadLevelSensor(threadId, metricName, recordingLevel);
         final Map<String, String> tagMap = streamsMetrics.threadLevelTagMap(threadId);
         addAvgAndMaxToSensor(
-            sensor,
-            THREAD_LEVEL_GROUP,
-            tagMap,
-            metricName + LATENCY_SUFFIX,
-            descriptionOfAvg,
-            descriptionOfMax
+                sensor,
+                THREAD_LEVEL_GROUP,
+                tagMap,
+                metricName + LATENCY_SUFFIX,
+                descriptionOfAvg,
+                descriptionOfMax
         );
         addInvocationRateAndCountToSensor(
-            sensor,
-            THREAD_LEVEL_GROUP,
-            tagMap,
-            metricName,
-            descriptionOfRate,
-            descriptionOfCount
+                sensor,
+                THREAD_LEVEL_GROUP,
+                tagMap,
+                metricName,
+                descriptionOfRate,
+                descriptionOfCount
         );
         return sensor;
     }

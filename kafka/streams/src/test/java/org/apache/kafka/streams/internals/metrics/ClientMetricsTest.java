@@ -18,10 +18,11 @@ package org.apache.kafka.streams.internals.metrics;
 
 import org.apache.kafka.common.metrics.Gauge;
 import org.apache.kafka.common.metrics.Sensor;
-import org.apache.kafka.common.metrics.Sensor.RecordingLevel;
+import org.apache.kafka.common.metrics.SensorRecordingLevel;
 import org.apache.kafka.streams.KafkaStreams.State;
 import org.apache.kafka.streams.processor.internals.metrics.StreamsMetricsImpl;
 import org.junit.Test;
+
 import static org.mockito.Mockito.mock;
 import static org.mockito.Mockito.when;
 import static org.mockito.Mockito.verify;
@@ -63,10 +64,10 @@ public class ClientMetricsTest {
         final String description = "The application ID of the Kafka Streams client";
         final String applicationId = "thisIsAnID";
         setUpAndVerifyImmutableMetric(
-            name,
-            description,
-            applicationId,
-            () -> ClientMetrics.addApplicationIdMetric(streamsMetrics, applicationId)
+                name,
+                description,
+                applicationId,
+                () -> ClientMetrics.addApplicationIdMetric(streamsMetrics, applicationId)
         );
     }
 
@@ -76,10 +77,10 @@ public class ClientMetricsTest {
         final String description = "The description of the topology executed in the Kafka Streams client";
         final String topologyDescription = "thisIsATopologyDescription";
         setUpAndVerifyImmutableMetric(
-            name,
-            description,
-            topologyDescription,
-            () -> ClientMetrics.addTopologyDescriptionMetric(streamsMetrics, topologyDescription)
+                name,
+                description,
+                topologyDescription,
+                () -> ClientMetrics.addTopologyDescriptionMetric(streamsMetrics, topologyDescription)
         );
     }
 
@@ -89,10 +90,10 @@ public class ClientMetricsTest {
         final String description = "The state of the Kafka Streams client";
         final Gauge<State> stateProvider = (config, now) -> State.RUNNING;
         setUpAndVerifyMutableMetric(
-            name,
-            description,
-            stateProvider,
-            () -> ClientMetrics.addStateMetric(streamsMetrics, stateProvider)
+                name,
+                description,
+                stateProvider,
+                () -> ClientMetrics.addStateMetric(streamsMetrics, stateProvider)
         );
     }
 
@@ -102,10 +103,10 @@ public class ClientMetricsTest {
         final String description = "The current number of alive stream threads that are running or participating in rebalance";
         final Gauge<Integer> valueProvider = (config, now) -> 1;
         setUpAndVerifyMutableMetric(
-            name,
-            description,
-            valueProvider,
-            () -> ClientMetrics.addNumAliveStreamThreadMetric(streamsMetrics, valueProvider)
+                name,
+                description,
+                valueProvider,
+                () -> ClientMetrics.addNumAliveStreamThreadMetric(streamsMetrics, valueProvider)
         );
     }
 
@@ -113,15 +114,15 @@ public class ClientMetricsTest {
     public void shouldGetFailedStreamThreadsSensor() {
         final String name = "failed-stream-threads";
         final String description = "The number of failed stream threads since the start of the Kafka Streams client";
-        when(streamsMetrics.clientLevelSensor(name, RecordingLevel.INFO)).thenReturn(expectedSensor);
+        when(streamsMetrics.clientLevelSensor(name, SensorRecordingLevel.INFO)).thenReturn(expectedSensor);
         when(streamsMetrics.clientLevelTagMap()).thenReturn(tagMap);
         StreamsMetricsImpl.addSumMetricToSensor(
-            expectedSensor,
-            CLIENT_LEVEL_GROUP,
-            tagMap,
-            name,
-            false,
-            description
+                expectedSensor,
+                CLIENT_LEVEL_GROUP,
+                tagMap,
+                name,
+                false,
+                description
         );
 
         final Sensor sensor = ClientMetrics.failedStreamThreadSensor(streamsMetrics);
@@ -138,7 +139,7 @@ public class ClientMetricsTest {
         verify(streamsMetrics).addClientLevelMutableMetric(
                 eq(name),
                 eq(description),
-                eq(RecordingLevel.INFO),
+                eq(SensorRecordingLevel.INFO),
                 eq(valueProvider)
         );
     }
@@ -153,7 +154,7 @@ public class ClientMetricsTest {
         verify(streamsMetrics).addClientLevelImmutableMetric(
                 eq(name),
                 eq(description),
-                eq(RecordingLevel.INFO),
+                eq(SensorRecordingLevel.INFO),
                 eq(value)
         );
     }

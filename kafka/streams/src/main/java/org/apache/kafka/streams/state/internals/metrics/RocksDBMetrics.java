@@ -18,7 +18,7 @@ package org.apache.kafka.streams.state.internals.metrics;
 
 import org.apache.kafka.common.metrics.Gauge;
 import org.apache.kafka.common.metrics.Sensor;
-import org.apache.kafka.common.metrics.Sensor.RecordingLevel;
+import org.apache.kafka.common.metrics.SensorRecordingLevel;
 import org.apache.kafka.streams.processor.internals.metrics.StreamsMetricsImpl;
 
 import java.math.BigInteger;
@@ -36,7 +36,8 @@ import static org.apache.kafka.streams.processor.internals.metrics.StreamsMetric
 import static org.apache.kafka.streams.processor.internals.metrics.StreamsMetricsImpl.addValueMetricToSensor;
 
 public class RocksDBMetrics {
-    private RocksDBMetrics() {}
+    private RocksDBMetrics() {
+    }
 
     private static final String BYTES_WRITTEN_TO_DB = "bytes-written";
     private static final String BYTES_READ_FROM_DB = "bytes-read";
@@ -82,79 +83,79 @@ public class RocksDBMetrics {
     static final String NUMBER_OF_BACKGROUND_ERRORS = "background-errors";
 
     private static final String BYTES_WRITTEN_TO_DB_RATE_DESCRIPTION =
-        "Average number of bytes written per second to the RocksDB state store";
+            "Average number of bytes written per second to the RocksDB state store";
     private static final String BYTES_WRITTEN_TO_DB_TOTAL_DESCRIPTION =
-        "Total number of bytes written to the RocksDB state store";
+            "Total number of bytes written to the RocksDB state store";
     private static final String BYTES_READ_FROM_DB_RATE_DESCRIPTION =
-        "Average number of bytes read per second from the RocksDB state store";
+            "Average number of bytes read per second from the RocksDB state store";
     private static final String BYTES_READ_FROM_DB_TOTAL_DESCRIPTION =
-        "Total number of bytes read from the RocksDB state store";
+            "Total number of bytes read from the RocksDB state store";
     private static final String MEMTABLE_BYTES_FLUSHED_RATE_DESCRIPTION =
-        "Average number of bytes flushed per second from the memtable to disk";
+            "Average number of bytes flushed per second from the memtable to disk";
     private static final String MEMTABLE_BYTES_FLUSHED_TOTAL_DESCRIPTION =
-        "Total number of bytes flushed from the memtable to disk";
+            "Total number of bytes flushed from the memtable to disk";
     private static final String MEMTABLE_HIT_RATIO_DESCRIPTION =
-        "Ratio of memtable hits relative to all lookups to the memtable";
+            "Ratio of memtable hits relative to all lookups to the memtable";
     private static final String MEMTABLE_FLUSH_TIME_AVG_DESCRIPTION =
-        "Average time spent on flushing the memtable to disk in ms";
+            "Average time spent on flushing the memtable to disk in ms";
     private static final String MEMTABLE_FLUSH_TIME_MIN_DESCRIPTION =
-        "Minimum time spent on flushing the memtable to disk in ms";
+            "Minimum time spent on flushing the memtable to disk in ms";
     private static final String MEMTABLE_FLUSH_TIME_MAX_DESCRIPTION =
-        "Maximum time spent on flushing the memtable to disk in ms";
+            "Maximum time spent on flushing the memtable to disk in ms";
     private static final String WRITE_STALL_DURATION_AVG_DESCRIPTION = "Average duration of write stalls in ms";
     private static final String WRITE_STALL_DURATION_TOTAL_DESCRIPTION = "Total duration of write stalls in ms";
     private static final String BLOCK_CACHE_DATA_HIT_RATIO_DESCRIPTION =
-        "Ratio of block cache hits for data relative to all lookups for data to the block cache";
+            "Ratio of block cache hits for data relative to all lookups for data to the block cache";
     private static final String BLOCK_CACHE_INDEX_HIT_RATIO_DESCRIPTION =
-        "Ratio of block cache hits for indexes relative to all lookups for indexes to the block cache";
+            "Ratio of block cache hits for indexes relative to all lookups for indexes to the block cache";
     private static final String BLOCK_CACHE_FILTER_HIT_RATIO_DESCRIPTION =
-        "Ratio of block cache hits for filters relative to all lookups for filters to the block cache";
+            "Ratio of block cache hits for filters relative to all lookups for filters to the block cache";
     private static final String BYTES_READ_DURING_COMPACTION_DESCRIPTION =
-        "Average number of bytes read per second during compaction";
+            "Average number of bytes read per second during compaction";
     private static final String BYTES_WRITTEN_DURING_COMPACTION_DESCRIPTION =
-        "Average number of bytes written per second during compaction";
+            "Average number of bytes written per second during compaction";
     private static final String COMPACTION_TIME_AVG_DESCRIPTION = "Average time spent on compaction in ms";
     private static final String COMPACTION_TIME_MIN_DESCRIPTION = "Minimum time spent on compaction in ms";
     private static final String COMPACTION_TIME_MAX_DESCRIPTION = "Maximum time spent on compaction in ms";
     private static final String NUMBER_OF_OPEN_FILES_DESCRIPTION = "Number of currently open files";
     private static final String NUMBER_OF_FILE_ERRORS_DESCRIPTION = "Total number of file errors occurred";
     private static final String NUMBER_OF_ENTRIES_ACTIVE_MEMTABLE_DESCRIPTION =
-        "Total number of entries in the active memtable";
+            "Total number of entries in the active memtable";
     private static final String NUMBER_OF_DELETES_ACTIVE_MEMTABLES_DESCRIPTION =
-        "Total number of delete entries in the active memtable";
+            "Total number of delete entries in the active memtable";
     private static final String NUMBER_OF_ENTRIES_IMMUTABLE_MEMTABLES_DESCRIPTION =
-        "Total number of entries in the unflushed immutable memtables";
+            "Total number of entries in the unflushed immutable memtables";
     private static final String NUMBER_OF_DELETES_IMMUTABLE_MEMTABLES_DESCRIPTION =
-        "Total number of delete entries in the unflushed immutable memtables";
+            "Total number of delete entries in the unflushed immutable memtables";
     private static final String NUMBER_OF_IMMUTABLE_MEMTABLES_DESCRIPTION =
-        "Number of immutable memtables that have not yet been flushed";
+            "Number of immutable memtables that have not yet been flushed";
     private static final String CURRENT_SIZE_OF_ACTIVE_MEMTABLE_DESCRIPTION =
-        "Approximate size of active memtable in bytes";
+            "Approximate size of active memtable in bytes";
     private static final String CURRENT_SIZE_OF_ALL_MEMTABLES_DESCRIPTION =
-        "Approximate size of active and unflushed immutable memtables in bytes";
+            "Approximate size of active and unflushed immutable memtables in bytes";
     private static final String SIZE_OF_ALL_MEMTABLES_DESCRIPTION =
-        "Approximate size of active, unflushed immutable, and pinned immutable memtables in bytes";
+            "Approximate size of active, unflushed immutable, and pinned immutable memtables in bytes";
     private static final String MEMTABLE_FLUSH_PENDING_DESCRIPTION =
-        "Reports 1 if a memtable flush is pending, otherwise it reports 0";
+            "Reports 1 if a memtable flush is pending, otherwise it reports 0";
     private static final String NUMBER_OF_RUNNING_FLUSHES_DESCRIPTION = "Number of currently running flushes";
     private static final String COMPACTION_PENDING_DESCRIPTION =
-        "Reports 1 if at least one compaction is pending, otherwise it reports 0";
+            "Reports 1 if at least one compaction is pending, otherwise it reports 0";
     private static final String NUMBER_OF_RUNNING_COMPACTIONS_DESCRIPTION = "Number of currently running compactions";
     private static final String ESTIMATED_BYTES_OF_PENDING_COMPACTION_DESCRIPTION =
-        "Estimated total number of bytes a compaction needs to rewrite on disk to get all levels down to under target size";
+            "Estimated total number of bytes a compaction needs to rewrite on disk to get all levels down to under target size";
     private static final String TOTAL_SST_FILE_SIZE_DESCRIPTION = "Total size in bytes of all SST files";
     private static final String LIVE_SST_FILES_SIZE_DESCRIPTION =
-        "Total size in bytes of all SST files that belong to the latest LSM tree";
+            "Total size in bytes of all SST files that belong to the latest LSM tree";
     private static final String NUMBER_OF_LIVE_VERSIONS_DESCRIPTION = "Number of live versions of the LSM tree";
     private static final String CAPACITY_OF_BLOCK_CACHE_DESCRIPTION = "Capacity of the block cache in bytes";
     private static final String USAGE_OF_BLOCK_CACHE_DESCRIPTION =
-        "Memory size of the entries residing in block cache in bytes";
+            "Memory size of the entries residing in block cache in bytes";
     private static final String PINNED_USAGE_OF_BLOCK_CACHE_DESCRIPTION =
-        "Memory size for the entries being pinned in the block cache in bytes";
+            "Memory size for the entries being pinned in the block cache in bytes";
     private static final String ESTIMATED_NUMBER_OF_KEYS_DESCRIPTION =
-        "Estimated number of keys in the active and unflushed immutable memtables and storage";
+            "Estimated number of keys in the active and unflushed immutable memtables and storage";
     private static final String ESTIMATED_MEMORY_OF_TABLE_READERS_DESCRIPTION =
-        "Estimated memory in bytes used for reading SST tables, excluding memory used in block cache";
+            "Estimated memory in bytes used for reading SST tables, excluding memory used in block cache";
     private static final String TOTAL_NUMBER_OF_BACKGROUND_ERRORS_DESCRIPTION = "Total number of background errors";
 
     public static class RocksDBMetricContext {
@@ -173,9 +174,11 @@ public class RocksDBMetrics {
         public String taskName() {
             return taskName;
         }
+
         public String metricsScope() {
             return metricsScope;
         }
+
         public String storeName() {
             return storeName;
         }
@@ -190,8 +193,8 @@ public class RocksDBMetrics {
             }
             final RocksDBMetricContext that = (RocksDBMetricContext) o;
             return Objects.equals(taskName, that.taskName) &&
-                Objects.equals(metricsScope, that.metricsScope) &&
-                Objects.equals(storeName, that.storeName);
+                    Objects.equals(metricsScope, that.metricsScope) &&
+                    Objects.equals(storeName, that.storeName);
         }
 
         @Override
@@ -204,16 +207,16 @@ public class RocksDBMetrics {
                                                       final RocksDBMetricContext metricContext) {
         final Sensor sensor = createSensor(streamsMetrics, metricContext, BYTES_WRITTEN_TO_DB);
         addRateOfSumAndSumMetricsToSensor(
-            sensor,
-            STATE_STORE_LEVEL_GROUP,
-            streamsMetrics.storeLevelTagMap(
-                metricContext.taskName(),
-                metricContext.metricsScope(),
-                metricContext.storeName()
-            ),
-            BYTES_WRITTEN_TO_DB,
-            BYTES_WRITTEN_TO_DB_RATE_DESCRIPTION,
-            BYTES_WRITTEN_TO_DB_TOTAL_DESCRIPTION
+                sensor,
+                STATE_STORE_LEVEL_GROUP,
+                streamsMetrics.storeLevelTagMap(
+                        metricContext.taskName(),
+                        metricContext.metricsScope(),
+                        metricContext.storeName()
+                ),
+                BYTES_WRITTEN_TO_DB,
+                BYTES_WRITTEN_TO_DB_RATE_DESCRIPTION,
+                BYTES_WRITTEN_TO_DB_TOTAL_DESCRIPTION
         );
         return sensor;
     }
@@ -222,16 +225,16 @@ public class RocksDBMetrics {
                                                      final RocksDBMetricContext metricContext) {
         final Sensor sensor = createSensor(streamsMetrics, metricContext, BYTES_READ_FROM_DB);
         addRateOfSumAndSumMetricsToSensor(
-            sensor,
-            STATE_STORE_LEVEL_GROUP,
-            streamsMetrics.storeLevelTagMap(
-                metricContext.taskName(),
-                metricContext.metricsScope(),
-                metricContext.storeName()
-            ),
-            BYTES_READ_FROM_DB,
-            BYTES_READ_FROM_DB_RATE_DESCRIPTION,
-            BYTES_READ_FROM_DB_TOTAL_DESCRIPTION
+                sensor,
+                STATE_STORE_LEVEL_GROUP,
+                streamsMetrics.storeLevelTagMap(
+                        metricContext.taskName(),
+                        metricContext.metricsScope(),
+                        metricContext.storeName()
+                ),
+                BYTES_READ_FROM_DB,
+                BYTES_READ_FROM_DB_RATE_DESCRIPTION,
+                BYTES_READ_FROM_DB_TOTAL_DESCRIPTION
         );
         return sensor;
     }
@@ -240,16 +243,16 @@ public class RocksDBMetrics {
                                                     final RocksDBMetricContext metricContext) {
         final Sensor sensor = createSensor(streamsMetrics, metricContext, MEMTABLE_BYTES_FLUSHED);
         addRateOfSumAndSumMetricsToSensor(
-            sensor,
-            STATE_STORE_LEVEL_GROUP,
-            streamsMetrics.storeLevelTagMap(
-                metricContext.taskName(),
-                metricContext.metricsScope(),
-                metricContext.storeName()
-            ),
-            MEMTABLE_BYTES_FLUSHED,
-            MEMTABLE_BYTES_FLUSHED_RATE_DESCRIPTION,
-            MEMTABLE_BYTES_FLUSHED_TOTAL_DESCRIPTION
+                sensor,
+                STATE_STORE_LEVEL_GROUP,
+                streamsMetrics.storeLevelTagMap(
+                        metricContext.taskName(),
+                        metricContext.metricsScope(),
+                        metricContext.storeName()
+                ),
+                MEMTABLE_BYTES_FLUSHED,
+                MEMTABLE_BYTES_FLUSHED_RATE_DESCRIPTION,
+                MEMTABLE_BYTES_FLUSHED_TOTAL_DESCRIPTION
         );
         return sensor;
     }
@@ -258,15 +261,15 @@ public class RocksDBMetrics {
                                                 final RocksDBMetricContext metricContext) {
         final Sensor sensor = createSensor(streamsMetrics, metricContext, MEMTABLE_HIT_RATIO);
         addValueMetricToSensor(
-            sensor,
-            STATE_STORE_LEVEL_GROUP,
-            streamsMetrics.storeLevelTagMap(
-                metricContext.taskName(),
-                metricContext.metricsScope(),
-                metricContext.storeName()
-            ),
-            MEMTABLE_HIT_RATIO,
-            MEMTABLE_HIT_RATIO_DESCRIPTION
+                sensor,
+                STATE_STORE_LEVEL_GROUP,
+                streamsMetrics.storeLevelTagMap(
+                        metricContext.taskName(),
+                        metricContext.metricsScope(),
+                        metricContext.storeName()
+                ),
+                MEMTABLE_HIT_RATIO,
+                MEMTABLE_HIT_RATIO_DESCRIPTION
         );
         return sensor;
     }
@@ -275,15 +278,15 @@ public class RocksDBMetrics {
                                                     final RocksDBMetricContext metricContext) {
         final Sensor sensor = createSensor(streamsMetrics, metricContext, MEMTABLE_FLUSH_TIME_AVG);
         addValueMetricToSensor(
-            sensor,
-            STATE_STORE_LEVEL_GROUP,
-            streamsMetrics.storeLevelTagMap(
-                metricContext.taskName(),
-                metricContext.metricsScope(),
-                metricContext.storeName()
-            ),
-            MEMTABLE_FLUSH_TIME_AVG,
-            MEMTABLE_FLUSH_TIME_AVG_DESCRIPTION
+                sensor,
+                STATE_STORE_LEVEL_GROUP,
+                streamsMetrics.storeLevelTagMap(
+                        metricContext.taskName(),
+                        metricContext.metricsScope(),
+                        metricContext.storeName()
+                ),
+                MEMTABLE_FLUSH_TIME_AVG,
+                MEMTABLE_FLUSH_TIME_AVG_DESCRIPTION
         );
         return sensor;
     }
@@ -292,15 +295,15 @@ public class RocksDBMetrics {
                                                     final RocksDBMetricContext metricContext) {
         final Sensor sensor = createSensor(streamsMetrics, metricContext, MEMTABLE_FLUSH_TIME_MIN);
         addValueMetricToSensor(
-            sensor,
-            STATE_STORE_LEVEL_GROUP,
-            streamsMetrics.storeLevelTagMap(
-                metricContext.taskName(),
-                metricContext.metricsScope(),
-                metricContext.storeName()
-            ),
-            MEMTABLE_FLUSH_TIME_MIN,
-            MEMTABLE_FLUSH_TIME_MIN_DESCRIPTION
+                sensor,
+                STATE_STORE_LEVEL_GROUP,
+                streamsMetrics.storeLevelTagMap(
+                        metricContext.taskName(),
+                        metricContext.metricsScope(),
+                        metricContext.storeName()
+                ),
+                MEMTABLE_FLUSH_TIME_MIN,
+                MEMTABLE_FLUSH_TIME_MIN_DESCRIPTION
         );
         return sensor;
     }
@@ -309,15 +312,15 @@ public class RocksDBMetrics {
                                                     final RocksDBMetricContext metricContext) {
         final Sensor sensor = createSensor(streamsMetrics, metricContext, MEMTABLE_FLUSH_TIME_MAX);
         addValueMetricToSensor(
-            sensor,
-            STATE_STORE_LEVEL_GROUP,
-            streamsMetrics.storeLevelTagMap(
-                metricContext.taskName(),
-                metricContext.metricsScope(),
-                metricContext.storeName()
-            ),
-            MEMTABLE_FLUSH_TIME_MAX,
-            MEMTABLE_FLUSH_TIME_MAX_DESCRIPTION
+                sensor,
+                STATE_STORE_LEVEL_GROUP,
+                streamsMetrics.storeLevelTagMap(
+                        metricContext.taskName(),
+                        metricContext.metricsScope(),
+                        metricContext.storeName()
+                ),
+                MEMTABLE_FLUSH_TIME_MAX,
+                MEMTABLE_FLUSH_TIME_MAX_DESCRIPTION
         );
         return sensor;
     }
@@ -326,16 +329,16 @@ public class RocksDBMetrics {
                                                   final RocksDBMetricContext metricContext) {
         final Sensor sensor = createSensor(streamsMetrics, metricContext, WRITE_STALL_DURATION);
         addAvgAndSumMetricsToSensor(
-            sensor,
-            STATE_STORE_LEVEL_GROUP,
-            streamsMetrics.storeLevelTagMap(
-                metricContext.taskName(),
-                metricContext.metricsScope(),
-                metricContext.storeName()
-            ),
-            WRITE_STALL_DURATION,
-            WRITE_STALL_DURATION_AVG_DESCRIPTION,
-            WRITE_STALL_DURATION_TOTAL_DESCRIPTION
+                sensor,
+                STATE_STORE_LEVEL_GROUP,
+                streamsMetrics.storeLevelTagMap(
+                        metricContext.taskName(),
+                        metricContext.metricsScope(),
+                        metricContext.storeName()
+                ),
+                WRITE_STALL_DURATION,
+                WRITE_STALL_DURATION_AVG_DESCRIPTION,
+                WRITE_STALL_DURATION_TOTAL_DESCRIPTION
         );
         return sensor;
     }
@@ -344,15 +347,15 @@ public class RocksDBMetrics {
                                                       final RocksDBMetricContext metricContext) {
         final Sensor sensor = createSensor(streamsMetrics, metricContext, BLOCK_CACHE_DATA_HIT_RATIO);
         addValueMetricToSensor(
-            sensor,
-            STATE_STORE_LEVEL_GROUP,
-            streamsMetrics.storeLevelTagMap(
-                metricContext.taskName(),
-                metricContext.metricsScope(),
-                metricContext.storeName()
-            ),
-            BLOCK_CACHE_DATA_HIT_RATIO,
-            BLOCK_CACHE_DATA_HIT_RATIO_DESCRIPTION
+                sensor,
+                STATE_STORE_LEVEL_GROUP,
+                streamsMetrics.storeLevelTagMap(
+                        metricContext.taskName(),
+                        metricContext.metricsScope(),
+                        metricContext.storeName()
+                ),
+                BLOCK_CACHE_DATA_HIT_RATIO,
+                BLOCK_CACHE_DATA_HIT_RATIO_DESCRIPTION
         );
         return sensor;
     }
@@ -361,15 +364,15 @@ public class RocksDBMetrics {
                                                        final RocksDBMetricContext metricContext) {
         final Sensor sensor = createSensor(streamsMetrics, metricContext, BLOCK_CACHE_INDEX_HIT_RATIO);
         addValueMetricToSensor(
-            sensor,
-            STATE_STORE_LEVEL_GROUP,
-            streamsMetrics.storeLevelTagMap(
-                metricContext.taskName(),
-                metricContext.metricsScope(),
-                metricContext.storeName()
-            ),
-            BLOCK_CACHE_INDEX_HIT_RATIO,
-            BLOCK_CACHE_INDEX_HIT_RATIO_DESCRIPTION
+                sensor,
+                STATE_STORE_LEVEL_GROUP,
+                streamsMetrics.storeLevelTagMap(
+                        metricContext.taskName(),
+                        metricContext.metricsScope(),
+                        metricContext.storeName()
+                ),
+                BLOCK_CACHE_INDEX_HIT_RATIO,
+                BLOCK_CACHE_INDEX_HIT_RATIO_DESCRIPTION
         );
         return sensor;
     }
@@ -378,15 +381,15 @@ public class RocksDBMetrics {
                                                         final RocksDBMetricContext metricContext) {
         final Sensor sensor = createSensor(streamsMetrics, metricContext, BLOCK_CACHE_FILTER_HIT_RATIO);
         addValueMetricToSensor(
-            sensor,
-            STATE_STORE_LEVEL_GROUP,
-            streamsMetrics.storeLevelTagMap(
-                metricContext.taskName(),
-                metricContext.metricsScope(),
-                metricContext.storeName()
-            ),
-            BLOCK_CACHE_FILTER_HIT_RATIO,
-            BLOCK_CACHE_FILTER_HIT_RATIO_DESCRIPTION
+                sensor,
+                STATE_STORE_LEVEL_GROUP,
+                streamsMetrics.storeLevelTagMap(
+                        metricContext.taskName(),
+                        metricContext.metricsScope(),
+                        metricContext.storeName()
+                ),
+                BLOCK_CACHE_FILTER_HIT_RATIO,
+                BLOCK_CACHE_FILTER_HIT_RATIO_DESCRIPTION
         );
         return sensor;
     }
@@ -395,15 +398,15 @@ public class RocksDBMetrics {
                                                          final RocksDBMetricContext metricContext) {
         final Sensor sensor = createSensor(streamsMetrics, metricContext, BYTES_READ_DURING_COMPACTION);
         addRateOfSumMetricToSensor(
-            sensor,
-            STATE_STORE_LEVEL_GROUP,
-            streamsMetrics.storeLevelTagMap(
-                metricContext.taskName(),
-                metricContext.metricsScope(),
-                metricContext.storeName()
-            ),
-            BYTES_READ_DURING_COMPACTION,
-            BYTES_READ_DURING_COMPACTION_DESCRIPTION
+                sensor,
+                STATE_STORE_LEVEL_GROUP,
+                streamsMetrics.storeLevelTagMap(
+                        metricContext.taskName(),
+                        metricContext.metricsScope(),
+                        metricContext.storeName()
+                ),
+                BYTES_READ_DURING_COMPACTION,
+                BYTES_READ_DURING_COMPACTION_DESCRIPTION
         );
         return sensor;
     }
@@ -412,15 +415,15 @@ public class RocksDBMetrics {
                                                             final RocksDBMetricContext metricContext) {
         final Sensor sensor = createSensor(streamsMetrics, metricContext, BYTES_WRITTEN_DURING_COMPACTION);
         addRateOfSumMetricToSensor(
-            sensor,
-            STATE_STORE_LEVEL_GROUP,
-            streamsMetrics.storeLevelTagMap(
-                metricContext.taskName(),
-                metricContext.metricsScope(),
-                metricContext.storeName()
-            ),
-            BYTES_WRITTEN_DURING_COMPACTION,
-            BYTES_WRITTEN_DURING_COMPACTION_DESCRIPTION
+                sensor,
+                STATE_STORE_LEVEL_GROUP,
+                streamsMetrics.storeLevelTagMap(
+                        metricContext.taskName(),
+                        metricContext.metricsScope(),
+                        metricContext.storeName()
+                ),
+                BYTES_WRITTEN_DURING_COMPACTION,
+                BYTES_WRITTEN_DURING_COMPACTION_DESCRIPTION
         );
         return sensor;
     }
@@ -429,15 +432,15 @@ public class RocksDBMetrics {
                                                  final RocksDBMetricContext metricContext) {
         final Sensor sensor = createSensor(streamsMetrics, metricContext, COMPACTION_TIME_AVG);
         addValueMetricToSensor(
-            sensor,
-            STATE_STORE_LEVEL_GROUP,
-            streamsMetrics.storeLevelTagMap(
-                metricContext.taskName(),
-                metricContext.metricsScope(),
-                metricContext.storeName()
-            ),
-            COMPACTION_TIME_AVG,
-            COMPACTION_TIME_AVG_DESCRIPTION
+                sensor,
+                STATE_STORE_LEVEL_GROUP,
+                streamsMetrics.storeLevelTagMap(
+                        metricContext.taskName(),
+                        metricContext.metricsScope(),
+                        metricContext.storeName()
+                ),
+                COMPACTION_TIME_AVG,
+                COMPACTION_TIME_AVG_DESCRIPTION
         );
         return sensor;
     }
@@ -446,15 +449,15 @@ public class RocksDBMetrics {
                                                  final RocksDBMetricContext metricContext) {
         final Sensor sensor = createSensor(streamsMetrics, metricContext, COMPACTION_TIME_MIN);
         addValueMetricToSensor(
-            sensor,
-            STATE_STORE_LEVEL_GROUP,
-            streamsMetrics.storeLevelTagMap(
-                metricContext.taskName(),
-                metricContext.metricsScope(),
-                metricContext.storeName()
-            ),
-            COMPACTION_TIME_MIN,
-            COMPACTION_TIME_MIN_DESCRIPTION
+                sensor,
+                STATE_STORE_LEVEL_GROUP,
+                streamsMetrics.storeLevelTagMap(
+                        metricContext.taskName(),
+                        metricContext.metricsScope(),
+                        metricContext.storeName()
+                ),
+                COMPACTION_TIME_MIN,
+                COMPACTION_TIME_MIN_DESCRIPTION
         );
         return sensor;
     }
@@ -463,15 +466,15 @@ public class RocksDBMetrics {
                                                  final RocksDBMetricContext metricContext) {
         final Sensor sensor = createSensor(streamsMetrics, metricContext, COMPACTION_TIME_MAX);
         addValueMetricToSensor(
-            sensor,
-            STATE_STORE_LEVEL_GROUP,
-            streamsMetrics.storeLevelTagMap(
-                metricContext.taskName(),
-                metricContext.metricsScope(),
-                metricContext.storeName()
-            ),
-            COMPACTION_TIME_MAX,
-            COMPACTION_TIME_MAX_DESCRIPTION
+                sensor,
+                STATE_STORE_LEVEL_GROUP,
+                streamsMetrics.storeLevelTagMap(
+                        metricContext.taskName(),
+                        metricContext.metricsScope(),
+                        metricContext.storeName()
+                ),
+                COMPACTION_TIME_MAX,
+                COMPACTION_TIME_MAX_DESCRIPTION
         );
         return sensor;
     }
@@ -480,16 +483,16 @@ public class RocksDBMetrics {
                                                  final RocksDBMetricContext metricContext) {
         final Sensor sensor = createSensor(streamsMetrics, metricContext, NUMBER_OF_OPEN_FILES);
         addSumMetricToSensor(
-            sensor,
-            STATE_STORE_LEVEL_GROUP,
-            streamsMetrics.storeLevelTagMap(
-                metricContext.taskName(),
-                metricContext.metricsScope(),
-                metricContext.storeName()
-            ),
-            NUMBER_OF_OPEN_FILES,
-            false,
-            NUMBER_OF_OPEN_FILES_DESCRIPTION
+                sensor,
+                STATE_STORE_LEVEL_GROUP,
+                streamsMetrics.storeLevelTagMap(
+                        metricContext.taskName(),
+                        metricContext.metricsScope(),
+                        metricContext.storeName()
+                ),
+                NUMBER_OF_OPEN_FILES,
+                false,
+                NUMBER_OF_OPEN_FILES_DESCRIPTION
         );
         return sensor;
     }
@@ -498,15 +501,15 @@ public class RocksDBMetrics {
                                                   final RocksDBMetricContext metricContext) {
         final Sensor sensor = createSensor(streamsMetrics, metricContext, NUMBER_OF_FILE_ERRORS);
         addSumMetricToSensor(
-            sensor,
-            STATE_STORE_LEVEL_GROUP,
-            streamsMetrics.storeLevelTagMap(
-                metricContext.taskName(),
-                metricContext.metricsScope(),
-                metricContext.storeName()
-            ),
-            NUMBER_OF_FILE_ERRORS,
-            NUMBER_OF_FILE_ERRORS_DESCRIPTION
+                sensor,
+                STATE_STORE_LEVEL_GROUP,
+                streamsMetrics.storeLevelTagMap(
+                        metricContext.taskName(),
+                        metricContext.metricsScope(),
+                        metricContext.storeName()
+                ),
+                NUMBER_OF_FILE_ERRORS,
+                NUMBER_OF_FILE_ERRORS_DESCRIPTION
         );
         return sensor;
     }
@@ -515,11 +518,11 @@ public class RocksDBMetrics {
                                                          final RocksDBMetricContext metricContext,
                                                          final Gauge<BigInteger> valueProvider) {
         addMutableMetric(
-            streamsMetrics,
-            metricContext,
-            valueProvider,
-            NUMBER_OF_ENTRIES_ACTIVE_MEMTABLE,
-            NUMBER_OF_ENTRIES_ACTIVE_MEMTABLE_DESCRIPTION
+                streamsMetrics,
+                metricContext,
+                valueProvider,
+                NUMBER_OF_ENTRIES_ACTIVE_MEMTABLE,
+                NUMBER_OF_ENTRIES_ACTIVE_MEMTABLE_DESCRIPTION
         );
     }
 
@@ -527,11 +530,11 @@ public class RocksDBMetrics {
                                                        final RocksDBMetricContext metricContext,
                                                        final Gauge<BigInteger> valueProvider) {
         addMutableMetric(
-            streamsMetrics,
-            metricContext,
-            valueProvider,
-            NUMBER_OF_ENTRIES_IMMUTABLE_MEMTABLES,
-            NUMBER_OF_ENTRIES_IMMUTABLE_MEMTABLES_DESCRIPTION
+                streamsMetrics,
+                metricContext,
+                valueProvider,
+                NUMBER_OF_ENTRIES_IMMUTABLE_MEMTABLES,
+                NUMBER_OF_ENTRIES_IMMUTABLE_MEMTABLES_DESCRIPTION
         );
     }
 
@@ -539,11 +542,11 @@ public class RocksDBMetrics {
                                                        final RocksDBMetricContext metricContext,
                                                        final Gauge<BigInteger> valueProvider) {
         addMutableMetric(
-            streamsMetrics,
-            metricContext,
-            valueProvider,
-            NUMBER_OF_DELETES_IMMUTABLE_MEMTABLES,
-            NUMBER_OF_DELETES_IMMUTABLE_MEMTABLES_DESCRIPTION
+                streamsMetrics,
+                metricContext,
+                valueProvider,
+                NUMBER_OF_DELETES_IMMUTABLE_MEMTABLES,
+                NUMBER_OF_DELETES_IMMUTABLE_MEMTABLES_DESCRIPTION
         );
     }
 
@@ -551,11 +554,11 @@ public class RocksDBMetrics {
                                                          final RocksDBMetricContext metricContext,
                                                          final Gauge<BigInteger> valueProvider) {
         addMutableMetric(
-            streamsMetrics,
-            metricContext,
-            valueProvider,
-            NUMBER_OF_DELETES_ACTIVE_MEMTABLE,
-            NUMBER_OF_DELETES_ACTIVE_MEMTABLES_DESCRIPTION
+                streamsMetrics,
+                metricContext,
+                valueProvider,
+                NUMBER_OF_DELETES_ACTIVE_MEMTABLE,
+                NUMBER_OF_DELETES_ACTIVE_MEMTABLES_DESCRIPTION
         );
     }
 
@@ -563,11 +566,11 @@ public class RocksDBMetrics {
                                                      final RocksDBMetricContext metricContext,
                                                      final Gauge<BigInteger> valueProvider) {
         addMutableMetric(
-            streamsMetrics,
-            metricContext,
-            valueProvider,
-            NUMBER_OF_IMMUTABLE_MEMTABLES,
-            NUMBER_OF_IMMUTABLE_MEMTABLES_DESCRIPTION
+                streamsMetrics,
+                metricContext,
+                valueProvider,
+                NUMBER_OF_IMMUTABLE_MEMTABLES,
+                NUMBER_OF_IMMUTABLE_MEMTABLES_DESCRIPTION
         );
     }
 
@@ -575,11 +578,11 @@ public class RocksDBMetrics {
                                                 final RocksDBMetricContext metricContext,
                                                 final Gauge<BigInteger> valueProvider) {
         addMutableMetric(
-            streamsMetrics,
-            metricContext,
-            valueProvider,
-            CURRENT_SIZE_OF_ACTIVE_MEMTABLE,
-            CURRENT_SIZE_OF_ACTIVE_MEMTABLE_DESCRIPTION
+                streamsMetrics,
+                metricContext,
+                valueProvider,
+                CURRENT_SIZE_OF_ACTIVE_MEMTABLE,
+                CURRENT_SIZE_OF_ACTIVE_MEMTABLE_DESCRIPTION
         );
     }
 
@@ -587,11 +590,11 @@ public class RocksDBMetrics {
                                               final RocksDBMetricContext metricContext,
                                               final Gauge<BigInteger> valueProvider) {
         addMutableMetric(
-            streamsMetrics,
-            metricContext,
-            valueProvider,
-            CURRENT_SIZE_OF_ALL_MEMTABLES,
-            CURRENT_SIZE_OF_ALL_MEMTABLES_DESCRIPTION
+                streamsMetrics,
+                metricContext,
+                valueProvider,
+                CURRENT_SIZE_OF_ALL_MEMTABLES,
+                CURRENT_SIZE_OF_ALL_MEMTABLES_DESCRIPTION
         );
     }
 
@@ -599,11 +602,11 @@ public class RocksDBMetrics {
                                            final RocksDBMetricContext metricContext,
                                            final Gauge<BigInteger> valueProvider) {
         addMutableMetric(
-            streamsMetrics,
-            metricContext,
-            valueProvider,
-            SIZE_OF_ALL_MEMTABLES,
-            SIZE_OF_ALL_MEMTABLES_DESCRIPTION
+                streamsMetrics,
+                metricContext,
+                valueProvider,
+                SIZE_OF_ALL_MEMTABLES,
+                SIZE_OF_ALL_MEMTABLES_DESCRIPTION
         );
     }
 
@@ -611,11 +614,11 @@ public class RocksDBMetrics {
                                                final RocksDBMetricContext metricContext,
                                                final Gauge<BigInteger> valueProvider) {
         addMutableMetric(
-            streamsMetrics,
-            metricContext,
-            valueProvider,
-            MEMTABLE_FLUSH_PENDING,
-            MEMTABLE_FLUSH_PENDING_DESCRIPTION
+                streamsMetrics,
+                metricContext,
+                valueProvider,
+                MEMTABLE_FLUSH_PENDING,
+                MEMTABLE_FLUSH_PENDING_DESCRIPTION
         );
     }
 
@@ -623,11 +626,11 @@ public class RocksDBMetrics {
                                                   final RocksDBMetricContext metricContext,
                                                   final Gauge<BigInteger> valueProvider) {
         addMutableMetric(
-            streamsMetrics,
-            metricContext,
-            valueProvider,
-            NUMBER_OF_RUNNING_FLUSHES,
-            NUMBER_OF_RUNNING_FLUSHES_DESCRIPTION
+                streamsMetrics,
+                metricContext,
+                valueProvider,
+                NUMBER_OF_RUNNING_FLUSHES,
+                NUMBER_OF_RUNNING_FLUSHES_DESCRIPTION
         );
     }
 
@@ -635,11 +638,11 @@ public class RocksDBMetrics {
                                                   final RocksDBMetricContext metricContext,
                                                   final Gauge<BigInteger> valueProvider) {
         addMutableMetric(
-            streamsMetrics,
-            metricContext,
-            valueProvider,
-            COMPACTION_PENDING,
-            COMPACTION_PENDING_DESCRIPTION
+                streamsMetrics,
+                metricContext,
+                valueProvider,
+                COMPACTION_PENDING,
+                COMPACTION_PENDING_DESCRIPTION
         );
     }
 
@@ -647,11 +650,11 @@ public class RocksDBMetrics {
                                                       final RocksDBMetricContext metricContext,
                                                       final Gauge<BigInteger> valueProvider) {
         addMutableMetric(
-            streamsMetrics,
-            metricContext,
-            valueProvider,
-            NUMBER_OF_RUNNING_COMPACTIONS,
-            NUMBER_OF_RUNNING_COMPACTIONS_DESCRIPTION
+                streamsMetrics,
+                metricContext,
+                valueProvider,
+                NUMBER_OF_RUNNING_COMPACTIONS,
+                NUMBER_OF_RUNNING_COMPACTIONS_DESCRIPTION
         );
     }
 
@@ -659,11 +662,11 @@ public class RocksDBMetrics {
                                                                final RocksDBMetricContext metricContext,
                                                                final Gauge<BigInteger> valueProvider) {
         addMutableMetric(
-            streamsMetrics,
-            metricContext,
-            valueProvider,
-            ESTIMATED_BYTES_OF_PENDING_COMPACTION,
-            ESTIMATED_BYTES_OF_PENDING_COMPACTION_DESCRIPTION
+                streamsMetrics,
+                metricContext,
+                valueProvider,
+                ESTIMATED_BYTES_OF_PENDING_COMPACTION,
+                ESTIMATED_BYTES_OF_PENDING_COMPACTION_DESCRIPTION
         );
     }
 
@@ -671,11 +674,11 @@ public class RocksDBMetrics {
                                                   final RocksDBMetricContext metricContext,
                                                   final Gauge<BigInteger> valueProvider) {
         addMutableMetric(
-            streamsMetrics,
-            metricContext,
-            valueProvider,
-            TOTAL_SST_FILES_SIZE,
-            TOTAL_SST_FILE_SIZE_DESCRIPTION
+                streamsMetrics,
+                metricContext,
+                valueProvider,
+                TOTAL_SST_FILES_SIZE,
+                TOTAL_SST_FILE_SIZE_DESCRIPTION
         );
     }
 
@@ -683,11 +686,11 @@ public class RocksDBMetrics {
                                                  final RocksDBMetricContext metricContext,
                                                  final Gauge<BigInteger> valueProvider) {
         addMutableMetric(
-            streamsMetrics,
-            metricContext,
-            valueProvider,
-            LIVE_SST_FILES_SIZE,
-            LIVE_SST_FILES_SIZE_DESCRIPTION
+                streamsMetrics,
+                metricContext,
+                valueProvider,
+                LIVE_SST_FILES_SIZE,
+                LIVE_SST_FILES_SIZE_DESCRIPTION
         );
     }
 
@@ -695,11 +698,11 @@ public class RocksDBMetrics {
                                                final RocksDBMetricContext metricContext,
                                                final Gauge<BigInteger> valueProvider) {
         addMutableMetric(
-            streamsMetrics,
-            metricContext,
-            valueProvider,
-            NUMBER_OF_LIVE_VERSIONS,
-            NUMBER_OF_LIVE_VERSIONS_DESCRIPTION
+                streamsMetrics,
+                metricContext,
+                valueProvider,
+                NUMBER_OF_LIVE_VERSIONS,
+                NUMBER_OF_LIVE_VERSIONS_DESCRIPTION
         );
     }
 
@@ -707,11 +710,11 @@ public class RocksDBMetrics {
                                                    final RocksDBMetricContext metricContext,
                                                    final Gauge<BigInteger> valueProvider) {
         addMutableMetric(
-            streamsMetrics,
-            metricContext,
-            valueProvider,
-            CAPACITY_OF_BLOCK_CACHE,
-            CAPACITY_OF_BLOCK_CACHE_DESCRIPTION
+                streamsMetrics,
+                metricContext,
+                valueProvider,
+                CAPACITY_OF_BLOCK_CACHE,
+                CAPACITY_OF_BLOCK_CACHE_DESCRIPTION
         );
     }
 
@@ -719,11 +722,11 @@ public class RocksDBMetrics {
                                                 final RocksDBMetricContext metricContext,
                                                 final Gauge<BigInteger> valueProvider) {
         addMutableMetric(
-            streamsMetrics,
-            metricContext,
-            valueProvider,
-            USAGE_OF_BLOCK_CACHE,
-            USAGE_OF_BLOCK_CACHE_DESCRIPTION
+                streamsMetrics,
+                metricContext,
+                valueProvider,
+                USAGE_OF_BLOCK_CACHE,
+                USAGE_OF_BLOCK_CACHE_DESCRIPTION
         );
     }
 
@@ -731,11 +734,11 @@ public class RocksDBMetrics {
                                                       final RocksDBMetricContext metricContext,
                                                       final Gauge<BigInteger> valueProvider) {
         addMutableMetric(
-            streamsMetrics,
-            metricContext,
-            valueProvider,
-            PINNED_USAGE_OF_BLOCK_CACHE,
-            PINNED_USAGE_OF_BLOCK_CACHE_DESCRIPTION
+                streamsMetrics,
+                metricContext,
+                valueProvider,
+                PINNED_USAGE_OF_BLOCK_CACHE,
+                PINNED_USAGE_OF_BLOCK_CACHE_DESCRIPTION
         );
     }
 
@@ -743,11 +746,11 @@ public class RocksDBMetrics {
                                                 final RocksDBMetricContext metricContext,
                                                 final Gauge<BigInteger> valueProvider) {
         addMutableMetric(
-            streamsMetrics,
-            metricContext,
-            valueProvider,
-            ESTIMATED_NUMBER_OF_KEYS,
-            ESTIMATED_NUMBER_OF_KEYS_DESCRIPTION
+                streamsMetrics,
+                metricContext,
+                valueProvider,
+                ESTIMATED_NUMBER_OF_KEYS,
+                ESTIMATED_NUMBER_OF_KEYS_DESCRIPTION
         );
     }
 
@@ -755,11 +758,11 @@ public class RocksDBMetrics {
                                                         final RocksDBMetricContext metricContext,
                                                         final Gauge<BigInteger> valueProvider) {
         addMutableMetric(
-            streamsMetrics,
-            metricContext,
-            valueProvider,
-            ESTIMATED_MEMORY_OF_TABLE_READERS,
-            ESTIMATED_MEMORY_OF_TABLE_READERS_DESCRIPTION
+                streamsMetrics,
+                metricContext,
+                valueProvider,
+                ESTIMATED_MEMORY_OF_TABLE_READERS,
+                ESTIMATED_MEMORY_OF_TABLE_READERS_DESCRIPTION
         );
     }
 
@@ -767,11 +770,11 @@ public class RocksDBMetrics {
                                                  final RocksDBMetricContext metricContext,
                                                  final Gauge<BigInteger> valueProvider) {
         addMutableMetric(
-            streamsMetrics,
-            metricContext,
-            valueProvider,
-            NUMBER_OF_BACKGROUND_ERRORS,
-            TOTAL_NUMBER_OF_BACKGROUND_ERRORS_DESCRIPTION
+                streamsMetrics,
+                metricContext,
+                valueProvider,
+                NUMBER_OF_BACKGROUND_ERRORS,
+                TOTAL_NUMBER_OF_BACKGROUND_ERRORS_DESCRIPTION
         );
     }
 
@@ -781,13 +784,13 @@ public class RocksDBMetrics {
                                          final String name,
                                          final String description) {
         streamsMetrics.addStoreLevelMutableMetric(
-            metricContext.taskName(),
-            metricContext.metricsScope(),
-            metricContext.storeName(),
-            name,
-            description,
-            RecordingLevel.INFO,
-            valueProvider
+                metricContext.taskName(),
+                metricContext.metricsScope(),
+                metricContext.storeName(),
+                name,
+                description,
+                SensorRecordingLevel.INFO,
+                valueProvider
         );
     }
 
@@ -795,9 +798,9 @@ public class RocksDBMetrics {
                                        final RocksDBMetricContext metricContext,
                                        final String sensorName) {
         return streamsMetrics.storeLevelSensor(
-            metricContext.taskName(),
-            metricContext.storeName(),
-            sensorName,
-            RecordingLevel.DEBUG);
+                metricContext.taskName(),
+                metricContext.storeName(),
+                sensorName,
+                SensorRecordingLevel.DEBUG);
     }
 }

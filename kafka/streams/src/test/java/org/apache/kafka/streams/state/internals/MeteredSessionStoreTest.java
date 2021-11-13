@@ -18,12 +18,7 @@
 package org.apache.kafka.streams.state.internals;
 
 import org.apache.kafka.common.MetricName;
-import org.apache.kafka.common.metrics.JmxReporter;
-import org.apache.kafka.common.metrics.KafkaMetric;
-import org.apache.kafka.common.metrics.KafkaMetricsContext;
-import org.apache.kafka.common.metrics.Metrics;
-import org.apache.kafka.common.metrics.MetricsContext;
-import org.apache.kafka.common.metrics.Sensor;
+import org.apache.kafka.common.metrics.*;
 import org.apache.kafka.common.serialization.Deserializer;
 import org.apache.kafka.common.serialization.Serde;
 import org.apache.kafka.common.serialization.Serdes;
@@ -106,28 +101,28 @@ public class MeteredSessionStoreTest {
     private InternalProcessorContext context;
 
     private Map<String, String> tags;
-    
+
     @Before
     public void before() {
         final Time mockTime = new MockTime();
         store = new MeteredSessionStore<>(
-            innerStore,
-            STORE_TYPE,
-            Serdes.String(),
-            Serdes.String(),
-            mockTime
+                innerStore,
+                STORE_TYPE,
+                Serdes.String(),
+                Serdes.String(),
+                mockTime
         );
-        metrics.config().recordLevel(Sensor.RecordingLevel.DEBUG);
+        metrics.config().recordLevel(SensorRecordingLevel.DEBUG);
         expect(context.applicationId()).andStubReturn(APPLICATION_ID);
         expect(context.metrics())
-            .andStubReturn(new StreamsMetricsImpl(metrics, "test", StreamsConfig.METRICS_LATEST, mockTime));
+                .andStubReturn(new StreamsMetricsImpl(metrics, "test", StreamsConfig.METRICS_LATEST, mockTime));
         expect(context.taskId()).andStubReturn(taskId);
         expect(context.changelogFor(STORE_NAME)).andStubReturn(CHANGELOG_TOPIC);
         expect(innerStore.name()).andStubReturn(STORE_NAME);
         tags = mkMap(
-            mkEntry(THREAD_ID_TAG_KEY, threadId),
-            mkEntry("task-id", taskId.toString()),
-            mkEntry(STORE_TYPE + "-state-id", STORE_NAME)
+                mkEntry(THREAD_ID_TAG_KEY, threadId),
+                mkEntry("task-id", taskId.toString()),
+                mkEntry(STORE_TYPE + "-state-id", STORE_NAME)
         );
     }
 
@@ -141,11 +136,11 @@ public class MeteredSessionStoreTest {
     public void shouldDelegateDeprecatedInit() {
         final SessionStore<Bytes, byte[]> inner = mock(SessionStore.class);
         final MeteredSessionStore<String, String> outer = new MeteredSessionStore<>(
-            inner,
-            STORE_TYPE,
-            Serdes.String(),
-            Serdes.String(),
-            new MockTime()
+                inner,
+                STORE_TYPE,
+                Serdes.String(),
+                Serdes.String(),
+                new MockTime()
         );
         expect(inner.name()).andStubReturn("store");
         inner.init((ProcessorContext) context, outer);
@@ -159,11 +154,11 @@ public class MeteredSessionStoreTest {
     public void shouldDelegateInit() {
         final SessionStore<Bytes, byte[]> inner = mock(SessionStore.class);
         final MeteredSessionStore<String, String> outer = new MeteredSessionStore<>(
-            inner,
-            STORE_TYPE,
-            Serdes.String(),
-            Serdes.String(),
-            new MockTime()
+                inner,
+                STORE_TYPE,
+                Serdes.String(),
+                Serdes.String(),
+                new MockTime()
         );
         expect(inner.name()).andStubReturn("store");
         inner.init((StateStoreContext) context, outer);
@@ -181,7 +176,7 @@ public class MeteredSessionStoreTest {
     @Test
     public void shouldPassDefaultChangelogTopicNameToStateStoreSerdeIfLoggingDisabled() {
         final String defaultChangelogTopicName =
-            ProcessorStateManager.storeChangelogTopic(APPLICATION_ID, STORE_NAME);
+                ProcessorStateManager.storeChangelogTopic(APPLICATION_ID, STORE_NAME);
         expect(context.changelogFor(STORE_NAME)).andReturn(null);
         doShouldPassChangelogTopicNameToStateStoreSerde(defaultChangelogTopicName);
     }
@@ -201,11 +196,11 @@ public class MeteredSessionStoreTest {
         expect(innerStore.fetchSession(KEY_BYTES, START_TIMESTAMP, END_TIMESTAMP)).andStubReturn(VALUE_BYTES);
         replay(innerStore, context, keySerializer, keySerde, valueDeserializer, valueSerializer, valueSerde);
         store = new MeteredSessionStore<>(
-            innerStore,
-            STORE_TYPE,
-            keySerde,
-            valueSerde,
-            new MockTime()
+                innerStore,
+                STORE_TYPE,
+                keySerde,
+                valueSerde,
+                new MockTime()
         );
         store.init((StateStoreContext) context, store);
 
@@ -224,13 +219,13 @@ public class MeteredSessionStoreTest {
 
         metrics.addReporter(reporter);
         assertTrue(reporter.containsMbean(String.format(
-            "kafka.streams:type=%s,%s=%s,task-id=%s,%s-state-id=%s",
-            STORE_LEVEL_GROUP,
-            THREAD_ID_TAG_KEY,
-            threadId,
-            taskId.toString(),
-            STORE_TYPE,
-            STORE_NAME
+                "kafka.streams:type=%s,%s=%s,task-id=%s,%s-state-id=%s",
+                STORE_LEVEL_GROUP,
+                THREAD_ID_TAG_KEY,
+                threadId,
+                taskId.toString(),
+                STORE_TYPE,
+                STORE_NAME
         )));
     }
 
@@ -271,11 +266,11 @@ public class MeteredSessionStoreTest {
     @Test
     public void shouldBackwardFindSessionsFromStoreAndRecordFetchMetric() {
         expect(innerStore.backwardFindSessions(KEY_BYTES, 0, 0))
-            .andReturn(
-                new KeyValueIteratorStub<>(
-                    Collections.singleton(KeyValue.pair(WINDOWED_KEY_BYTES, VALUE_BYTES)).iterator()
-                )
-            );
+                .andReturn(
+                        new KeyValueIteratorStub<>(
+                                Collections.singleton(KeyValue.pair(WINDOWED_KEY_BYTES, VALUE_BYTES)).iterator()
+                        )
+                );
         init();
 
         final KeyValueIterator<Windowed<String>, String> iterator = store.backwardFindSessions(KEY, 0, 0);
@@ -312,11 +307,11 @@ public class MeteredSessionStoreTest {
     @Test
     public void shouldBackwardFindSessionRangeFromStoreAndRecordFetchMetric() {
         expect(innerStore.backwardFindSessions(KEY_BYTES, KEY_BYTES, 0, 0))
-            .andReturn(
-                new KeyValueIteratorStub<>(
-                    Collections.singleton(KeyValue.pair(WINDOWED_KEY_BYTES, VALUE_BYTES)).iterator()
-                )
-            );
+                .andReturn(
+                        new KeyValueIteratorStub<>(
+                                Collections.singleton(KeyValue.pair(WINDOWED_KEY_BYTES, VALUE_BYTES)).iterator()
+                        )
+                );
         init();
 
         final KeyValueIterator<Windowed<String>, String> iterator = store.backwardFindSessions(KEY, KEY, 0, 0);
@@ -369,11 +364,11 @@ public class MeteredSessionStoreTest {
     @Test
     public void shouldBackwardFetchForKeyAndRecordFetchMetric() {
         expect(innerStore.backwardFetch(KEY_BYTES))
-            .andReturn(
-                new KeyValueIteratorStub<>(
-                    Collections.singleton(KeyValue.pair(WINDOWED_KEY_BYTES, VALUE_BYTES)).iterator()
-                )
-            );
+                .andReturn(
+                        new KeyValueIteratorStub<>(
+                                Collections.singleton(KeyValue.pair(WINDOWED_KEY_BYTES, VALUE_BYTES)).iterator()
+                        )
+                );
         init();
 
         final KeyValueIterator<Windowed<String>, String> iterator = store.backwardFetch(KEY);
@@ -410,11 +405,11 @@ public class MeteredSessionStoreTest {
     @Test
     public void shouldBackwardFetchRangeFromStoreAndRecordFetchMetric() {
         expect(innerStore.backwardFetch(KEY_BYTES, KEY_BYTES))
-            .andReturn(
-                new KeyValueIteratorStub<>(
-                    Collections.singleton(KeyValue.pair(WINDOWED_KEY_BYTES, VALUE_BYTES)).iterator()
-                )
-            );
+                .andReturn(
+                        new KeyValueIteratorStub<>(
+                                Collections.singleton(KeyValue.pair(WINDOWED_KEY_BYTES, VALUE_BYTES)).iterator()
+                        )
+                );
         init();
 
         final KeyValueIterator<Windowed<String>, String> iterator = store.backwardFetch(KEY, KEY);
@@ -542,7 +537,8 @@ public class MeteredSessionStoreTest {
         assertThrows(NullPointerException.class, () -> store.backwardFindSessions("a", null, 0, 0));
     }
 
-    private interface CachedSessionStore extends SessionStore<Bytes, byte[]>, CachedStateStore<byte[], byte[]> { }
+    private interface CachedSessionStore extends SessionStore<Bytes, byte[]>, CachedStateStore<byte[], byte[]> {
+    }
 
     @SuppressWarnings("unchecked")
     @Test
@@ -553,11 +549,11 @@ public class MeteredSessionStoreTest {
         replay(cachedSessionStore);
 
         store = new MeteredSessionStore<>(
-            cachedSessionStore,
-            STORE_TYPE,
-            Serdes.String(),
-            Serdes.String(),
-            new MockTime());
+                cachedSessionStore,
+                STORE_TYPE,
+                Serdes.String(),
+                Serdes.String(),
+                new MockTime());
         assertTrue(store.setFlushListener(null, false));
 
         verify(cachedSessionStore);
@@ -599,9 +595,9 @@ public class MeteredSessionStoreTest {
 
     private List<MetricName> storeMetrics() {
         return metrics.metrics()
-                      .keySet()
-                      .stream()
-                      .filter(name -> name.group().equals(STORE_LEVEL_GROUP) && name.tags().equals(tags))
-                      .collect(Collectors.toList());
+                .keySet()
+                .stream()
+                .filter(name -> name.group().equals(STORE_LEVEL_GROUP) && name.tags().equals(tags))
+                .collect(Collectors.toList());
     }
 }

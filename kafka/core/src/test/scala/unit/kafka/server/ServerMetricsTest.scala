@@ -6,7 +6,7 @@
  * (the "License"); you may not use this file except in compliance with
  * the License.  You may obtain a copy of the License at
  *
- *    http://www.apache.org/licenses/LICENSE-2.0
+ * http://www.apache.org/licenses/LICENSE-2.0
  *
  * Unless required by applicable law or agreed to in writing, software
  * distributed under the License is distributed on an "AS IS" BASIS,
@@ -18,7 +18,7 @@
 package kafka.server
 
 import kafka.utils.TestUtils
-import org.apache.kafka.common.metrics.Sensor
+import org.apache.kafka.common.metrics.SensorRecordingLevel
 import org.junit.jupiter.api.Assertions._
 import org.junit.jupiter.api.Test
 
@@ -26,7 +26,7 @@ class ServerMetricsTest {
 
   @Test
   def testMetricsConfig(): Unit = {
-    val recordingLevels = List(Sensor.RecordingLevel.DEBUG, Sensor.RecordingLevel.INFO)
+    val recordingLevels = List(SensorRecordingLevel.DEBUG, SensorRecordingLevel.INFO)
     val illegalNames = List("IllegalName", "")
     val props = TestUtils.createBrokerConfig(0, "localhost:2818")
 

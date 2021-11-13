@@ -17,6 +17,7 @@
 package org.apache.kafka.common.metrics;
 
 import java.util.function.Supplier;
+
 import org.apache.kafka.common.MetricName;
 import org.apache.kafka.common.metrics.CompoundStat.NamedMeasurable;
 import org.apache.kafka.common.metrics.stats.TokenBucket;
@@ -76,66 +77,11 @@ public final class Sensor {
         }
     }
 
-    public enum RecordingLevel {
-        INFO(0, "INFO"), DEBUG(1, "DEBUG"), TRACE(2, "TRACE");
 
-        private static final RecordingLevel[] ID_TO_TYPE;
-        private static final int MIN_RECORDING_LEVEL_KEY = 0;
-        public static final int MAX_RECORDING_LEVEL_KEY;
-
-        static {
-            int maxRL = -1;
-            for (RecordingLevel level : RecordingLevel.values()) {
-                maxRL = Math.max(maxRL, level.id);
-            }
-            RecordingLevel[] idToName = new RecordingLevel[maxRL + 1];
-            for (RecordingLevel level : RecordingLevel.values()) {
-                idToName[level.id] = level;
-            }
-            ID_TO_TYPE = idToName;
-            MAX_RECORDING_LEVEL_KEY = maxRL;
-        }
-
-        /** an english description of the api--this is for debugging and can change */
-        public final String name;
-
-        /** the permanent and immutable id of an API--this can't change ever */
-        public final short id;
-
-        RecordingLevel(int id, String name) {
-            this.id = (short) id;
-            this.name = name;
-        }
-
-        public static RecordingLevel forId(int id) {
-            if (id < MIN_RECORDING_LEVEL_KEY || id > MAX_RECORDING_LEVEL_KEY)
-                throw new IllegalArgumentException(String.format("Unexpected RecordLevel id `%d`, it should be between `%d` " +
-                    "and `%d` (inclusive)", id, MIN_RECORDING_LEVEL_KEY, MAX_RECORDING_LEVEL_KEY));
-            return ID_TO_TYPE[id];
-        }
-
-        /** Case insensitive lookup by protocol name */
-        public static RecordingLevel forName(String name) {
-            return RecordingLevel.valueOf(name.toUpperCase(Locale.ROOT));
-        }
-
-        public boolean shouldRecord(final int configId) {
-            if (configId == INFO.id) {
-                return this.id == INFO.id;
-            } else if (configId == DEBUG.id) {
-                return this.id == INFO.id || this.id == DEBUG.id;
-            } else if (configId == TRACE.id) {
-                return true;
-            } else {
-                throw new IllegalStateException("Did not recognize recording level " + configId);
-            }
-        }
-    }
-
-    private final RecordingLevel recordingLevel;
+    private final SensorRecordingLevel recordingLevel;
 
     Sensor(Metrics registry, String name, Sensor[] parents, MetricConfig config, Time time,
-           long inactiveSensorExpirationTimeSeconds, RecordingLevel recordingLevel) {
+           long inactiveSensorExpirationTimeSeconds, SensorRecordingLevel recordingLevel) {
         super();
         this.registry = registry;
         this.name = Objects.requireNonNull(name);
@@ -174,7 +120,7 @@ public final class Sensor {
      * @return true if the sensor's record level indicates that the metric will be recorded, false otherwise
      */
     public boolean shouldRecord() {
-        return this.recordingLevel.shouldRecord(config.recordLevel().id);
+        return this.recordingLevel.shouldRecord(config.recordLevel());
     }
 
     /**
@@ -188,9 +134,10 @@ public final class Sensor {
 
     /**
      * Record a value with this sensor
+     *
      * @param value The value to record
      * @throws QuotaViolationException if recording this value moves a metric beyond its configured maximum or minimum
-     *         bound
+     *                                 bound
      */
     public void record(double value) {
         if (shouldRecord()) {
@@ -201,10 +148,11 @@ public final class Sensor {
     /**
      * Record a value at a known time. This method is slightly faster than {@link #record(double)} since it will reuse
      * the time stamp.
-     * @param value The value we are recording
+     *
+     * @param value  The value we are recording
      * @param timeMs The current POSIX time in milliseconds
      * @throws QuotaViolationException if recording this value moves a metric beyond its configured maximum or minimum
-     *         bound
+     *                                 bound
      */
     public void record(double value, long timeMs) {
         if (shouldRecord()) {
@@ -215,11 +163,12 @@ public final class Sensor {
     /**
      * Record a value at a known time. This method is slightly faster than {@link #record(double)} since it will reuse
      * the time stamp.
-     * @param value The value we are recording
-     * @param timeMs The current POSIX time in milliseconds
+     *
+     * @param value       The value we are recording
+     * @param timeMs      The current POSIX time in milliseconds
      * @param checkQuotas Indicate if quota must be enforced or not
      * @throws QuotaViolationException if recording this value moves a metric beyond its configured maximum or minimum
-     *         bound
+     *                                 bound
      */
     public void record(double value, long timeMs, boolean checkQuotas) {
         if (shouldRecord()) {
@@ -273,6 +222,7 @@ public final class Sensor {
 
     /**
      * Register a compound statistic with this sensor with no config override
+     *
      * @param stat The stat to register
      * @return true if stat is added to sensor, false if sensor is expired
      */
@@ -282,9 +232,10 @@ public final class Sensor {
 
     /**
      * Register a compound statistic with this sensor which yields multiple measurable quantities (like a histogram)
-     * @param stat The stat to register
+     *
+     * @param stat   The stat to register
      * @param config The configuration for this stat. If null then the stat will use the default configuration for this
-     *        sensor.
+     *               sensor.
      * @return true if stat is added to sensor, false if sensor is expired
      */
     public synchronized boolean add(CompoundStat stat, MetricConfig config) {
@@ -306,8 +257,9 @@ public final class Sensor {
 
     /**
      * Register a metric with this sensor
+     *
      * @param metricName The name of the metric
-     * @param stat The statistic to keep
+     * @param stat       The statistic to keep
      * @return true if metric is added to sensor, false if sensor is expired
      */
     public boolean add(MetricName metricName, MeasurableStat stat) {
@@ -330,11 +282,11 @@ public final class Sensor {
         } else {
             final MetricConfig statConfig = config == null ? this.config : config;
             final KafkaMetric metric = new KafkaMetric(
-                metricLock(),
-                Objects.requireNonNull(metricName),
-                Objects.requireNonNull(stat),
-                statConfig,
-                time
+                    metricLock(),
+                    Objects.requireNonNull(metricName),
+                    Objects.requireNonNull(stat),
+                    statConfig,
+                    time
             );
             registry.registerMetric(metric);
             metrics.put(metric.metricName(), metric);
@@ -354,7 +306,7 @@ public final class Sensor {
 
     /**
      * Return true if the Sensor is eligible for removal due to inactivity.
-     *        false otherwise
+     * false otherwise
      */
     public boolean hasExpired() {
         return (time.milliseconds() - this.lastRecordTime) > this.inactiveSensorExpirationTimeMs;

@@ -25,6 +25,7 @@ import org.apache.kafka.common.config.ConfigDef.Type;
 import org.apache.kafka.common.config.ConfigException;
 import org.apache.kafka.common.config.internals.BrokerSecurityConfigs;
 import org.apache.kafka.common.metrics.Sensor;
+import org.apache.kafka.common.metrics.SensorRecordingLevel;
 import org.apache.kafka.common.utils.Utils;
 import org.apache.kafka.connect.storage.SimpleHeaderConverter;
 import org.slf4j.Logger;
@@ -143,8 +144,8 @@ public class WorkerConfig extends AbstractConfig {
 
     public static final String ACCESS_CONTROL_ALLOW_METHODS_CONFIG = "access.control.allow.methods";
     protected static final String ACCESS_CONTROL_ALLOW_METHODS_DOC =
-        "Sets the methods supported for cross origin requests by setting the Access-Control-Allow-Methods header. "
-        + "The default value of the Access-Control-Allow-Methods header allows cross origin requests for GET, POST and HEAD.";
+            "Sets the methods supported for cross origin requests by setting the Access-Control-Allow-Methods header. "
+                    + "The default value of the Access-Control-Allow-Methods header allows cross origin requests for GET, POST and HEAD.";
     protected static final String ACCESS_CONTROL_ALLOW_METHODS_DEFAULT = "";
 
     public static final String ADMIN_LISTENERS_CONFIG = "admin.listeners";
@@ -164,7 +165,7 @@ public class WorkerConfig extends AbstractConfig {
             + "plugins and their dependencies\n"
             + "Note: symlinks will be followed to discover dependencies or plugins.\n"
             + "Examples: plugin.path=/usr/local/share/java,/usr/local/share/kafka/plugins,"
-            + "/opt/connectors\n" 
+            + "/opt/connectors\n"
             + "Do not use config provider variables in this property, since the raw path is used "
             + "by the worker's scanner before config providers are initialized and used to "
             + "replace variables.";
@@ -172,23 +173,23 @@ public class WorkerConfig extends AbstractConfig {
     public static final String CONFIG_PROVIDERS_CONFIG = "config.providers";
     protected static final String CONFIG_PROVIDERS_DOC =
             "Comma-separated names of <code>ConfigProvider</code> classes, loaded and used "
-            + "in the order specified. Implementing the interface  "
-            + "<code>ConfigProvider</code> allows you to replace variable references in connector configurations, "
-            + "such as for externalized secrets. ";
+                    + "in the order specified. Implementing the interface  "
+                    + "<code>ConfigProvider</code> allows you to replace variable references in connector configurations, "
+                    + "such as for externalized secrets. ";
 
     public static final String REST_EXTENSION_CLASSES_CONFIG = "rest.extension.classes";
     protected static final String REST_EXTENSION_CLASSES_DOC =
             "Comma-separated names of <code>ConnectRestExtension</code> classes, loaded and called "
-            + "in the order specified. Implementing the interface  "
-            + "<code>ConnectRestExtension</code> allows you to inject into Connect's REST API user defined resources like filters. "
-            + "Typically used to add custom capability like logging, security, etc. ";
+                    + "in the order specified. Implementing the interface  "
+                    + "<code>ConnectRestExtension</code> allows you to inject into Connect's REST API user defined resources like filters. "
+                    + "Typically used to add custom capability like logging, security, etc. ";
 
     public static final String CONNECTOR_CLIENT_POLICY_CLASS_CONFIG = "connector.client.config.override.policy";
     public static final String CONNECTOR_CLIENT_POLICY_CLASS_DOC =
-        "Class name or alias of implementation of <code>ConnectorClientConfigOverridePolicy</code>. Defines what client configurations can be "
-        + "overriden by the connector. The default implementation is `All`, meaning connector configurations can override all client properties. "
-        + "The other possible policies in the framework include `None` to disallow connectors from overriding client properties, "
-        + "and `Principal` to allow connectors to override only client principals.";
+            "Class name or alias of implementation of <code>ConnectorClientConfigOverridePolicy</code>. Defines what client configurations can be "
+                    + "overriden by the connector. The default implementation is `All`, meaning connector configurations can override all client properties. "
+                    + "The other possible policies in the framework include `None` to disallow connectors from overriding client properties, "
+                    + "and `Principal` to allow connectors to override only client principals.";
     public static final String CONNECTOR_CLIENT_POLICY_CLASS_DEFAULT = "All";
 
 
@@ -225,6 +226,7 @@ public class WorkerConfig extends AbstractConfig {
     /**
      * Get a basic ConfigDef for a WorkerConfig. This includes all the common settings. Subclasses can use this to
      * bootstrap their own ConfigDef.
+     *
      * @return a ConfigDef with all the common options specified
      */
     protected static ConfigDef baseConfigDef() {
@@ -235,7 +237,7 @@ public class WorkerConfig extends AbstractConfig {
                         Type.STRING,
                         ClientDnsLookup.USE_ALL_DNS_IPS.toString(),
                         in(ClientDnsLookup.USE_ALL_DNS_IPS.toString(),
-                           ClientDnsLookup.RESOLVE_CANONICAL_BOOTSTRAP_SERVERS_ONLY.toString()),
+                                ClientDnsLookup.RESOLVE_CANONICAL_BOOTSTRAP_SERVERS_ONLY.toString()),
                         Importance.MEDIUM,
                         CLIENT_DNS_LOOKUP_DOC)
                 .define(KEY_CONVERTER_CLASS_CONFIG, Type.CLASS,
@@ -250,9 +252,9 @@ public class WorkerConfig extends AbstractConfig {
                 .define(OFFSET_COMMIT_TIMEOUT_MS_CONFIG, Type.LONG, OFFSET_COMMIT_TIMEOUT_MS_DEFAULT,
                         Importance.LOW, OFFSET_COMMIT_TIMEOUT_MS_DOC)
                 .define(LISTENERS_CONFIG, Type.LIST, LISTENERS_DEFAULT, new ListenersValidator(), Importance.LOW, LISTENERS_DOC)
-                .define(REST_ADVERTISED_HOST_NAME_CONFIG, Type.STRING,  null, Importance.LOW, REST_ADVERTISED_HOST_NAME_DOC)
-                .define(REST_ADVERTISED_PORT_CONFIG, Type.INT,  null, Importance.LOW, REST_ADVERTISED_PORT_DOC)
-                .define(REST_ADVERTISED_LISTENER_CONFIG, Type.STRING,  null, Importance.LOW, REST_ADVERTISED_LISTENER_DOC)
+                .define(REST_ADVERTISED_HOST_NAME_CONFIG, Type.STRING, null, Importance.LOW, REST_ADVERTISED_HOST_NAME_DOC)
+                .define(REST_ADVERTISED_PORT_CONFIG, Type.INT, null, Importance.LOW, REST_ADVERTISED_PORT_DOC)
+                .define(REST_ADVERTISED_LISTENER_CONFIG, Type.STRING, null, Importance.LOW, REST_ADVERTISED_LISTENER_DOC)
                 .define(ACCESS_CONTROL_ALLOW_ORIGIN_CONFIG, Type.STRING,
                         ACCESS_CONTROL_ALLOW_ORIGIN_DEFAULT, Importance.LOW,
                         ACCESS_CONTROL_ALLOW_ORIGIN_DOC)
@@ -271,8 +273,8 @@ public class WorkerConfig extends AbstractConfig {
                         2, atLeast(1), Importance.LOW,
                         CommonClientConfigs.METRICS_NUM_SAMPLES_DOC)
                 .define(METRICS_RECORDING_LEVEL_CONFIG, Type.STRING,
-                        Sensor.RecordingLevel.INFO.toString(),
-                        in(Sensor.RecordingLevel.INFO.toString(), Sensor.RecordingLevel.DEBUG.toString()),
+                        SensorRecordingLevel.INFO.toString(),
+                        in(SensorRecordingLevel.INFO.toString(), SensorRecordingLevel.DEBUG.toString()),
                         Importance.LOW,
                         CommonClientConfigs.METRICS_RECORDING_LEVEL_DOC)
                 .define(METRIC_REPORTER_CLASSES_CONFIG, Type.LIST,
@@ -332,12 +334,12 @@ public class WorkerConfig extends AbstractConfig {
         String transformedPluginPath = Objects.toString(originals().get(PLUGIN_PATH_CONFIG));
         if (!Objects.equals(rawPluginPath, transformedPluginPath)) {
             log.warn(
-                "Variables cannot be used in the 'plugin.path' property, since the property is "
-                + "used by plugin scanning before the config providers that replace the " 
-                + "variables are initialized. The raw value '{}' was used for plugin scanning, as " 
-                + "opposed to the transformed value '{}', and this may cause unexpected results.",
-                rawPluginPath,
-                transformedPluginPath
+                    "Variables cannot be used in the 'plugin.path' property, since the property is "
+                            + "used by plugin scanning before the config providers that replace the "
+                            + "variables are initialized. The raw value '{}' was used for plugin scanning, as "
+                            + "opposed to the transformed value '{}', and this may cause unexpected results.",
+                    rawPluginPath,
+                    transformedPluginPath
             );
         }
     }
@@ -358,8 +360,8 @@ public class WorkerConfig extends AbstractConfig {
     public static List<String> pluginLocations(Map<String, String> props) {
         String locationList = props.get(WorkerConfig.PLUGIN_PATH_CONFIG);
         return locationList == null
-                         ? new ArrayList<>()
-                         : Arrays.asList(COMMA_WITH_WHITESPACE.split(locationList.trim(), -1));
+                ? new ArrayList<>()
+                : Arrays.asList(COMMA_WITH_WHITESPACE.split(locationList.trim(), -1));
     }
 
     public WorkerConfig(ConfigDef definition, Map<String, String> props) {

@@ -18,6 +18,7 @@ package org.apache.kafka.streams.integration;
 
 import org.apache.kafka.common.Metric;
 import org.apache.kafka.common.metrics.Sensor;
+import org.apache.kafka.common.metrics.SensorRecordingLevel;
 import org.apache.kafka.common.serialization.IntegerSerializer;
 import org.apache.kafka.common.serialization.Serdes;
 import org.apache.kafka.common.serialization.StringSerializer;
@@ -138,10 +139,10 @@ public class RocksDBMetricsIntegrationTest {
     @SuppressWarnings("deprecation")
     @Parameters(name = "{0}")
     public static Collection<Object[]> data() {
-        return Arrays.asList(new Object[][] {
-            {StreamsConfig.AT_LEAST_ONCE},
-            {StreamsConfig.EXACTLY_ONCE},
-            {StreamsConfig.EXACTLY_ONCE_V2}
+        return Arrays.asList(new Object[][]{
+                {StreamsConfig.AT_LEAST_ONCE},
+                {StreamsConfig.EXACTLY_ONCE},
+                {StreamsConfig.EXACTLY_ONCE_V2}
         });
     }
 
@@ -174,17 +175,17 @@ public class RocksDBMetricsIntegrationTest {
         final StreamsBuilder builder = builderForStateStores();
 
         cleanUpStateRunVerifyAndClose(
-            builder,
-            streamsConfiguration,
-            this::verifyThatRocksDBMetricsAreExposed
+                builder,
+                streamsConfiguration,
+                this::verifyThatRocksDBMetricsAreExposed
         );
 
         // simulated failure
 
         cleanUpStateRunVerifyAndClose(
-            builder,
-            streamsConfiguration,
-            this::verifyThatRocksDBMetricsAreExposed
+                builder,
+                streamsConfiguration,
+                this::verifyThatRocksDBMetricsAreExposed
         );
     }
 
@@ -195,7 +196,7 @@ public class RocksDBMetricsIntegrationTest {
         streamsConfiguration.put(StreamsConfig.BOOTSTRAP_SERVERS_CONFIG, CLUSTER.bootstrapServers());
         streamsConfiguration.put(StreamsConfig.DEFAULT_KEY_SERDE_CLASS_CONFIG, Serdes.Integer().getClass());
         streamsConfiguration.put(StreamsConfig.DEFAULT_VALUE_SERDE_CLASS_CONFIG, Serdes.String().getClass());
-        streamsConfiguration.put(StreamsConfig.METRICS_RECORDING_LEVEL_CONFIG, Sensor.RecordingLevel.DEBUG.name);
+        streamsConfiguration.put(StreamsConfig.METRICS_RECORDING_LEVEL_CONFIG, SensorRecordingLevel.DEBUG.name);
         streamsConfiguration.put(StreamsConfig.PROCESSING_GUARANTEE_CONFIG, processingGuarantee);
         streamsConfiguration.put(StreamsConfig.STATE_DIR_CONFIG, TestUtils.tempDirectory().getPath());
         streamsConfiguration.put(StreamsConfig.CACHE_MAX_BYTES_BUFFERING_CONFIG, 0);
@@ -206,20 +207,20 @@ public class RocksDBMetricsIntegrationTest {
         final StreamsBuilder builder = new StreamsBuilder();
         // create two state stores, one non-segmented and one segmented
         builder.table(
-            STREAM_INPUT_ONE,
-            Materialized.as(Stores.persistentKeyValueStore(MY_STORE_PERSISTENT_KEY_VALUE)).withCachingEnabled()
+                STREAM_INPUT_ONE,
+                Materialized.as(Stores.persistentKeyValueStore(MY_STORE_PERSISTENT_KEY_VALUE)).withCachingEnabled()
         ).toStream().to(STREAM_OUTPUT_ONE);
         builder.stream(STREAM_INPUT_TWO, Consumed.with(Serdes.Integer(), Serdes.String()))
-            .groupByKey()
-            .windowedBy(TimeWindows.of(WINDOW_SIZE).grace(Duration.ZERO))
-            .aggregate(() -> 0L,
-                (aggKey, newValue, aggValue) -> aggValue,
-                Materialized.<Integer, Long, WindowStore<Bytes, byte[]>>as("time-windowed-aggregated-stream-store")
-                    .withValueSerde(Serdes.Long())
-                    .withRetention(WINDOW_SIZE))
-            .toStream()
-            .map((key, value) -> KeyValue.pair(value, value))
-            .to(STREAM_OUTPUT_TWO, Produced.with(Serdes.Long(), Serdes.Long()));
+                .groupByKey()
+                .windowedBy(TimeWindows.of(WINDOW_SIZE).grace(Duration.ZERO))
+                .aggregate(() -> 0L,
+                        (aggKey, newValue, aggValue) -> aggValue,
+                        Materialized.<Integer, Long, WindowStore<Bytes, byte[]>>as("time-windowed-aggregated-stream-store")
+                                .withValueSerde(Serdes.Long())
+                                .withRetention(WINDOW_SIZE))
+                .toStream()
+                .map((key, value) -> KeyValue.pair(value, value))
+                .to(STREAM_OUTPUT_TWO, Produced.with(Serdes.Long(), Serdes.Long()));
         return builder;
     }
 
@@ -240,35 +241,35 @@ public class RocksDBMetricsIntegrationTest {
     private void produceRecords() {
         final MockTime mockTime = new MockTime(WINDOW_SIZE.toMillis());
         final Properties prop = TestUtils.producerConfig(
-            CLUSTER.bootstrapServers(),
-            IntegerSerializer.class,
-            StringSerializer.class,
-            new Properties()
+                CLUSTER.bootstrapServers(),
+                IntegerSerializer.class,
+                StringSerializer.class,
+                new Properties()
         );
         // non-segmented store do not need records with different timestamps
         IntegrationTestUtils.produceKeyValuesSynchronouslyWithTimestamp(
-            STREAM_INPUT_ONE,
-            Utils.mkSet(new KeyValue<>(1, "A"), new KeyValue<>(1, "B"), new KeyValue<>(1, "C")),
-            prop,
-            mockTime.milliseconds()
+                STREAM_INPUT_ONE,
+                Utils.mkSet(new KeyValue<>(1, "A"), new KeyValue<>(1, "B"), new KeyValue<>(1, "C")),
+                prop,
+                mockTime.milliseconds()
         );
         IntegrationTestUtils.produceKeyValuesSynchronouslyWithTimestamp(
-            STREAM_INPUT_TWO,
-            Collections.singleton(new KeyValue<>(1, "A")),
-            prop,
-            mockTime.milliseconds()
+                STREAM_INPUT_TWO,
+                Collections.singleton(new KeyValue<>(1, "A")),
+                prop,
+                mockTime.milliseconds()
         );
         IntegrationTestUtils.produceKeyValuesSynchronouslyWithTimestamp(
-            STREAM_INPUT_TWO,
-            Collections.singleton(new KeyValue<>(1, "B")),
-            prop,
-            mockTime.milliseconds()
+                STREAM_INPUT_TWO,
+                Collections.singleton(new KeyValue<>(1, "B")),
+                prop,
+                mockTime.milliseconds()
         );
         IntegrationTestUtils.produceKeyValuesSynchronouslyWithTimestamp(
-            STREAM_INPUT_TWO,
-            Collections.singleton(new KeyValue<>(1, "C")),
-            prop,
-            mockTime.milliseconds()
+                STREAM_INPUT_TWO,
+                Collections.singleton(new KeyValue<>(1, "C")),
+                prop,
+                mockTime.milliseconds()
         );
     }
 
@@ -319,12 +320,12 @@ public class RocksDBMetricsIntegrationTest {
                                    final String metricName,
                                    final int numMetric) {
         final List<Metric> metrics = listMetric.stream()
-            .filter(m -> m.metricName().name().equals(metricName))
-            .collect(Collectors.toList());
+                .filter(m -> m.metricName().name().equals(metricName))
+                .collect(Collectors.toList());
         assertThat(
-            "Size of metrics of type:'" + metricName + "' must be equal to " + numMetric + " but it's equal to " + metrics.size(),
-            metrics.size(),
-            is(numMetric)
+                "Size of metrics of type:'" + metricName + "' must be equal to " + numMetric + " but it's equal to " + metrics.size(),
+                metrics.size(),
+                is(numMetric)
         );
         for (final Metric metric : metrics) {
             assertThat("Metric:'" + metric.metricName() + "' must be not null", metric.metricValue(), is(notNullValue()));
@@ -334,7 +335,7 @@ public class RocksDBMetricsIntegrationTest {
     private List<Metric> getRocksDBMetrics(final KafkaStreams kafkaStreams,
                                            final String metricsScope) {
         return new ArrayList<Metric>(kafkaStreams.metrics().values()).stream()
-            .filter(m -> m.metricName().group().equals(METRICS_GROUP) && m.metricName().tags().containsKey(metricsScope))
-            .collect(Collectors.toList());
+                .filter(m -> m.metricName().group().equals(METRICS_GROUP) && m.metricName().tags().containsKey(metricsScope))
+                .collect(Collectors.toList());
     }
 }

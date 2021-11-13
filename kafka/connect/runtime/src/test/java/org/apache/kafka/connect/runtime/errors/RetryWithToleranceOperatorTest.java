@@ -19,6 +19,7 @@ package org.apache.kafka.connect.runtime.errors;
 import org.apache.kafka.clients.CommonClientConfigs;
 import org.apache.kafka.clients.consumer.ConsumerRecord;
 import org.apache.kafka.common.metrics.Sensor;
+import org.apache.kafka.common.metrics.SensorRecordingLevel;
 import org.apache.kafka.common.utils.MockTime;
 import org.apache.kafka.common.utils.SystemTime;
 import org.apache.kafka.connect.errors.ConnectException;
@@ -80,19 +81,20 @@ public class RetryWithToleranceOperatorTest {
 
     public static final RetryWithToleranceOperator NOOP_OPERATOR = new RetryWithToleranceOperator(
             ERRORS_RETRY_TIMEOUT_DEFAULT, ERRORS_RETRY_MAX_DELAY_DEFAULT, NONE, SYSTEM);
+
     static {
         Map<String, String> properties = new HashMap<>();
         properties.put(CommonClientConfigs.METRICS_NUM_SAMPLES_CONFIG, Objects.toString(2));
         properties.put(CommonClientConfigs.METRICS_SAMPLE_WINDOW_MS_CONFIG, Objects.toString(3000));
-        properties.put(CommonClientConfigs.METRICS_RECORDING_LEVEL_CONFIG, Sensor.RecordingLevel.INFO.toString());
+        properties.put(CommonClientConfigs.METRICS_RECORDING_LEVEL_CONFIG, SensorRecordingLevel.INFO.toString());
 
         // define required properties
         properties.put(WorkerConfig.KEY_CONVERTER_CLASS_CONFIG, TestConverter.class.getName());
         properties.put(WorkerConfig.VALUE_CONVERTER_CLASS_CONFIG, TestConverter.class.getName());
 
         NOOP_OPERATOR.metrics(new ErrorHandlingMetrics(
-            new ConnectorTaskId("noop-connector", -1),
-            new ConnectMetrics("noop-worker", new TestableWorkerConfig(properties), new SystemTime(), "test-cluster"))
+                new ConnectorTaskId("noop-connector", -1),
+                new ConnectMetrics("noop-worker", new TestableWorkerConfig(properties), new SystemTime(), "test-cluster"))
         );
     }
 
@@ -112,21 +114,21 @@ public class RetryWithToleranceOperatorTest {
     @Test
     public void testExecuteFailed() {
         RetryWithToleranceOperator retryWithToleranceOperator = new RetryWithToleranceOperator(0,
-            ERRORS_RETRY_MAX_DELAY_DEFAULT, ALL, SYSTEM);
+                ERRORS_RETRY_MAX_DELAY_DEFAULT, ALL, SYSTEM);
         retryWithToleranceOperator.metrics(errorHandlingMetrics);
 
         retryWithToleranceOperator.executeFailed(Stage.TASK_PUT,
-            SinkTask.class, consumerRecord, new Throwable());
+                SinkTask.class, consumerRecord, new Throwable());
     }
 
     @Test
     public void testExecuteFailedNoTolerance() {
         RetryWithToleranceOperator retryWithToleranceOperator = new RetryWithToleranceOperator(0,
-            ERRORS_RETRY_MAX_DELAY_DEFAULT, NONE, SYSTEM);
+                ERRORS_RETRY_MAX_DELAY_DEFAULT, NONE, SYSTEM);
         retryWithToleranceOperator.metrics(errorHandlingMetrics);
 
         assertThrows(ConnectException.class, () -> retryWithToleranceOperator.executeFailed(Stage.TASK_PUT,
-            SinkTask.class, consumerRecord, new Throwable()));
+                SinkTask.class, consumerRecord, new Throwable()));
     }
 
     @Test
@@ -363,42 +365,42 @@ public class RetryWithToleranceOperatorTest {
         AtomicReference<Throwable> failed = new AtomicReference<>(null);
         RetryWithToleranceOperator retryWithToleranceOperator = new RetryWithToleranceOperator(0,
                 ERRORS_RETRY_MAX_DELAY_DEFAULT, ALL, SYSTEM, new ProcessingContext() {
-                    private AtomicInteger count = new AtomicInteger();
-                    private AtomicInteger attempt = new AtomicInteger();
+            private AtomicInteger count = new AtomicInteger();
+            private AtomicInteger attempt = new AtomicInteger();
 
-                    @Override
-                    public void error(Throwable error) {
-                        if (count.getAndIncrement() > 0) {
-                            failed.compareAndSet(null, new AssertionError("Concurrent call to error()"));
-                        }
-                        super.error(error);
-                    }
+            @Override
+            public void error(Throwable error) {
+                if (count.getAndIncrement() > 0) {
+                    failed.compareAndSet(null, new AssertionError("Concurrent call to error()"));
+                }
+                super.error(error);
+            }
 
-                    @Override
-                    public Future<Void> report() {
-                        if (count.getAndSet(0) > 1) {
-                            failed.compareAndSet(null, new AssertionError("Concurrent call to error() in report()"));
-                        }
+            @Override
+            public Future<Void> report() {
+                if (count.getAndSet(0) > 1) {
+                    failed.compareAndSet(null, new AssertionError("Concurrent call to error() in report()"));
+                }
 
-                        return super.report();
-                    }
+                return super.report();
+            }
 
-                    @Override
-                    public void currentContext(Stage stage, Class<?> klass) {
-                        this.attempt.set(0);
-                        super.currentContext(stage, klass);
-                    }
+            @Override
+            public void currentContext(Stage stage, Class<?> klass) {
+                this.attempt.set(0);
+                super.currentContext(stage, klass);
+            }
 
-                    @Override
-                    public void attempt(int attempt) {
-                        if (!this.attempt.compareAndSet(attempt - 1, attempt)) {
-                            failed.compareAndSet(null, new AssertionError(
-                                    "Concurrent call to attempt(): Attempts should increase monotonically " +
-                                            "within the scope of a given currentContext()"));
-                        }
-                        super.attempt(attempt);
-                    }
-                });
+            @Override
+            public void attempt(int attempt) {
+                if (!this.attempt.compareAndSet(attempt - 1, attempt)) {
+                    failed.compareAndSet(null, new AssertionError(
+                            "Concurrent call to attempt(): Attempts should increase monotonically " +
+                                    "within the scope of a given currentContext()"));
+                }
+                super.attempt(attempt);
+            }
+        });
         retryWithToleranceOperator.metrics(errorHandlingMetrics);
 
         ExecutorService pool = Executors.newFixedThreadPool(numThreads);

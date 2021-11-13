@@ -12,7 +12,7 @@ use jni::{
 
 use super::record_header::RecordHeader;
 
-#[derive(Default, Clone)]
+#[derive(Default, Debug, Clone)]
 pub struct RecordHeaders(Vec<RecordHeader>);
 impl Deref for RecordHeaders {
     type Target = Vec<RecordHeader>;

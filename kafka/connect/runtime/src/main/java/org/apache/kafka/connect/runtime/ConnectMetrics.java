@@ -19,14 +19,7 @@ package org.apache.kafka.connect.runtime;
 import org.apache.kafka.clients.CommonClientConfigs;
 import org.apache.kafka.common.MetricName;
 import org.apache.kafka.common.MetricNameTemplate;
-import org.apache.kafka.common.metrics.Gauge;
-import org.apache.kafka.common.metrics.JmxReporter;
-import org.apache.kafka.common.metrics.KafkaMetricsContext;
-import org.apache.kafka.common.metrics.MetricConfig;
-import org.apache.kafka.common.metrics.Metrics;
-import org.apache.kafka.common.metrics.MetricsContext;
-import org.apache.kafka.common.metrics.MetricsReporter;
-import org.apache.kafka.common.metrics.Sensor;
+import org.apache.kafka.common.metrics.*;
 import org.apache.kafka.common.metrics.internals.MetricsUtils;
 import org.apache.kafka.common.utils.AppInfoParser;
 import org.apache.kafka.common.utils.Time;
@@ -44,7 +37,6 @@ import java.util.Objects;
 import java.util.Set;
 import java.util.concurrent.ConcurrentHashMap;
 import java.util.concurrent.ConcurrentMap;
-import java.util.concurrent.TimeUnit;
 
 /**
  * The Connect metrics with JMX reporter.
@@ -64,9 +56,9 @@ public class ConnectMetrics {
     /**
      * Create an instance.
      *
-     * @param workerId the worker identifier; may not be null
-     * @param config   the worker configuration; may not be null
-     * @param time     the time; may not be null
+     * @param workerId  the worker identifier; may not be null
+     * @param config    the worker configuration; may not be null
+     * @param time      the time; may not be null
      * @param clusterId the Kafka cluster ID
      */
     public ConnectMetrics(String workerId, WorkerConfig config, Time time, String clusterId) {
@@ -79,8 +71,8 @@ public class ConnectMetrics {
         List<MetricsReporter> reporters = config.getConfiguredInstances(CommonClientConfigs.METRIC_REPORTER_CLASSES_CONFIG, MetricsReporter.class);
 
         MetricConfig metricConfig = new MetricConfig().samples(numSamples)
-                .timeWindow(sampleWindowMs, TimeUnit.MILLISECONDS).recordLevel(
-                        Sensor.RecordingLevel.forName(metricsRecordingLevel));
+                .timeWindowMs(sampleWindowMs).recordLevel(
+                        SensorRecordingLevel.forName(metricsRecordingLevel));
         JmxReporter jmxReporter = new JmxReporter();
         jmxReporter.configure(config.originals());
         reporters.add(jmxReporter);
@@ -346,7 +338,7 @@ public class ConnectMetrics {
          * @return The sensor
          */
         public Sensor sensor(String name) {
-            return sensor(name, null, Sensor.RecordingLevel.INFO);
+            return sensor(name, null, SensorRecordingLevel.INFO);
         }
 
         /**
@@ -357,7 +349,7 @@ public class ConnectMetrics {
          * @return The sensor
          */
         public Sensor sensor(String name, Sensor... parents) {
-            return sensor(name, null, Sensor.RecordingLevel.INFO, parents);
+            return sensor(name, null, SensorRecordingLevel.INFO, parents);
         }
 
         /**
@@ -369,7 +361,7 @@ public class ConnectMetrics {
          * @param parents        The parent sensors
          * @return The sensor that is created
          */
-        public Sensor sensor(String name, Sensor.RecordingLevel recordingLevel, Sensor... parents) {
+        public Sensor sensor(String name, SensorRecordingLevel recordingLevel, Sensor... parents) {
             return sensor(name, null, recordingLevel, parents);
         }
 
@@ -383,7 +375,7 @@ public class ConnectMetrics {
          * @return The sensor that is created
          */
         public Sensor sensor(String name, MetricConfig config, Sensor... parents) {
-            return sensor(name, config, Sensor.RecordingLevel.INFO, parents);
+            return sensor(name, config, SensorRecordingLevel.INFO, parents);
         }
 
         /**
@@ -396,7 +388,7 @@ public class ConnectMetrics {
          * @param parents        The parent sensors
          * @return The sensor that is created
          */
-        public synchronized Sensor sensor(String name, MetricConfig config, Sensor.RecordingLevel recordingLevel, Sensor... parents) {
+        public synchronized Sensor sensor(String name, MetricConfig config, SensorRecordingLevel recordingLevel, Sensor... parents) {
             // We need to make sure that all sensor names are unique across all groups, so use the sensor prefix
             Sensor result = metrics.sensor(sensorPrefix + name, config, Long.MAX_VALUE, recordingLevel, parents);
             if (result != null)

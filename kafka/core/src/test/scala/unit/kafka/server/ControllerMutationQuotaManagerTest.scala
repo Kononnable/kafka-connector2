@@ -38,7 +38,7 @@ class StrictControllerMutationQuotaTest {
     val metrics = new Metrics(time)
     val sensor = metrics.sensor("sensor", new MetricConfig()
       .quota(Quota.upperBound(10))
-      .timeWindow(1, TimeUnit.SECONDS)
+      .timeWindowMs(TimeUnit.MILLISECONDS.convert(1, TimeUnit.SECONDS))
       .samples(10))
     val metricName = metrics.metricName("rate", "test-group")
     assertTrue(sensor.add(metricName, new TokenBucket))
@@ -78,7 +78,7 @@ class PermissiveControllerMutationQuotaTest {
     val metrics = new Metrics(time)
     val sensor = metrics.sensor("sensor", new MetricConfig()
       .quota(Quota.upperBound(10))
-      .timeWindow(1, TimeUnit.SECONDS)
+      .timeWindowMs(TimeUnit.MILLISECONDS.convert(1, TimeUnit.SECONDS))
       .samples(10))
     val metricName = metrics.metricName("rate", "test-group")
     assertTrue(sensor.add(metricName, new TokenBucket))
@@ -121,7 +121,7 @@ class ControllerMutationQuotaManagerTest extends BaseClientQuotaManagerTest {
   )
 
   private def withQuotaManager(f: ControllerMutationQuotaManager => Unit): Unit = {
-    val quotaManager = new ControllerMutationQuotaManager(config, metrics, time,"", None)
+    val quotaManager = new ControllerMutationQuotaManager(config, metrics, time, "", None)
     try {
       f(quotaManager)
     } finally {

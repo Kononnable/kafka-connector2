@@ -87,7 +87,7 @@ public class WorkerGroupMember {
             Map<String, String> metricsTags = new LinkedHashMap<>();
             metricsTags.put("client-id", clientId);
             MetricConfig metricConfig = new MetricConfig().samples(config.getInt(CommonClientConfigs.METRICS_NUM_SAMPLES_CONFIG))
-                    .timeWindow(config.getLong(CommonClientConfigs.METRICS_SAMPLE_WINDOW_MS_CONFIG), TimeUnit.MILLISECONDS)
+                    .timeWindowMs(config.getLong(CommonClientConfigs.METRICS_SAMPLE_WINDOW_MS_CONFIG))
                     .tags(metricsTags);
             List<MetricsReporter> reporters = config.getConfiguredInstances(CommonClientConfigs.METRIC_REPORTER_CLASSES_CONFIG,
                     MetricsReporter.class,
@@ -188,7 +188,7 @@ public class WorkerGroupMember {
 
     /**
      * Get the member ID of this worker in the group of workers.
-     *
+     * <p>
      * This ID is the unique member ID automatically generated.
      *
      * @return the member ID

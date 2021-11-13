@@ -36,22 +36,24 @@ import scala.jdk.CollectionConverters._
 
 /**
  * Represents the sensors aggregated per client
- * @param metricTags Quota metric tags for the client
- * @param quotaSensor @Sensor that tracks the quota
+ *
+ * @param metricTags         Quota metric tags for the client
+ * @param quotaSensor        @Sensor that tracks the quota
  * @param throttleTimeSensor @Sensor that tracks the throttle time
  */
 case class ClientSensors(metricTags: Map[String, String], quotaSensor: Sensor, throttleTimeSensor: Sensor)
 
 /**
  * Configuration settings for quota management
- * @param numQuotaSamples The number of samples to retain in memory
+ *
+ * @param numQuotaSamples        The number of samples to retain in memory
  * @param quotaWindowSizeSeconds The time span of each sample
  *
  */
 case class ClientQuotaManagerConfig(numQuotaSamples: Int =
-                                        ClientQuotaManagerConfig.DefaultNumQuotaSamples,
+                                    ClientQuotaManagerConfig.DefaultNumQuotaSamples,
                                     quotaWindowSizeSeconds: Int =
-                                        ClientQuotaManagerConfig.DefaultQuotaWindowSizeSeconds)
+                                    ClientQuotaManagerConfig.DefaultQuotaWindowSizeSeconds)
 
 object ClientQuotaManagerConfig {
   // Always have 10 whole windows + 1 current window
@@ -79,25 +81,33 @@ object ClientQuotaManager {
 
   case class UserEntity(sanitizedUser: String) extends BaseUserEntity {
     override def entityType: ClientQuotaEntity.ConfigEntityType = ClientQuotaEntity.ConfigEntityType.USER
+
     override def name: String = Sanitizer.desanitize(sanitizedUser)
+
     override def toString: String = s"user $sanitizedUser"
   }
 
   case class ClientIdEntity(clientId: String) extends ClientQuotaEntity.ConfigEntity {
     override def entityType: ClientQuotaEntity.ConfigEntityType = ClientQuotaEntity.ConfigEntityType.CLIENT_ID
+
     override def name: String = clientId
+
     override def toString: String = s"client-id $clientId"
   }
 
   case object DefaultUserEntity extends BaseUserEntity {
     override def entityType: ClientQuotaEntity.ConfigEntityType = ClientQuotaEntity.ConfigEntityType.DEFAULT_USER
+
     override def name: String = ConfigEntityName.Default
+
     override def toString: String = "default user"
   }
 
   case object DefaultClientIdEntity extends ClientQuotaEntity.ConfigEntity {
     override def entityType: ClientQuotaEntity.ConfigEntityType = ClientQuotaEntity.ConfigEntityType.DEFAULT_CLIENT_ID
+
     override def name: String = ConfigEntityName.Default
+
     override def toString: String = "default client-id"
   }
 
@@ -161,23 +171,23 @@ object ClientQuotaManager {
  * and a user quota match a connection, the <user, client-id> quota will be used. Otherwise, user quota takes
  * precedence over client-id quota. The order of precedence is:
  * <ul>
- *   <li>/config/users/<user>/clients/<client-id>
- *   <li>/config/users/<user>/clients/<default>
- *   <li>/config/users/<user>
- *   <li>/config/users/<default>/clients/<client-id>
- *   <li>/config/users/<default>/clients/<default>
- *   <li>/config/users/<default>
- *   <li>/config/clients/<client-id>
- *   <li>/config/clients/<default>
+ * <li>/config/users/<user>/clients/<client-id>
+ * <li>/config/users/<user>/clients/<default>
+ * <li>/config/users/<user>
+ * <li>/config/users/<default>/clients/<client-id>
+ * <li>/config/users/<default>/clients/<default>
+ * <li>/config/users/<default>
+ * <li>/config/clients/<client-id>
+ * <li>/config/clients/<default>
  * </ul>
  * Quota limits including defaults may be updated dynamically. The implementation is optimized for the case
  * where a single level of quotas is configured.
  *
- * @param config @ClientQuotaManagerConfig quota configs
- * @param metrics @Metrics Metrics instance
- * @param quotaType Quota type of this quota manager
- * @param time @Time object to use
- * @param threadNamePrefix The thread prefix to use
+ * @param config              @ClientQuotaManagerConfig quota configs
+ * @param metrics             @Metrics Metrics instance
+ * @param quotaType           Quota type of this quota manager
+ * @param time                @Time object to use
+ * @param threadNamePrefix    The thread prefix to use
  * @param clientQuotaCallback An optional @ClientQuotaCallback
  */
 class ClientQuotaManager(private val config: ClientQuotaManagerConfig,
@@ -205,12 +215,14 @@ class ClientQuotaManager(private val config: ClientQuotaManagerConfig,
   private val delayQueue = new DelayQueue[ThrottledChannel]()
   private[server] val throttledChannelReaper = new ThrottledChannelReaper(delayQueue, threadNamePrefix)
   start() // Use start method to keep spotbugs happy
+
   private def start(): Unit = {
     throttledChannelReaper.start()
   }
 
   /**
    * Reaper thread that triggers channel unmute callbacks on all throttled channels
+   *
    * @param delayQueue DelayQueue to dequeue from
    */
   class ThrottledChannelReaper(delayQueue: DelayQueue[ThrottledChannel], prefix: String) extends ShutdownableThread(
@@ -259,10 +271,10 @@ class ClientQuotaManager(private val config: ClientQuotaManagerConfig,
    * Records that a user/clientId accumulated or would like to accumulate the provided amount at the
    * the specified time, returns throttle time in milliseconds.
    *
-   * @param session The session from which the user is extracted
+   * @param session  The session from which the user is extracted
    * @param clientId The client id
-   * @param value The value to accumulate
-   * @param timeMs The time at which to accumulate the value
+   * @param value    The value to accumulate
+   * @param timeMs   The time at which to accumulate the value
    * @return The throttle time in milliseconds defines as the time to wait until the average
    *         rate gets back to the defined quota
    */
@@ -323,15 +335,15 @@ class ClientQuotaManager(private val config: ClientQuotaManagerConfig,
   /**
    * Throttle a client by muting the associated channel for the given throttle time.
    *
-   * @param request client request
-   * @param throttleTimeMs Duration in milliseconds for which the channel is to be muted.
+   * @param request          client request
+   * @param throttleTimeMs   Duration in milliseconds for which the channel is to be muted.
    * @param throttleCallback Callback for channel throttling
    */
   def throttle(
-    request: RequestChannel.Request,
-    throttleCallback: ThrottleCallback,
-    throttleTimeMs: Int
-  ): Unit = {
+                request: RequestChannel.Request,
+                throttleCallback: ThrottleCallback,
+                throttleTimeMs: Int
+              ): Unit = {
     if (throttleTimeMs > 0) {
       val clientSensors = getOrCreateQuotaSensors(request.session, request.headerForLoggingOrThrottling().clientId)
       clientSensors.throttleTimeSensor.record(throttleTimeMs)
@@ -428,7 +440,7 @@ class ClientQuotaManager(private val config: ClientQuotaManagerConfig,
 
   private def getQuotaMetricConfig(quotaLimit: Double): MetricConfig = {
     new MetricConfig()
-      .timeWindow(config.quotaWindowSizeSeconds, TimeUnit.SECONDS)
+      .timeWindowMs(TimeUnit.MILLISECONDS.convert(config.quotaWindowSizeSeconds, TimeUnit.SECONDS))
       .samples(config.numQuotaSamples)
       .quota(new Quota(quotaLimit, true))
   }
@@ -499,9 +511,9 @@ class ClientQuotaManager(private val config: ClientQuotaManagerConfig,
    * have updated quotas.
    *
    * @param updatedQuotaEntity If set to one entity and quotas have only been enabled at one
-   *    level, then an optimized update is performed with a single metric update. If None is provided,
-   *    or if custom callbacks are used or if multi-level quotas have been enabled, all metric configs
-   *    are checked and updated if required.
+   *                           level, then an optimized update is performed with a single metric update. If None is provided,
+   *                           or if custom callbacks are used or if multi-level quotas have been enabled, all metric configs
+   *                           are checked and updated if required.
    */
   def updateQuotaMetricConfigs(updatedQuotaEntity: Option[KafkaQuotaEntity] = None): Unit = {
     val allMetrics = metrics.metrics()
@@ -636,7 +648,7 @@ class ClientQuotaManager(private val config: ClientQuotaManagerConfig,
 
     override def quotaResetRequired(quotaType: ClientQuotaType): Boolean = false
 
-    def quotaMetricTags(sanitizedUser: String, clientId: String) : Map[String, String] = {
+    def quotaMetricTags(sanitizedUser: String, clientId: String): Map[String, String] = {
       val (userTag, clientIdTag) = quotaTypesEnabled match {
         case QuotaTypes.NoQuotas | QuotaTypes.ClientIdQuotaEnabled =>
           ("", clientId)

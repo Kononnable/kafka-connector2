@@ -35,7 +35,8 @@ pub fn java_enum_impl(input: TokenStream) -> TokenStream {
                 let class = env.find_class(#class_name)?;
                 assert!(env.is_instance_of(obj, class)?, "Wrong object class");
                 #fields_from_jobject
-                panic!("Unknown enum value")
+                env.throw_new("java/lang/Exception", "Unknown enum value")?;
+                return Err(jni::errors::Error::JavaException);
             }
         }
     };

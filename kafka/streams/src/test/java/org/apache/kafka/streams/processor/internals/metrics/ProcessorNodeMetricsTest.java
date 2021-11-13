@@ -17,8 +17,9 @@
 package org.apache.kafka.streams.processor.internals.metrics;
 
 import org.apache.kafka.common.metrics.Sensor;
-import org.apache.kafka.common.metrics.Sensor.RecordingLevel;
+import org.apache.kafka.common.metrics.SensorRecordingLevel;
 import org.junit.Test;
+
 import static org.mockito.Mockito.mock;
 import static org.mockito.Mockito.when;
 
@@ -49,7 +50,7 @@ public class ProcessorNodeMetricsTest {
         final String metricNamePrefix = "suppression-emit";
         final String descriptionOfCount = "The total number of emitted records from the suppression buffer";
         final String descriptionOfRate = "The average number of emitted records from the suppression buffer per second";
-        when(streamsMetrics.nodeLevelSensor(THREAD_ID, TASK_ID, PROCESSOR_NODE_ID, metricNamePrefix, RecordingLevel.DEBUG))
+        when(streamsMetrics.nodeLevelSensor(THREAD_ID, TASK_ID, PROCESSOR_NODE_ID, metricNamePrefix, SensorRecordingLevel.DEBUG))
                 .thenReturn(expectedSensor);
         when(streamsMetrics.nodeLevelTagMap(THREAD_ID, TASK_ID, PROCESSOR_NODE_ID)).thenReturn(tagMap);
         StreamsMetricsImpl.addInvocationRateAndCountToSensor(
@@ -70,7 +71,7 @@ public class ProcessorNodeMetricsTest {
         final String metricNamePrefix = "idempotent-update-skip";
         final String descriptionOfCount = "The total number of skipped idempotent updates";
         final String descriptionOfRate = "The average number of skipped idempotent updates per second";
-        when(streamsMetrics.nodeLevelSensor(THREAD_ID, TASK_ID, PROCESSOR_NODE_ID, metricNamePrefix, RecordingLevel.DEBUG))
+        when(streamsMetrics.nodeLevelSensor(THREAD_ID, TASK_ID, PROCESSOR_NODE_ID, metricNamePrefix, SensorRecordingLevel.DEBUG))
                 .thenReturn(expectedSensor);
         when(streamsMetrics.nodeLevelTagMap(THREAD_ID, TASK_ID, PROCESSOR_NODE_ID)).thenReturn(tagMap);
         StreamsMetricsImpl.addInvocationRateAndCountToSensor(
@@ -91,7 +92,7 @@ public class ProcessorNodeMetricsTest {
         final String metricNamePrefix = "process";
         final String descriptionOfCount = "The total number of calls to process";
         final String descriptionOfRate = "The average number of calls to process per second";
-        when(streamsMetrics.taskLevelSensor(THREAD_ID, TASK_ID, metricNamePrefix, RecordingLevel.DEBUG))
+        when(streamsMetrics.taskLevelSensor(THREAD_ID, TASK_ID, metricNamePrefix, SensorRecordingLevel.DEBUG))
                 .thenReturn(expectedParentSensor);
         when(streamsMetrics.taskLevelTagMap(THREAD_ID, TASK_ID))
                 .thenReturn(parentTagMap);
@@ -107,7 +108,7 @@ public class ProcessorNodeMetricsTest {
                 metricNamePrefix,
                 descriptionOfRate,
                 descriptionOfCount,
-                RecordingLevel.DEBUG,
+                SensorRecordingLevel.DEBUG,
                 expectedParentSensor
         );
 
@@ -120,16 +121,16 @@ public class ProcessorNodeMetricsTest {
         final String descriptionOfCount = "The total number of calls to forward";
         final String descriptionOfRate = "The average number of calls to forward per second";
         setUpThroughputParentSensor(
-            metricNamePrefix,
-            descriptionOfRate,
-            descriptionOfCount
+                metricNamePrefix,
+                descriptionOfRate,
+                descriptionOfCount
         );
         setUpThroughputSensor(
-            metricNamePrefix,
-            descriptionOfRate,
-            descriptionOfCount,
-            RecordingLevel.DEBUG,
-            expectedParentSensor
+                metricNamePrefix,
+                descriptionOfRate,
+                descriptionOfCount,
+                SensorRecordingLevel.DEBUG,
+                expectedParentSensor
         );
 
         verifySensor(() -> ProcessorNodeMetrics.forwardSensor(THREAD_ID, TASK_ID, PROCESSOR_NODE_ID, streamsMetrics));
@@ -138,7 +139,7 @@ public class ProcessorNodeMetricsTest {
     private void setUpThroughputParentSensor(final String metricNamePrefix,
                                              final String descriptionOfRate,
                                              final String descriptionOfCount) {
-        when(streamsMetrics.taskLevelSensor(THREAD_ID, TASK_ID, metricNamePrefix, RecordingLevel.DEBUG))
+        when(streamsMetrics.taskLevelSensor(THREAD_ID, TASK_ID, metricNamePrefix, SensorRecordingLevel.DEBUG))
                 .thenReturn(expectedParentSensor);
         when(streamsMetrics.nodeLevelTagMap(THREAD_ID, TASK_ID, StreamsMetricsImpl.ROLLUP_VALUE))
                 .thenReturn(parentTagMap);
@@ -153,10 +154,10 @@ public class ProcessorNodeMetricsTest {
     }
 
     private void setUpThroughputSensor(final String metricNamePrefix,
-                                           final String descriptionOfRate,
-                                           final String descriptionOfCount,
-                                           final RecordingLevel recordingLevel,
-                                           final Sensor... parentSensors) {
+                                       final String descriptionOfRate,
+                                       final String descriptionOfCount,
+                                       final SensorRecordingLevel recordingLevel,
+                                       final Sensor... parentSensors) {
         when(streamsMetrics.nodeLevelSensor(
                 THREAD_ID,
                 TASK_ID,
@@ -167,12 +168,12 @@ public class ProcessorNodeMetricsTest {
         )).thenReturn(expectedSensor);
         when(streamsMetrics.nodeLevelTagMap(THREAD_ID, TASK_ID, PROCESSOR_NODE_ID)).thenReturn(tagMap);
         StreamsMetricsImpl.addInvocationRateAndCountToSensor(
-            expectedSensor,
-            PROCESSOR_NODE_LEVEL_GROUP,
-            tagMap,
-            metricNamePrefix,
-            descriptionOfRate,
-            descriptionOfCount
+                expectedSensor,
+                PROCESSOR_NODE_LEVEL_GROUP,
+                tagMap,
+                metricNamePrefix,
+                descriptionOfRate,
+                descriptionOfCount
         );
     }
 

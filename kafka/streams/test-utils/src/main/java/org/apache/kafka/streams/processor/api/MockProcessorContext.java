@@ -19,6 +19,7 @@ package org.apache.kafka.streams.processor.api;
 import org.apache.kafka.common.metrics.MetricConfig;
 import org.apache.kafka.common.metrics.Metrics;
 import org.apache.kafka.common.metrics.Sensor;
+import org.apache.kafka.common.metrics.SensorRecordingLevel;
 import org.apache.kafka.common.serialization.Serde;
 import org.apache.kafka.common.utils.Time;
 import org.apache.kafka.streams.StreamsConfig;
@@ -163,7 +164,7 @@ public class MockProcessorContext<KForward, VForward> implements ProcessorContex
          * The child this data was forwarded to.
          *
          * @return If present, the child name the record was forwarded to.
-         *         If empty, the forward was a broadcast.
+         * If empty, the forward was a broadcast.
          */
         public Optional<String> childName() {
             return childName;
@@ -181,9 +182,9 @@ public class MockProcessorContext<KForward, VForward> implements ProcessorContex
         @Override
         public String toString() {
             return "CapturedForward{" +
-                "record=" + record +
-                ", childName=" + childName +
-                '}';
+                    "record=" + record +
+                    ", childName=" + childName +
+                    '}';
         }
 
         @Override
@@ -192,7 +193,7 @@ public class MockProcessorContext<KForward, VForward> implements ProcessorContex
             if (o == null || getClass() != o.getClass()) return false;
             final CapturedForward<?, ?> that = (CapturedForward<?, ?>) o;
             return Objects.equals(record, that.record) &&
-                Objects.equals(childName, that.childName);
+                    Objects.equals(childName, that.childName);
         }
 
         @Override
@@ -211,12 +212,12 @@ public class MockProcessorContext<KForward, VForward> implements ProcessorContex
      */
     public MockProcessorContext() {
         this(
-            mkProperties(mkMap(
-                mkEntry(StreamsConfig.APPLICATION_ID_CONFIG, ""),
-                mkEntry(StreamsConfig.BOOTSTRAP_SERVERS_CONFIG, "")
-            )),
-            new TaskId(0, 0),
-            null
+                mkProperties(mkMap(
+                        mkEntry(StreamsConfig.APPLICATION_ID_CONFIG, ""),
+                        mkEntry(StreamsConfig.BOOTSTRAP_SERVERS_CONFIG, "")
+                )),
+                new TaskId(0, 0),
+                null
         );
     }
 
@@ -249,13 +250,13 @@ public class MockProcessorContext<KForward, VForward> implements ProcessorContex
         this.config = streamsConfig;
         this.stateDir = stateDir;
         final MetricConfig metricConfig = new MetricConfig();
-        metricConfig.recordLevel(Sensor.RecordingLevel.DEBUG);
+        metricConfig.recordLevel(SensorRecordingLevel.DEBUG);
         final String threadId = Thread.currentThread().getName();
         metrics = new StreamsMetricsImpl(
-            new Metrics(metricConfig),
-            threadId,
-            streamsConfig.getString(StreamsConfig.BUILT_IN_METRICS_VERSION_CONFIG),
-            Time.SYSTEM
+                new Metrics(metricConfig),
+                threadId,
+                streamsConfig.getString(StreamsConfig.BUILT_IN_METRICS_VERSION_CONFIG),
+                Time.SYSTEM
         );
         TaskMetrics.droppedRecordsSensor(threadId, taskId.toString(), metrics);
     }
@@ -296,11 +297,11 @@ public class MockProcessorContext<KForward, VForward> implements ProcessorContex
     @Override
     public File stateDir() {
         return Objects.requireNonNull(
-            stateDir,
-            "The stateDir constructor argument was needed (probably for a state store) but not supplied. " +
-                "You can either reconfigure your test so that it doesn't need access to the disk " +
-                "(such as using an in-memory store), or use the full MockProcessorContext constructor to supply " +
-                "a non-null stateDir argument."
+                stateDir,
+                "The stateDir constructor argument was needed (probably for a state store) but not supplied. " +
+                        "You can either reconfigure your test so that it doesn't need access to the disk " +
+                        "(such as using an in-memory store), or use the full MockProcessorContext constructor to supply " +
+                        "a non-null stateDir argument."
         );
     }
 
@@ -435,9 +436,9 @@ public class MockProcessorContext<KForward, VForward> implements ProcessorContex
         // Rather than risk a mysterious ClassCastException during unit tests, throw an explanatory exception.
 
         throw new UnsupportedOperationException(
-            "MockProcessorContext does not provide record collection. " +
-                "For processor unit tests, use an in-memory state store with change-logging disabled. " +
-                "Alternatively, use the TopologyTestDriver for testing processor/store/topology integration."
+                "MockProcessorContext does not provide record collection. " +
+                        "For processor unit tests, use an in-memory state store with change-logging disabled. " +
+                        "Alternatively, use the TopologyTestDriver for testing processor/store/topology integration."
         );
     }
 
@@ -445,6 +446,7 @@ public class MockProcessorContext<KForward, VForward> implements ProcessorContex
      * Used to get a {@link StateStoreContext} for use with
      * {@link StateStore#init(StateStoreContext, StateStore)}
      * if you need to initialize a store for your tests.
+     *
      * @return a {@link StateStoreContext} that delegates to this ProcessorContext.
      */
     public StateStoreContext getStateStoreContext() {

@@ -16,86 +16,116 @@
  */
 package org.apache.kafka.common.metrics;
 
-import java.util.LinkedHashMap;
+import org.apache.kafka.RustLib;
+
 import java.util.Map;
-import java.util.concurrent.TimeUnit;
 
 /**
  * Configuration values for metrics
  */
 public class MetricConfig {
 
-    private Quota quota;
-    private int samples;
-    private long eventWindow;
-    private long timeWindowMs;
-    private Map<String, String> tags;
-    private Sensor.RecordingLevel recordingLevel;
+    static {
+        RustLib.load();
+    }
+
+    private long rustPointer;
+
+    public native void rustConstructor();
+
+    public native void rustDeconstructor();
+
+    @Override
+    protected void finalize() throws Throwable {
+        rustDeconstructor();
+        super.finalize();
+    }
+
+//    private Quota quota;
+//    private int samples;
+//    private long eventWindow;
+//    private long timeWindowMs;
+//    private Map<String, String> tags;
+//    private Sensor.RecordingLevel recordingLevel;
 
     public MetricConfig() {
-        this.quota = null;
-        this.samples = 2;
-        this.eventWindow = Long.MAX_VALUE;
-        this.timeWindowMs = TimeUnit.MILLISECONDS.convert(30, TimeUnit.SECONDS);
-        this.tags = new LinkedHashMap<>();
-        this.recordingLevel = Sensor.RecordingLevel.INFO;
+        rustConstructor();
+//        this.quota = null;
+//        this.samples = 2;
+//        this.eventWindow = Long.MAX_VALUE;
+//        this.timeWindowMs = TimeUnit.MILLISECONDS.convert(30, TimeUnit.SECONDS);
+//        this.tags = new LinkedHashMap<>();
+//        this.recordingLevel = Sensor.RecordingLevel.INFO;
     }
 
-    public Quota quota() {
-        return this.quota;
-    }
+    public native Quota quota();
 
-    public MetricConfig quota(Quota quota) {
-        this.quota = quota;
-        return this;
-    }
+    //    public Quota quota() {
+//        return this.quota;
+//    }
+    public native MetricConfig quota(Quota quota);
 
-    public long eventWindow() {
-        return eventWindow;
-    }
+    //    public MetricConfig quota(Quota quota) {
+//        this.quota = quota;w
+//        return this;
+//    }
+    public native long eventWindow();
 
-    public MetricConfig eventWindow(long window) {
-        this.eventWindow = window;
-        return this;
-    }
+//    public long eventWindow() {
+//        return eventWindow;
+//    }
 
-    public long timeWindowMs() {
-        return timeWindowMs;
-    }
+    public native MetricConfig eventWindow(long window);
+//    public MetricConfig eventWindow(long window) {
+//        this.eventWindow = window;
+//        return this;
+//    }
 
-    public MetricConfig timeWindow(long window, TimeUnit unit) {
-        this.timeWindowMs = TimeUnit.MILLISECONDS.convert(window, unit);
-        return this;
-    }
+    public native long timeWindowMs();
+//    public long timeWindowMs() {
+//        return timeWindowMs;
+//    }
 
-    public Map<String, String> tags() {
-        return this.tags;
-    }
+    public native MetricConfig timeWindowMs(long window);
+//    public MetricConfig timeWindow(long window, TimeUnit unit) {
+//        this.timeWindowMs = TimeUnit.MILLISECONDS.convert(window, unit);
+//        return this;
+//    }
 
-    public MetricConfig tags(Map<String, String> tags) {
-        this.tags = tags;
-        return this;
-    }
+    public native Map<String, String> tags();
+//    public Map<String, String> tags() {
+//        return this.tags;
+//    }
 
-    public int samples() {
-        return this.samples;
-    }
+    public native MetricConfig tags(Map<String, String> tags);
+//    public MetricConfig tags(Map<String, String> tags) {
+//        this.tags = tags;
+//        return this;
+//    }
 
-    public MetricConfig samples(int samples) {
-        if (samples < 1)
-            throw new IllegalArgumentException("The number of samples must be at least 1.");
-        this.samples = samples;
-        return this;
-    }
+    public native int samples();
+//    public int samples() {
+//        return this.samples;
+//    }
 
-    public Sensor.RecordingLevel recordLevel() {
-        return this.recordingLevel;
-    }
+    public native MetricConfig samples(int samples);
+//    public MetricConfig samples(int samples) {
+//        if (samples < 1)
+//            throw new IllegalArgumentException("The number of samples must be at least 1.");
+//        this.samples = samples;
+//        return this;
+//    }
 
-    public MetricConfig recordLevel(Sensor.RecordingLevel recordingLevel) {
-        this.recordingLevel = recordingLevel;
-        return this;
-    }
+    public native SensorRecordingLevel recordLevel();
+//    public Sensor.RecordingLevel recordLevel() {
+//        return this.recordingLevel;
+//    }
+
+    public native MetricConfig recordLevel(SensorRecordingLevel recordingLevel);
+//    public MetricConfig recordLevel(Sensor.RecordingLevel recordingLevel) {
+//        this.recordingLevel = recordingLevel;
+//        return this;
+//    }
 
 
 }

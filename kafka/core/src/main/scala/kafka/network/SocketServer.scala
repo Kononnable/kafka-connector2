@@ -6,7 +6,7 @@
  * (the "License"); you may not use this file except in compliance with
  * the License.  You may obtain a copy of the License at
  *
- *    http://www.apache.org/licenses/LICENSE-2.0
+ * http://www.apache.org/licenses/LICENSE-2.0
  *
  * Unless required by applicable law or agreed to in writing, software
  * distributed under the License is distributed on an "AS IS" BASIS,
@@ -99,8 +99,8 @@ class SocketServer(val config: KafkaConfig,
   private[network] val dataPlaneAcceptors = new ConcurrentHashMap[EndPoint, Acceptor]()
   val dataPlaneRequestChannel = new RequestChannel(maxQueuedRequests, DataPlaneMetricPrefix, time, apiVersionManager.newRequestMetrics)
   // control-plane
-  private var controlPlaneProcessorOpt : Option[Processor] = None
-  private[network] var controlPlaneAcceptorOpt : Option[Acceptor] = None
+  private var controlPlaneProcessorOpt: Option[Processor] = None
+  private[network] var controlPlaneAcceptorOpt: Option[Acceptor] = None
   val controlPlaneRequestChannelOpt: Option[RequestChannel] = config.controlPlaneListenerName.map(_ =>
     new RequestChannel(20, ControlPlaneMetricPrefix, time, apiVersionManager.newRequestMetrics))
 
@@ -282,7 +282,7 @@ class SocketServer(val config: KafkaConfig,
     }
   }
 
-  private def createAcceptor(endPoint: EndPoint, metricPrefix: String) : Acceptor = {
+  private def createAcceptor(endPoint: EndPoint, metricPrefix: String): Acceptor = {
     val sendBufferSize = config.socketSendBufferBytes
     val recvBufferSize = config.socketReceiveBufferBytes
     new Acceptor(endPoint, sendBufferSize, recvBufferSize, nodeId, connectionQuotas, metricPrefix, time)
@@ -354,7 +354,7 @@ class SocketServer(val config: KafkaConfig,
       if (acceptor != null) {
         acceptor.serverChannel.socket.getLocalPort
       } else {
-        controlPlaneAcceptorOpt.map (_.serverChannel.socket().getLocalPort).getOrElse(throw new KafkaException("Could not find listenerName : " + listenerName + " in data-plane or control-plane"))
+        controlPlaneAcceptorOpt.map(_.serverChannel.socket().getLocalPort).getOrElse(throw new KafkaException("Could not find listenerName : " + listenerName + " in data-plane or control-plane"))
       }
     } catch {
       case e: Exception =>
@@ -928,7 +928,9 @@ private[kafka] class Processor(val id: Int,
 
   private def processNewResponses(): Unit = {
     var currentResponse: RequestChannel.Response = null
-    while ({currentResponse = dequeueResponse(); currentResponse != null}) {
+    while ( {
+      currentResponse = dequeueResponse(); currentResponse != null
+    }) {
       val channelId = currentResponse.request.context.connectionId
       try {
         currentResponse match {
@@ -988,7 +990,7 @@ private[kafka] class Processor(val id: Int,
     val pollTimeout = if (newConnections.isEmpty) 300 else 0
     try selector.poll(pollTimeout)
     catch {
-      case e @ (_: IllegalStateException | _: IOException) =>
+      case e@(_: IllegalStateException | _: IOException) =>
         // The exception is not re-thrown and any completed sends/receives/connections/disconnections
         // from this poll will be processed.
         error(s"Processor $id poll failed", e)
@@ -1255,8 +1257,11 @@ private[kafka] class Processor(val id: Int,
  */
 sealed trait ConnectionQuotaEntity {
   def sensorName: String
+
   def metricName: String
+
   def sensorExpiration: Long
+
   def metricTags: Map[String, String]
 }
 
@@ -1270,22 +1275,31 @@ object ConnectionQuotas {
 
   private case class ListenerQuotaEntity(listenerName: String) extends ConnectionQuotaEntity {
     override def sensorName: String = s"$ConnectionRateSensorName-$listenerName"
+
     override def sensorExpiration: Long = Long.MaxValue
+
     override def metricName: String = ConnectionRateMetricName
+
     override def metricTags: Map[String, String] = Map(ListenerMetricTag -> listenerName)
   }
 
   private case object BrokerQuotaEntity extends ConnectionQuotaEntity {
     override def sensorName: String = ConnectionRateSensorName
+
     override def sensorExpiration: Long = Long.MaxValue
+
     override def metricName: String = s"broker-$ConnectionRateMetricName"
+
     override def metricTags: Map[String, String] = Map.empty
   }
 
   private case class IpQuotaEntity(ip: InetAddress) extends ConnectionQuotaEntity {
     override def sensorName: String = s"$ConnectionRateSensorName-${ip.getHostAddress}"
+
     override def sensorExpiration: Long = InactiveSensorExpirationTimeSeconds
+
     override def metricName: String = ConnectionRateMetricName
+
     override def metricTags: Map[String, String] = Map(IpMetricTag -> ip.getHostAddress)
   }
 }
@@ -1352,14 +1366,14 @@ class ConnectionQuotas(config: KafkaConfig, time: Time, metrics: Metrics) extend
    * If an IP is given, metric config will be updated only for the given IP, otherwise
    * all metric configs will be checked and updated if required.
    *
-   * @param ip ip to update or default if None
+   * @param ip                ip to update or default if None
    * @param maxConnectionRate new connection rate, or resets entity to default if None
    */
   def updateIpConnectionRateQuota(ip: Option[InetAddress], maxConnectionRate: Option[Int]): Unit = synchronized {
     def isIpConnectionRateMetric(metricName: MetricName) = {
       metricName.name == ConnectionRateMetricName &&
-      metricName.group == MetricsGroup &&
-      metricName.tags.containsKey(IpMetricTag)
+        metricName.group == MetricsGroup &&
+        metricName.tags.containsKey(IpMetricTag)
     }
 
     def shouldUpdateQuota(metric: KafkaMetric, quotaLimit: Int) = {
@@ -1502,7 +1516,7 @@ class ConnectionQuotas(config: KafkaConfig, time: Time, metrics: Metrics) extend
    * limit, whichever the longest. The delay is capped to the quota window size defined by QuotaWindowSizeSecondsProp
    *
    * @param listenerName listener for which calculate the delay
-   * @param timeMs current time in milliseconds
+   * @param timeMs       current time in milliseconds
    * @return delay in milliseconds
    */
   private def recordConnectionAndGetThrottleTimeMs(listenerName: ListenerName, timeMs: Long): Long = {
@@ -1534,8 +1548,8 @@ class ConnectionQuotas(config: KafkaConfig, time: Time, metrics: Metrics) extend
    * also un-record the listener and broker connection if the IP gets throttled.
    *
    * @param listenerName listener to un-record connection
-   * @param throttleMs IP throttle time to record for listener
-   * @param timeMs current time in milliseconds
+   * @param throttleMs   IP throttle time to record for listener
+   * @param timeMs       current time in milliseconds
    */
   private def updateListenerMetrics(listenerName: ListenerName, throttleMs: Long, timeMs: Long): Unit = {
     if (!protectedListener(listenerName)) {
@@ -1557,7 +1571,7 @@ class ConnectionQuotas(config: KafkaConfig, time: Time, metrics: Metrics) extend
    * connection rate quota and creating the sensor's metric config is atomic.
    *
    * @param listenerName listener to unrecord connection if throttled
-   * @param address ip address to record connection
+   * @param address      ip address to record connection
    */
   private def recordIpConnectionMaybeThrottle(listenerName: ListenerName, address: InetAddress): Unit = {
     val connectionRateQuota = connectionRateForIp(address)
@@ -1579,6 +1593,7 @@ class ConnectionQuotas(config: KafkaConfig, time: Time, metrics: Metrics) extend
   /**
    * Records a new connection into a given connection acceptance rate sensor 'sensor' and returns throttle time
    * in milliseconds if quota got violated
+   *
    * @param sensor sensor to record connection
    * @param timeMs current time in milliseconds
    * @return throttle time in milliseconds if quota got violated, otherwise 0
@@ -1598,7 +1613,8 @@ class ConnectionQuotas(config: KafkaConfig, time: Time, metrics: Metrics) extend
   /**
    * Creates sensor for tracking the connection creation rate and corresponding connection rate quota for a given
    * listener or broker-wide, if listener is not provided.
-   * @param quotaLimit connection creation rate quota
+   *
+   * @param quotaLimit            connection creation rate quota
    * @param connectionQuotaEntity entity to create the sensor for
    */
   private def getOrCreateConnectionRateQuotaSensor(quotaLimit: Int, connectionQuotaEntity: ConnectionQuotaEntity): Sensor = {
@@ -1633,7 +1649,7 @@ class ConnectionQuotas(config: KafkaConfig, time: Time, metrics: Metrics) extend
 
   private def rateQuotaMetricConfig(quotaLimit: Int): MetricConfig = {
     new MetricConfig()
-      .timeWindow(config.quotaWindowSizeSeconds.toLong, TimeUnit.SECONDS)
+      .timeWindowMs(TimeUnit.MILLISECONDS.convert(config.quotaWindowSizeSeconds.toLong, TimeUnit.SECONDS))
       .samples(config.numQuotaSamples)
       .quota(new Quota(quotaLimit, true))
   }

@@ -19,6 +19,7 @@ package org.apache.kafka.streams;
 import org.apache.kafka.common.Metric;
 import org.apache.kafka.common.MetricName;
 import org.apache.kafka.common.metrics.Sensor;
+import org.apache.kafka.common.metrics.SensorRecordingLevel;
 
 import java.util.Map;
 
@@ -45,26 +46,26 @@ public interface StreamsMetrics {
      * Whenever a user records this sensor via {@link Sensor#record(double)} etc, it will be counted as one invocation
      * of the operation, and hence the rate / count metrics will be updated accordingly; and the recorded latency value
      * will be used to update the average / max latency as well.
-     *
+     * <p>
      * Note that you can add more metrics to this sensor after you created it, which can then be updated upon
      * {@link Sensor#record(double)} calls.
-     *
+     * <p>
      * The added sensor and its metrics can be removed with {@link #removeSensor(Sensor) removeSensor()}.
      *
-     * @param scopeName          name of the scope, which will be used as part of the metric type, e.g.: "stream-[scope]-metrics".
-     * @param entityName         name of the entity, which will be used as part of the metric tags, e.g.: "[scope]-id" = "[entity]".
-     * @param operationName      name of the operation, which will be used as the name of the metric, e.g.: "[operation]-latency-avg".
-     * @param recordingLevel     the recording level (e.g., INFO or DEBUG) for this sensor.
-     * @param tags               additional tags of the sensor
+     * @param scopeName      name of the scope, which will be used as part of the metric type, e.g.: "stream-[scope]-metrics".
+     * @param entityName     name of the entity, which will be used as part of the metric tags, e.g.: "[scope]-id" = "[entity]".
+     * @param operationName  name of the operation, which will be used as the name of the metric, e.g.: "[operation]-latency-avg".
+     * @param recordingLevel the recording level (e.g., INFO or DEBUG) for this sensor.
+     * @param tags           additional tags of the sensor
      * @return The added sensor.
-     * @see #addRateTotalSensor(String, String, String, Sensor.RecordingLevel, String...)
+     * @see #addRateTotalSensor(String, String, String, SensorRecordingLevel, String...)
      * @see #removeSensor(Sensor)
-     * @see #addSensor(String, Sensor.RecordingLevel, Sensor...)
+     * @see #addSensor(String, SensorRecordingLevel, Sensor...)
      */
     Sensor addLatencyRateTotalSensor(final String scopeName,
                                      final String entityName,
                                      final String operationName,
-                                     final Sensor.RecordingLevel recordingLevel,
+                                     final SensorRecordingLevel recordingLevel,
                                      final String... tags);
 
     /**
@@ -75,67 +76,68 @@ public interface StreamsMetrics {
      * </ol>
      * Whenever a user records this sensor via {@link Sensor#record(double)} etc,
      * it will be counted as one invocation of the operation, and hence the rate / count metrics will be updated accordingly.
-     *
+     * <p>
      * Note that you can add more metrics to this sensor after you created it, which can then be updated upon
      * {@link Sensor#record(double)} calls.
-     *
+     * <p>
      * The added sensor and its metrics can be removed with {@link #removeSensor(Sensor) removeSensor()}.
      *
-     * @param scopeName          name of the scope, which will be used as part of the metrics type, e.g.: "stream-[scope]-metrics".
-     * @param entityName         name of the entity, which will be used as part of the metric tags, e.g.: "[scope]-id" = "[entity]".
-     * @param operationName      name of the operation, which will be used as the name of the metric, e.g.: "[operation]-total".
-     * @param recordingLevel     the recording level (e.g., INFO or DEBUG) for this sensor.
-     * @param tags               additional tags of the sensor
+     * @param scopeName      name of the scope, which will be used as part of the metrics type, e.g.: "stream-[scope]-metrics".
+     * @param entityName     name of the entity, which will be used as part of the metric tags, e.g.: "[scope]-id" = "[entity]".
+     * @param operationName  name of the operation, which will be used as the name of the metric, e.g.: "[operation]-total".
+     * @param recordingLevel the recording level (e.g., INFO or DEBUG) for this sensor.
+     * @param tags           additional tags of the sensor
      * @return The added sensor.
-     * @see #addLatencyRateTotalSensor(String, String, String, Sensor.RecordingLevel, String...)
+     * @see #addLatencyRateTotalSensor(String, String, String, SensorRecordingLevel, String...)
      * @see #removeSensor(Sensor)
-     * @see #addSensor(String, Sensor.RecordingLevel, Sensor...)
+     * @see #addSensor(String, SensorRecordingLevel, Sensor...)
      */
     Sensor addRateTotalSensor(final String scopeName,
                               final String entityName,
                               final String operationName,
-                              final Sensor.RecordingLevel recordingLevel,
+                              final SensorRecordingLevel recordingLevel,
                               final String... tags);
 
     /**
      * Generic method to create a sensor.
      * Note that for most cases it is advisable to use
-     * {@link #addRateTotalSensor(String, String, String, Sensor.RecordingLevel, String...) addRateTotalSensor()}
-     * or {@link #addLatencyRateTotalSensor(String, String, String, Sensor.RecordingLevel, String...) addLatencyRateTotalSensor()}
+     * {@link #addRateTotalSensor(String, String, String, SensorRecordingLevel, String...) addRateTotalSensor()}
+     * or {@link #addLatencyRateTotalSensor(String, String, String, SensorRecordingLevel, String...) addLatencyRateTotalSensor()}
      * to ensure metric name well-formedness and conformity with the rest of the Kafka Streams code base.
      * However, if the above two methods are not sufficient, this method can also be used.
      *
      * @param name           name of the sensor.
      * @param recordingLevel the recording level (e.g., INFO or DEBUG) for this sensor
      * @return The added sensor.
-     * @see #addRateTotalSensor(String, String, String, Sensor.RecordingLevel, String...)
-     * @see #addLatencyRateTotalSensor(String, String, String, Sensor.RecordingLevel, String...)
+     * @see #addRateTotalSensor(String, String, String, SensorRecordingLevel, String...)
+     * @see #addLatencyRateTotalSensor(String, String, String, SensorRecordingLevel, String...)
      * @see #removeSensor(Sensor)
      */
     Sensor addSensor(final String name,
-                     final Sensor.RecordingLevel recordingLevel);
+                     final SensorRecordingLevel recordingLevel);
 
     /**
      * Generic method to create a sensor with parent sensors.
      * Note that for most cases it is advisable to use
-     * {@link #addRateTotalSensor(String, String, String, Sensor.RecordingLevel, String...) addRateTotalSensor()}
-     * or {@link #addLatencyRateTotalSensor(String, String, String, Sensor.RecordingLevel, String...) addLatencyRateTotalSensor()}
+     * {@link #addRateTotalSensor(String, String, String, SensorRecordingLevel, String...) addRateTotalSensor()}
+     * or {@link #addLatencyRateTotalSensor(String, String, String, SensorRecordingLevel, String...) addLatencyRateTotalSensor()}
      * to ensure metric name well-formedness and conformity with the rest of the Kafka Streams code base.
      * However, if the above two methods are not sufficient, this method can also be used.
      *
      * @param name           name of the sensor
      * @param recordingLevel the recording level (e.g., INFO or DEBUG) for this sensor
      * @return The added sensor.
-     * @see #addRateTotalSensor(String, String, String, Sensor.RecordingLevel, String...)
-     * @see #addLatencyRateTotalSensor(String, String, String, Sensor.RecordingLevel, String...)
+     * @see #addRateTotalSensor(String, String, String, SensorRecordingLevel, String...)
+     * @see #addLatencyRateTotalSensor(String, String, String, SensorRecordingLevel, String...)
      * @see #removeSensor(Sensor)
      */
     Sensor addSensor(final String name,
-                     final Sensor.RecordingLevel recordingLevel,
+                     final SensorRecordingLevel recordingLevel,
                      final Sensor... parents);
 
     /**
      * Remove a sensor.
+     *
      * @param sensor sensor to be removed
      */
     void removeSensor(final Sensor sensor);

@@ -17,9 +17,10 @@
 package org.apache.kafka.streams.state.internals.metrics;
 
 import org.apache.kafka.common.metrics.Sensor;
-import org.apache.kafka.common.metrics.Sensor.RecordingLevel;
+import org.apache.kafka.common.metrics.SensorRecordingLevel;
 import org.apache.kafka.streams.processor.internals.metrics.StreamsMetricsImpl;
 import org.junit.Test;
+
 import static org.mockito.Mockito.mock;
 import static org.mockito.Mockito.when;
 
@@ -49,11 +50,11 @@ public class StateStoreMetricsTest {
         final String descriptionOfAvg = "The average latency of calls to put";
         final String descriptionOfMax = "The maximum latency of calls to put";
         shouldGetSensor(
-            metricName,
-            descriptionOfRate,
-            descriptionOfAvg,
-            descriptionOfMax,
-            () -> StateStoreMetrics.putSensor(TASK_ID, STORE_TYPE, STORE_NAME, streamsMetrics)
+                metricName,
+                descriptionOfRate,
+                descriptionOfAvg,
+                descriptionOfMax,
+                () -> StateStoreMetrics.putSensor(TASK_ID, STORE_TYPE, STORE_NAME, streamsMetrics)
         );
     }
 
@@ -64,11 +65,11 @@ public class StateStoreMetricsTest {
         final String descriptionOfAvg = "The average latency of calls to put-if-absent";
         final String descriptionOfMax = "The maximum latency of calls to put-if-absent";
         shouldGetSensor(
-            metricName,
-            descriptionOfRate,
-            descriptionOfAvg,
-            descriptionOfMax,
-            () -> StateStoreMetrics.putIfAbsentSensor(TASK_ID, STORE_TYPE, STORE_NAME, streamsMetrics)
+                metricName,
+                descriptionOfRate,
+                descriptionOfAvg,
+                descriptionOfMax,
+                () -> StateStoreMetrics.putIfAbsentSensor(TASK_ID, STORE_TYPE, STORE_NAME, streamsMetrics)
         );
     }
 
@@ -79,11 +80,11 @@ public class StateStoreMetricsTest {
         final String descriptionOfAvg = "The average latency of calls to put-all";
         final String descriptionOfMax = "The maximum latency of calls to put-all";
         shouldGetSensor(
-            metricName,
-            descriptionOfRate,
-            descriptionOfAvg,
-            descriptionOfMax,
-            () -> StateStoreMetrics.putAllSensor(TASK_ID, STORE_TYPE, STORE_NAME, streamsMetrics)
+                metricName,
+                descriptionOfRate,
+                descriptionOfAvg,
+                descriptionOfMax,
+                () -> StateStoreMetrics.putAllSensor(TASK_ID, STORE_TYPE, STORE_NAME, streamsMetrics)
         );
     }
 
@@ -94,11 +95,11 @@ public class StateStoreMetricsTest {
         final String descriptionOfAvg = "The average latency of calls to fetch";
         final String descriptionOfMax = "The maximum latency of calls to fetch";
         shouldGetSensor(
-            metricName,
-            descriptionOfRate,
-            descriptionOfAvg,
-            descriptionOfMax,
-            () -> StateStoreMetrics.fetchSensor(TASK_ID, STORE_TYPE, STORE_NAME, streamsMetrics)
+                metricName,
+                descriptionOfRate,
+                descriptionOfAvg,
+                descriptionOfMax,
+                () -> StateStoreMetrics.fetchSensor(TASK_ID, STORE_TYPE, STORE_NAME, streamsMetrics)
         );
     }
 
@@ -109,11 +110,11 @@ public class StateStoreMetricsTest {
         final String descriptionOfAvg = "The average latency of calls to get";
         final String descriptionOfMax = "The maximum latency of calls to get";
         shouldGetSensor(
-            metricName,
-            descriptionOfRate,
-            descriptionOfAvg,
-            descriptionOfMax,
-            () -> StateStoreMetrics.getSensor(TASK_ID, STORE_TYPE, STORE_NAME, streamsMetrics)
+                metricName,
+                descriptionOfRate,
+                descriptionOfAvg,
+                descriptionOfMax,
+                () -> StateStoreMetrics.getSensor(TASK_ID, STORE_TYPE, STORE_NAME, streamsMetrics)
         );
     }
 
@@ -124,11 +125,11 @@ public class StateStoreMetricsTest {
         final String descriptionOfAvg = "The average latency of calls to all";
         final String descriptionOfMax = "The maximum latency of calls to all";
         shouldGetSensor(
-            metricName,
-            descriptionOfRate,
-            descriptionOfAvg,
-            descriptionOfMax,
-            () -> StateStoreMetrics.allSensor(TASK_ID, STORE_TYPE, STORE_NAME, streamsMetrics)
+                metricName,
+                descriptionOfRate,
+                descriptionOfAvg,
+                descriptionOfMax,
+                () -> StateStoreMetrics.allSensor(TASK_ID, STORE_TYPE, STORE_NAME, streamsMetrics)
         );
     }
 
@@ -139,11 +140,11 @@ public class StateStoreMetricsTest {
         final String descriptionOfAvg = "The average latency of calls to range";
         final String descriptionOfMax = "The maximum latency of calls to range";
         shouldGetSensor(
-            metricName,
-            descriptionOfRate,
-            descriptionOfAvg,
-            descriptionOfMax,
-            () -> StateStoreMetrics.rangeSensor(TASK_ID, STORE_TYPE, STORE_NAME, streamsMetrics)
+                metricName,
+                descriptionOfRate,
+                descriptionOfAvg,
+                descriptionOfMax,
+                () -> StateStoreMetrics.rangeSensor(TASK_ID, STORE_TYPE, STORE_NAME, streamsMetrics)
         );
     }
 
@@ -153,23 +154,23 @@ public class StateStoreMetricsTest {
         final String descriptionOfRate = "The average number of calls to prefix-scan per second";
         final String descriptionOfAvg = "The average latency of calls to prefix-scan";
         final String descriptionOfMax = "The maximum latency of calls to prefix-scan";
-        when(streamsMetrics.storeLevelSensor(TASK_ID, STORE_NAME, metricName, RecordingLevel.DEBUG))
+        when(streamsMetrics.storeLevelSensor(TASK_ID, STORE_NAME, metricName, SensorRecordingLevel.DEBUG))
                 .thenReturn(expectedSensor);
         when(streamsMetrics.storeLevelTagMap(TASK_ID, STORE_TYPE, STORE_NAME)).thenReturn(storeTagMap);
         StreamsMetricsImpl.addInvocationRateToSensor(
-            expectedSensor,
-            STORE_LEVEL_GROUP,
-            storeTagMap,
-            metricName,
-            descriptionOfRate
+                expectedSensor,
+                STORE_LEVEL_GROUP,
+                storeTagMap,
+                metricName,
+                descriptionOfRate
         );
         StreamsMetricsImpl.addAvgAndMaxToSensor(
-            expectedSensor,
-            STORE_LEVEL_GROUP,
-            storeTagMap,
-            latencyMetricName(metricName),
-            descriptionOfAvg,
-            descriptionOfMax
+                expectedSensor,
+                STORE_LEVEL_GROUP,
+                storeTagMap,
+                latencyMetricName(metricName),
+                descriptionOfAvg,
+                descriptionOfMax
         );
 
         final Sensor sensor = StateStoreMetrics.prefixScanSensor(TASK_ID, STORE_TYPE, STORE_NAME, streamsMetrics);
@@ -184,11 +185,11 @@ public class StateStoreMetricsTest {
         final String descriptionOfAvg = "The average latency of calls to flush";
         final String descriptionOfMax = "The maximum latency of calls to flush";
         shouldGetSensor(
-            metricName,
-            descriptionOfRate,
-            descriptionOfAvg,
-            descriptionOfMax,
-            () -> StateStoreMetrics.flushSensor(TASK_ID, STORE_TYPE, STORE_NAME, streamsMetrics)
+                metricName,
+                descriptionOfRate,
+                descriptionOfAvg,
+                descriptionOfMax,
+                () -> StateStoreMetrics.flushSensor(TASK_ID, STORE_TYPE, STORE_NAME, streamsMetrics)
         );
     }
 
@@ -199,11 +200,11 @@ public class StateStoreMetricsTest {
         final String descriptionOfAvg = "The average latency of calls to remove";
         final String descriptionOfMax = "The maximum latency of calls to remove";
         shouldGetSensor(
-            metricName,
-            descriptionOfRate,
-            descriptionOfAvg,
-            descriptionOfMax,
-            () -> StateStoreMetrics.removeSensor(TASK_ID, STORE_TYPE, STORE_NAME, streamsMetrics)
+                metricName,
+                descriptionOfRate,
+                descriptionOfAvg,
+                descriptionOfMax,
+                () -> StateStoreMetrics.removeSensor(TASK_ID, STORE_TYPE, STORE_NAME, streamsMetrics)
         );
     }
 
@@ -214,11 +215,11 @@ public class StateStoreMetricsTest {
         final String descriptionOfAvg = "The average latency of calls to delete";
         final String descriptionOfMax = "The maximum latency of calls to delete";
         shouldGetSensor(
-            metricName,
-            descriptionOfRate,
-            descriptionOfAvg,
-            descriptionOfMax,
-            () -> StateStoreMetrics.deleteSensor(TASK_ID, STORE_TYPE, STORE_NAME, streamsMetrics)
+                metricName,
+                descriptionOfRate,
+                descriptionOfAvg,
+                descriptionOfMax,
+                () -> StateStoreMetrics.deleteSensor(TASK_ID, STORE_TYPE, STORE_NAME, streamsMetrics)
         );
     }
 
@@ -229,11 +230,11 @@ public class StateStoreMetricsTest {
         final String descriptionOfAvg = "The average latency of restorations";
         final String descriptionOfMax = "The maximum latency of restorations";
         shouldGetSensor(
-            metricName,
-            descriptionOfRate,
-            descriptionOfAvg,
-            descriptionOfMax,
-            () -> StateStoreMetrics.restoreSensor(TASK_ID, STORE_TYPE, STORE_NAME, streamsMetrics)
+                metricName,
+                descriptionOfRate,
+                descriptionOfAvg,
+                descriptionOfMax,
+                () -> StateStoreMetrics.restoreSensor(TASK_ID, STORE_TYPE, STORE_NAME, streamsMetrics)
         );
     }
 
@@ -243,10 +244,10 @@ public class StateStoreMetricsTest {
         final String descriptionOfAvg = "The average count of buffered records";
         final String descriptionOfMax = "The maximum count of buffered records";
         shouldGetSuppressionBufferSensor(
-            metricName,
-            descriptionOfAvg,
-            descriptionOfMax,
-            () -> StateStoreMetrics.suppressionBufferCountSensor(TASK_ID, STORE_TYPE, BUFFER_NAME, streamsMetrics)
+                metricName,
+                descriptionOfAvg,
+                descriptionOfMax,
+                () -> StateStoreMetrics.suppressionBufferCountSensor(TASK_ID, STORE_TYPE, BUFFER_NAME, streamsMetrics)
         );
     }
 
@@ -256,10 +257,10 @@ public class StateStoreMetricsTest {
         final String descriptionOfAvg = "The average size of buffered records";
         final String descriptionOfMax = "The maximum size of buffered records";
         shouldGetSuppressionBufferSensor(
-            metricName,
-            descriptionOfAvg,
-            descriptionOfMax,
-            () -> StateStoreMetrics.suppressionBufferSizeSensor(TASK_ID, STORE_TYPE, BUFFER_NAME, streamsMetrics)
+                metricName,
+                descriptionOfAvg,
+                descriptionOfMax,
+                () -> StateStoreMetrics.suppressionBufferSizeSensor(TASK_ID, STORE_TYPE, BUFFER_NAME, streamsMetrics)
         );
     }
 
@@ -268,21 +269,21 @@ public class StateStoreMetricsTest {
         final String metricName = "expired-window-record-drop";
         final String descriptionOfRate = "The average number of dropped records due to an expired window per second";
         final String descriptionOfCount = "The total number of dropped records due to an expired window";
-        when(streamsMetrics.storeLevelSensor(TASK_ID, STORE_NAME, metricName, RecordingLevel.INFO))
+        when(streamsMetrics.storeLevelSensor(TASK_ID, STORE_NAME, metricName, SensorRecordingLevel.INFO))
                 .thenReturn(expectedSensor);
 
         when(streamsMetrics.storeLevelTagMap(TASK_ID, STORE_TYPE, STORE_NAME)).thenReturn(storeTagMap);
         StreamsMetricsImpl.addInvocationRateAndCountToSensor(
-            expectedSensor,
-            "stream-" + STORE_TYPE + "-metrics",
-            storeTagMap,
-            metricName,
-            descriptionOfRate,
-            descriptionOfCount
+                expectedSensor,
+                "stream-" + STORE_TYPE + "-metrics",
+                storeTagMap,
+                metricName,
+                descriptionOfRate,
+                descriptionOfCount
         );
 
         final Sensor sensor =
-            StateStoreMetrics.expiredWindowRecordDropSensor(TASK_ID, STORE_TYPE, STORE_NAME, streamsMetrics);
+                StateStoreMetrics.expiredWindowRecordDropSensor(TASK_ID, STORE_TYPE, STORE_NAME, streamsMetrics);
 
         assertThat(sensor, is(expectedSensor));
     }
@@ -292,28 +293,28 @@ public class StateStoreMetricsTest {
         final String metricName = "record-e2e-latency";
 
         final String e2eLatencyDescription =
-            "end-to-end latency of a record, measuring by comparing the record timestamp with the "
-                + "system time when it has been fully processed by the node";
+                "end-to-end latency of a record, measuring by comparing the record timestamp with the "
+                        + "system time when it has been fully processed by the node";
         final String descriptionOfAvg = "The average " + e2eLatencyDescription;
         final String descriptionOfMin = "The minimum " + e2eLatencyDescription;
         final String descriptionOfMax = "The maximum " + e2eLatencyDescription;
 
-        when(streamsMetrics.storeLevelSensor(TASK_ID, STORE_NAME, metricName, RecordingLevel.TRACE))
+        when(streamsMetrics.storeLevelSensor(TASK_ID, STORE_NAME, metricName, SensorRecordingLevel.TRACE))
                 .thenReturn(expectedSensor);
         when(streamsMetrics.storeLevelTagMap(TASK_ID, STORE_TYPE, STORE_NAME)).thenReturn(storeTagMap);
 
         StreamsMetricsImpl.addAvgAndMinAndMaxToSensor(
-            expectedSensor,
-            STORE_LEVEL_GROUP,
-            storeTagMap,
-            metricName,
-            descriptionOfAvg,
-            descriptionOfMin,
-            descriptionOfMax
+                expectedSensor,
+                STORE_LEVEL_GROUP,
+                storeTagMap,
+                metricName,
+                descriptionOfAvg,
+                descriptionOfMin,
+                descriptionOfMax
         );
 
         final Sensor sensor =
-            StateStoreMetrics.e2ELatencySensor(TASK_ID, STORE_TYPE, STORE_NAME, streamsMetrics);
+                StateStoreMetrics.e2ELatencySensor(TASK_ID, STORE_TYPE, STORE_NAME, streamsMetrics);
 
         assertThat(sensor, is(expectedSensor));
     }
@@ -327,25 +328,25 @@ public class StateStoreMetricsTest {
                 TASK_ID,
                 STORE_NAME,
                 metricName,
-                RecordingLevel.DEBUG
+                SensorRecordingLevel.DEBUG
         )).thenReturn(expectedSensor);
 
         StreamsMetricsImpl.addInvocationRateToSensor(
-            expectedSensor,
-            STORE_LEVEL_GROUP,
-            storeTagMap,
-            metricName,
-            descriptionOfRate
+                expectedSensor,
+                STORE_LEVEL_GROUP,
+                storeTagMap,
+                metricName,
+                descriptionOfRate
         );
         when(streamsMetrics.storeLevelTagMap(TASK_ID, STORE_TYPE, STORE_NAME)).thenReturn(storeTagMap);
 
         StreamsMetricsImpl.addAvgAndMaxToSensor(
-            expectedSensor,
-            STORE_LEVEL_GROUP,
-            storeTagMap,
-            latencyMetricName(metricName),
-            descriptionOfAvg,
-            descriptionOfMax
+                expectedSensor,
+                STORE_LEVEL_GROUP,
+                storeTagMap,
+                latencyMetricName(metricName),
+                descriptionOfAvg,
+                descriptionOfMax
         );
 
         final Sensor sensor = sensorSupplier.get();
@@ -362,17 +363,17 @@ public class StateStoreMetricsTest {
                                                   final String descriptionOfMax,
                                                   final Supplier<Sensor> sensorSupplier) {
         final Map<String, String> tagMap;
-        when(streamsMetrics.storeLevelSensor(TASK_ID, BUFFER_NAME, metricName, RecordingLevel.DEBUG)).thenReturn(expectedSensor);
+        when(streamsMetrics.storeLevelSensor(TASK_ID, BUFFER_NAME, metricName, SensorRecordingLevel.DEBUG)).thenReturn(expectedSensor);
         tagMap = storeTagMap;
         when(streamsMetrics.storeLevelTagMap(TASK_ID, STORE_TYPE, BUFFER_NAME)).thenReturn(tagMap);
 
         StreamsMetricsImpl.addAvgAndMaxToSensor(
-            expectedSensor,
-            STORE_LEVEL_GROUP,
-            tagMap,
-            metricName,
-            descriptionOfAvg,
-            descriptionOfMax
+                expectedSensor,
+                STORE_LEVEL_GROUP,
+                tagMap,
+                metricName,
+                descriptionOfAvg,
+                descriptionOfMax
         );
 
         final Sensor sensor = sensorSupplier.get();

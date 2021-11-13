@@ -76,6 +76,18 @@ impl CloneToFromJava for i32 {
         obj.i()
     }
 }
+impl CloneToFromJava for u32 {
+    fn clone_to_java<'a>(&self, _env: JNIEnv<'a>) -> jni::errors::Result<JValue<'a>> {
+        Ok(JValue::Int(*self as i32))
+    }
+
+    fn clone_from_java(_env: JNIEnv, obj: JValue) -> jni::errors::Result<Self>
+    where
+        Self: Sized,
+    {
+        Ok(obj.i()? as u32)
+    }
+}
 
 impl CloneToFromJava for i64 {
     fn clone_to_java<'a>(&self, _env: JNIEnv<'a>) -> jni::errors::Result<JValue<'a>> {
@@ -87,6 +99,30 @@ impl CloneToFromJava for i64 {
         Self: Sized,
     {
         obj.j()
+    }
+}
+impl CloneToFromJava for u64 {
+    fn clone_to_java<'a>(&self, _env: JNIEnv<'a>) -> jni::errors::Result<JValue<'a>> {
+        Ok(JValue::Long(*self as i64))
+    }
+
+    fn clone_from_java(_env: JNIEnv, obj: JValue) -> jni::errors::Result<Self>
+    where
+        Self: Sized,
+    {
+        Ok(obj.j()? as u64)
+    }
+}
+impl CloneToFromJava for u128 {
+    fn clone_to_java<'a>(&self, _env: JNIEnv<'a>) -> jni::errors::Result<JValue<'a>> {
+        Ok(JValue::Long(*self as i64))
+    }
+
+    fn clone_from_java(_env: JNIEnv, obj: JValue) -> jni::errors::Result<Self>
+    where
+        Self: Sized,
+    {
+        Ok(obj.j()? as u128)
     }
 }
 
