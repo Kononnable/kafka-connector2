@@ -20,6 +20,7 @@ import org.apache.kafka.common.MetricName;
 import org.apache.kafka.common.metrics.CompoundStat;
 import org.apache.kafka.common.metrics.Measurable;
 import org.apache.kafka.common.metrics.MetricConfig;
+import org.apache.kafka.common.metrics.NamedMeasurable;
 import org.apache.kafka.common.metrics.stats.Histogram.BinScheme;
 import org.apache.kafka.common.metrics.stats.Histogram.ConstantBinScheme;
 
@@ -87,7 +88,7 @@ public class Frequencies extends SampledStat implements CompoundStat {
         super(0.0); // initial value is unused by this implementation
         if (max < min) {
             throw new IllegalArgumentException("The maximum value " + max
-                                                       + " must be greater than the minimum value " + min);
+                    + " must be greater than the minimum value " + min);
         }
         if (buckets < 1) {
             throw new IllegalArgumentException("Must be at least 1 bucket");
@@ -99,7 +100,7 @@ public class Frequencies extends SampledStat implements CompoundStat {
         for (Frequency freq : frequencies) {
             if (min > freq.centerValue() || max < freq.centerValue()) {
                 throw new IllegalArgumentException("The frequency centered at '" + freq.centerValue()
-                                                           + "' is not within the range [" + min + "," + max + "]");
+                        + "' is not within the range [" + min + "," + max + "]");
             }
         }
         double halfBucketWidth = (max - min) / (buckets - 1) / 2.0;

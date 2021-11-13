@@ -18,7 +18,7 @@ package org.apache.kafka.common.metrics.stats;
 
 import org.apache.kafka.common.Metric;
 import org.apache.kafka.common.MetricName;
-import org.apache.kafka.common.metrics.CompoundStat.NamedMeasurable;
+import org.apache.kafka.common.metrics.NamedMeasurable;
 import org.apache.kafka.common.metrics.JmxReporter;
 import org.apache.kafka.common.metrics.MetricConfig;
 import org.apache.kafka.common.metrics.Metrics;
@@ -57,19 +57,19 @@ public class FrequenciesTest {
     @Test
     public void testFrequencyCenterValueAboveMax() {
         assertThrows(IllegalArgumentException.class,
-            () -> new Frequencies(4, 1.0, 4.0, freq("1", 1.0), freq("2", 20.0)));
+                () -> new Frequencies(4, 1.0, 4.0, freq("1", 1.0), freq("2", 20.0)));
     }
 
     @Test
     public void testFrequencyCenterValueBelowMin() {
         assertThrows(IllegalArgumentException.class,
-            () -> new Frequencies(4, 1.0, 4.0, freq("1", 1.0), freq("2", -20.0)));
+                () -> new Frequencies(4, 1.0, 4.0, freq("1", 1.0), freq("2", -20.0)));
     }
 
     @Test
     public void testMoreFrequencyParametersThanBuckets() {
         assertThrows(IllegalArgumentException.class,
-            () -> new Frequencies(1, 1.0, 4.0, freq("1", 1.0), freq("2", -20.0)));
+                () -> new Frequencies(1, 1.0, 4.0, freq("1", 1.0), freq("2", -20.0)));
     }
 
     @Test
@@ -108,10 +108,10 @@ public class FrequenciesTest {
         MetricName name3 = name("3");
         MetricName name4 = name("4");
         Frequencies frequencies = new Frequencies(4, 1.0, 4.0,
-                                                  new Frequency(name1, 1.0),
-                                                  new Frequency(name2, 2.0),
-                                                  new Frequency(name3, 3.0),
-                                                  new Frequency(name4, 4.0));
+                new Frequency(name1, 1.0),
+                new Frequency(name2, 2.0),
+                new Frequency(name3, 3.0),
+                new Frequency(name4, 4.0));
         Sensor sensor = metrics.sensor("test", config);
         sensor.add(frequencies);
         Metric metric1 = this.metrics.metrics().get(name1);

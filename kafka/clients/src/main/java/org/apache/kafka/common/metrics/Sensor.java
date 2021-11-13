@@ -19,7 +19,7 @@ package org.apache.kafka.common.metrics;
 import java.util.function.Supplier;
 
 import org.apache.kafka.common.MetricName;
-import org.apache.kafka.common.metrics.CompoundStat.NamedMeasurable;
+import org.apache.kafka.common.metrics.NamedMeasurable;
 import org.apache.kafka.common.metrics.stats.TokenBucket;
 import org.apache.kafka.common.utils.Time;
 

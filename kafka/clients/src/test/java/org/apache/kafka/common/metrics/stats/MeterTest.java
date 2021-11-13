@@ -23,7 +23,7 @@ import java.util.List;
 import java.util.Map;
 
 import org.apache.kafka.common.MetricName;
-import org.apache.kafka.common.metrics.CompoundStat.NamedMeasurable;
+import org.apache.kafka.common.metrics.NamedMeasurable;
 import org.apache.kafka.common.metrics.MetricConfig;
 import org.junit.jupiter.api.Test;
 

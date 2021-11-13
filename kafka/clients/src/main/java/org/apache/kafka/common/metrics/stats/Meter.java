@@ -23,6 +23,7 @@ import java.util.concurrent.TimeUnit;
 import org.apache.kafka.common.MetricName;
 import org.apache.kafka.common.metrics.CompoundStat;
 import org.apache.kafka.common.metrics.MetricConfig;
+import org.apache.kafka.common.metrics.NamedMeasurable;
 
 
 /**
@@ -71,8 +72,8 @@ public class Meter implements CompoundStat {
     @Override
     public List<NamedMeasurable> stats() {
         return Arrays.asList(
-            new NamedMeasurable(totalMetricName, total),
-            new NamedMeasurable(rateMetricName, rate));
+                new NamedMeasurable(totalMetricName, total),
+                new NamedMeasurable(rateMetricName, rate));
     }
 
     @Override
@@ -86,10 +87,10 @@ public class Meter implements CompoundStat {
     @Override
     public String toString() {
         return "Meter(" +
-            "rate=" + rate +
-            ", total=" + total +
-            ", rateMetricName=" + rateMetricName +
-            ", totalMetricName=" + totalMetricName +
-            ')';
+                "rate=" + rate +
+                ", total=" + total +
+                ", rateMetricName=" + rateMetricName +
+                ", totalMetricName=" + totalMetricName +
+                ')';
     }
 }

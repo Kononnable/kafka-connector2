@@ -19,7 +19,7 @@ pub trait CloneToFromJava {
 }
 
 macro_rules! clone_to_from_java_for_struct {
-    ($struct_name:ident, $class_name:literal) => {
+    ($struct_name:ty, $class_name:literal) => {
         impl crate::clone_to_from_java::CloneToFromJava for $struct_name {
             fn clone_to_java<'a>(&self, env: JNIEnv<'a>) -> jni::errors::Result<JValue<'a>> {
                 let class = env.find_class($class_name)?;
