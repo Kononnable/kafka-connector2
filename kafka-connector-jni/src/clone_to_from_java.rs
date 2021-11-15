@@ -37,10 +37,29 @@ macro_rules! clone_to_from_java_for_struct {
                     return Err(jni::errors::Error::JavaException);
                 }
                 let ptr = env.get_field(obj, "rustPointer", "J")?.j()?;
-                let record_header = unsafe { Box::from_raw(ptr as *mut Self) };
-                let clone = record_header.as_ref().clone();
-                let _ptr = Box::into_raw(record_header);
+                let this = unsafe { Box::from_raw(ptr as *mut Self) };
+                let clone = this.as_ref().clone();
+                let _ptr = Box::into_raw(this);
                 Ok(clone)
+            }
+        }
+        impl $struct_name {
+            fn replace_java_obj<'a>(
+                self,
+                env: JNIEnv<'a>,
+                obj: JObject,
+            ) -> jni::errors::Result<()> {
+                let class = env.find_class($class_name)?;
+                if !env.is_instance_of(obj, class)? {
+                    env.throw_new("java/lang/Exception", "Wrong object class")?;
+                    return Err(jni::errors::Error::JavaException);
+                }
+
+                let old_ptr = env.get_field(obj, "rustPointer", "J")?.j()?;
+                let old = unsafe { Box::from_raw(old_ptr as *mut Self) };
+                let ptr = Box::into_raw(Box::new(self));
+                env.set_field(obj, "rustPointer", "J", JValue::Long(ptr as i64))?;
+                Ok(())
             }
         }
     };

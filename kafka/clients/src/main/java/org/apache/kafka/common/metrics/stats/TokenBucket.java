@@ -17,6 +17,8 @@
 package org.apache.kafka.common.metrics.stats;
 
 import java.util.concurrent.TimeUnit;
+
+import org.apache.kafka.RustLib;
 import org.apache.kafka.common.metrics.MeasurableStat;
 import org.apache.kafka.common.metrics.MetricConfig;
 import org.apache.kafka.common.metrics.Quota;
@@ -26,14 +28,14 @@ import static org.apache.kafka.common.metrics.internals.MetricsUtils.convert;
 /**
  * The {@link TokenBucket} is a {@link MeasurableStat} implementing a token bucket algorithm
  * that is usable within a {@link org.apache.kafka.common.metrics.Sensor}.
- *
+ * <p>
  * The {@link Quota#bound()} defined the refill rate of the bucket while the maximum burst or
  * the maximum number of credits of the bucket is defined by
  * {@link MetricConfig#samples() * MetricConfig#timeWindowMs() * Quota#bound()}.
- *
+ * <p>
  * The quota is considered as exhausted when the amount of remaining credits in the bucket
  * is below zero. The enforcement is done by the {@link org.apache.kafka.common.metrics.Sensor}.
- *
+ * <p>
  * Token Bucket vs Rate based Quota:
  * The current sampled rate based quota does not cope well with bursty workloads. The issue is
  * that a unique and large sample can hold the average above the quota until it is discarded.
@@ -47,7 +49,7 @@ import static org.apache.kafka.common.metrics.internals.MetricsUtils.convert;
  * computed as follow: ((R - Q / Q * S * W)) = ((5.6 - 5) / 5 * 100 * 1) = 12 secs. In practice,
  * the average rate won't go below the quota before the burst is dropped from the samples so one
  * must wait 100s (S * W).
- *
+ * <p>
  * The token bucket relies on continuously updated amount of credits. Therefore, it does not
  * suffers from the above issue. The same example would work as follow:
  * - Quota (Q) = 5
@@ -56,55 +58,82 @@ import static org.apache.kafka.common.metrics.internals.MetricsUtils.convert;
  * bucket to zero.
  */
 public class TokenBucket implements MeasurableStat {
-    private final TimeUnit unit;
-    private double tokens;
-    private long lastUpdateMs;
+
+    static {
+        RustLib.load();
+    }
+
+    private long rustPointer;
+
+    public native void rustConstructor(TimeUnit unit);
+
+    public native void rustDeconstructor();
+
+    @Override
+    protected void finalize() throws Throwable {
+        rustDeconstructor();
+        super.finalize();
+    }
+
+
+//    private final TimeUnit unit;
+//    private double tokens;
+//    private long lastUpdateMs;
 
     public TokenBucket() {
         this(TimeUnit.SECONDS);
     }
 
     public TokenBucket(TimeUnit unit) {
-        this.unit = unit;
-        this.tokens = 0;
-        this.lastUpdateMs = 0;
+        rustConstructor(unit);
+//        this.unit = unit;
+//        this.tokens = 0;
+//        this.lastUpdateMs = 0;
     }
 
     @Override
-    public double measure(final MetricConfig config, final long timeMs) {
-        if (config.quota() == null)
-            return Long.MAX_VALUE;
-        final double quota = config.quota().bound();
-        final double burst = burst(config);
-        refill(quota, burst, timeMs);
-        return this.tokens;
-    }
+    public native double measure(final MetricConfig config, final long timeMs);
+//    public double measure(final MetricConfig config, final long timeMs) {
+//        if (config.quota() == null)
+//            return Long.MAX_VALUE;
+//        final double quota = config.quota().bound();
+//        final double burst = burst(config);
+//        refill(quota, burst, timeMs);
+//        return this.tokens;
+//    }
 
     @Override
-    public void record(final MetricConfig config, final double value, final long timeMs) {
-        if (config.quota() == null)
-            return;
-        final double quota = config.quota().bound();
-        final double burst = burst(config);
-        refill(quota, burst, timeMs);
-        this.tokens = Math.min(burst, this.tokens - value);
-    }
+    public native void record(final MetricConfig config, final double value, final long timeMs);
+//    public void record(final MetricConfig config, final double value, final long timeMs) {
+//        if (config.quota() == null)
+//            return;
+//        final double quota = config.quota().bound();
+//        final double burst = burst(config);
+//        refill(quota, burst, timeMs);
+//        this.tokens = Math.min(burst, this.tokens - value);
+//    }
 
-    private void refill(final double quota, final double burst, final long timeMs) {
-        this.tokens = Math.min(burst, this.tokens + quota * convert(timeMs - lastUpdateMs, unit));
-        this.lastUpdateMs = timeMs;
-    }
+//    private void refill(final double quota, final double burst, final long timeMs) {
+//        this.tokens = Math.min(burst, this.tokens + quota * convert(timeMs - lastUpdateMs, unit));
+//        this.lastUpdateMs = timeMs;
+//    }
 
-    private double burst(final MetricConfig config) {
-        return config.samples() * convert(config.timeWindowMs(), unit) * config.quota().bound();
-    }
+//    private double burst(final MetricConfig config) {
+//        return config.samples() * convert(config.timeWindowMs(), unit) * config.quota().bound();
+//    }
+
+    private native TimeUnit unit();
+
+    private native double tokens();
+
+    private native long lastUpdateMs();
 
     @Override
     public String toString() {
         return "TokenBucket(" +
-            "unit=" + unit +
-            ", tokens=" + tokens +
-            ", lastUpdateMs=" + lastUpdateMs +
-            ')';
+                "unit=" + unit() +
+                ", tokens=" + tokens() +
+                ", lastUpdateMs=" + lastUpdateMs() +
+                ')';
     }
 }
