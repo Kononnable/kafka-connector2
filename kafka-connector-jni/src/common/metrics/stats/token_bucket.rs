@@ -3,6 +3,7 @@ use crate::{
     common::metrics::{
         internals::metric_utils::TimeUnit, metric_config::MetricConfig, quota::Quota,
     },
+    java_stored_object::FromJObject,
 };
 use jni::{
     objects::{JObject, JValue},
@@ -145,16 +146,8 @@ pub extern "system" fn Java_org_apache_kafka_common_metrics_stats_TokenBucket_me
 ) -> jdouble {
     let result = || -> jni::errors::Result<_> {
         let config = MetricConfig::clone_from_java(env, config.into())?;
-        let mut token_bucket = TokenBucket::clone_from_java(env, obj.into())?;
-        let ret = token_bucket.measure(&config, time_ms as u128);
-        token_bucket.replace_java_obj(env, obj)?;
-        Ok(ret)
-        // modify_java_obj(
-        //     env,
-        //     obj,
-        //     "org/apache/kafka/common/metrics/stats/TokenBucket",
-        //     |x: &mut TokenBucket| x.measure(&config, time_ms as u128),
-        // )
+        let mut token_bucket = TokenBucket::from_jobject(env, obj)?;
+        Ok(token_bucket.modify(|bucket| bucket.measure(&config, time_ms as u128)))
     }();
     match result {
         Ok(v) => v,
@@ -178,41 +171,12 @@ pub extern "system" fn Java_org_apache_kafka_common_metrics_stats_TokenBucket_re
 ) {
     let result = || -> jni::errors::Result<_> {
         let config = MetricConfig::clone_from_java(env, config.into())?;
-        let mut token_bucket = TokenBucket::clone_from_java(env, obj.into())?;
-        token_bucket.record(&config, value, time_ms as u128);
-        token_bucket.replace_java_obj(env, obj)?;
+        let mut token_bucket = TokenBucket::from_jobject(env, obj)?;
+        token_bucket.modify(|bucket| bucket.record(&config, value, time_ms as u128));
         Ok(())
-        // modify_java_obj(
-        //     env,
-        //     obj,
-        //     "org/apache/kafka/common/metrics/stats/TokenBucket",
-        //     |x: &mut TokenBucket| x.record(&config, value, time_ms as u128),
-        // )
     }();
     match result {
         Ok(_) | Err(jni::errors::Error::JavaException) => (),
         _ => panic!("{:?}", result),
     }
 }
-
-// fn modify_java_obj<T, F, R>(
-//     env: JNIEnv,
-//     obj: JObject,
-//     class_name: &str,
-//     mut func: F,
-// ) -> jni::errors::Result<R>
-// where
-//     F: FnMut(&mut T) -> R,
-// {
-//     let class = env.find_class(class_name)?;
-//     if !env.is_instance_of(obj, class)? {
-//         env.throw_new("java/lang/Exception", "Wrong object class")?;
-//         return Err(jni::errors::Error::JavaException);
-//     }
-//     let ptr = env.get_field(obj, "rustPointer", "J")?.j()?;
-//     let mut this = unsafe { Box::from_raw(ptr as *mut T) };
-//     let ret = func(&mut this);
-
-//     let _ptr = Box::into_raw(this);
-//     Ok(ret)
-// }

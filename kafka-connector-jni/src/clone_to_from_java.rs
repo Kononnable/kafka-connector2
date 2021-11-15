@@ -43,23 +43,12 @@ macro_rules! clone_to_from_java_for_struct {
                 Ok(clone)
             }
         }
-        impl $struct_name {
-            fn replace_java_obj<'a>(
-                self,
-                env: JNIEnv<'a>,
+        impl crate::java_stored_object::FromJObject for $struct_name {
+            fn from_jobject(
+                env: JNIEnv,
                 obj: JObject,
-            ) -> jni::errors::Result<()> {
-                let class = env.find_class($class_name)?;
-                if !env.is_instance_of(obj, class)? {
-                    env.throw_new("java/lang/Exception", "Wrong object class")?;
-                    return Err(jni::errors::Error::JavaException);
-                }
-
-                let old_ptr = env.get_field(obj, "rustPointer", "J")?.j()?;
-                let old = unsafe { Box::from_raw(old_ptr as *mut Self) };
-                let ptr = Box::into_raw(Box::new(self));
-                env.set_field(obj, "rustPointer", "J", JValue::Long(ptr as i64))?;
-                Ok(())
+            ) -> jni::errors::Result<crate::java_stored_object::JavaStoredObject<Self>> {
+                crate::java_stored_object::JavaStoredObject::new(env, obj, $class_name)
             }
         }
     };
