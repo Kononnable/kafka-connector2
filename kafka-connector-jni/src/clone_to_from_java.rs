@@ -78,7 +78,11 @@ impl CloneToFromJava for i32 {
 }
 impl CloneToFromJava for u32 {
     fn clone_to_java<'a>(&self, _env: JNIEnv<'a>) -> jni::errors::Result<JValue<'a>> {
-        Ok(JValue::Int(*self as i32))
+        Ok(match *self {
+            u32::MAX => JValue::Int(i32::MAX),
+            u32::MIN => JValue::Int(i32::MIN),
+            v => JValue::Int(v as i32),
+        })
     }
 
     fn clone_from_java(_env: JNIEnv, obj: JValue) -> jni::errors::Result<Self>
@@ -103,7 +107,11 @@ impl CloneToFromJava for i64 {
 }
 impl CloneToFromJava for u64 {
     fn clone_to_java<'a>(&self, _env: JNIEnv<'a>) -> jni::errors::Result<JValue<'a>> {
-        Ok(JValue::Long(*self as i64))
+        Ok(match *self {
+            u64::MAX => JValue::Long(i64::MAX),
+            u64::MIN => JValue::Long(i64::MIN),
+            v => JValue::Long(v as i64),
+        })
     }
 
     fn clone_from_java(_env: JNIEnv, obj: JValue) -> jni::errors::Result<Self>
@@ -115,7 +123,11 @@ impl CloneToFromJava for u64 {
 }
 impl CloneToFromJava for u128 {
     fn clone_to_java<'a>(&self, _env: JNIEnv<'a>) -> jni::errors::Result<JValue<'a>> {
-        Ok(JValue::Long(*self as i64))
+        Ok(match *self {
+            u128::MAX => JValue::Long(i64::MAX),
+            u128::MIN => JValue::Long(i64::MIN),
+            v => JValue::Long(v as i64),
+        })
     }
 
     fn clone_from_java(_env: JNIEnv, obj: JValue) -> jni::errors::Result<Self>

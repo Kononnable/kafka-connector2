@@ -24,7 +24,7 @@ impl Default for MetricConfig {
         Self {
             quota: Default::default(),
             samples: 2,
-            event_window: i64::MAX as u64,
+            event_window: u64::MAX,
             time_window_ms: Duration::from_secs(30).as_millis(),
             tags: Default::default(),
             record_level: SensorRecordingLevel::Info,
