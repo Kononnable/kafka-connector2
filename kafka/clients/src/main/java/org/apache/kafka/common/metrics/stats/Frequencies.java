@@ -17,10 +17,7 @@
 package org.apache.kafka.common.metrics.stats;
 
 import org.apache.kafka.common.MetricName;
-import org.apache.kafka.common.metrics.CompoundStat;
-import org.apache.kafka.common.metrics.Measurable;
-import org.apache.kafka.common.metrics.MetricConfig;
-import org.apache.kafka.common.metrics.NamedMeasurable;
+import org.apache.kafka.common.metrics.*;
 import org.apache.kafka.common.metrics.stats.Histogram.BinScheme;
 import org.apache.kafka.common.metrics.stats.Histogram.ConstantBinScheme;
 
@@ -42,7 +39,53 @@ import java.util.List;
  * object is a {@link CompoundStat}, and so it can be {@link org.apache.kafka.common.metrics.Sensor#add(CompoundStat)
  * added directly to a Sensor} so the metrics are created automatically.
  */
-public class Frequencies extends SampledStat implements CompoundStat {
+public class Frequencies implements CompoundStat, MeasurableStat {
+
+    private int current = 0;
+    protected List<HistogramSample> samples;
+
+    @Override
+    public void record(MetricConfig config, double value, long timeMs) {
+        HistogramSample sample = current(timeMs);
+        if (sample.isComplete(timeMs, config))
+            sample = advance(config, timeMs);
+        update(sample, value);
+        sample.eventCount += 1;
+    }
+
+    public HistogramSample current(long timeMs) {
+        if (samples.size() == 0)
+            this.samples.add(newSample(timeMs));
+        return this.samples.get(this.current);
+    }
+
+    private HistogramSample advance(MetricConfig config, long timeMs) {
+        this.current = (this.current + 1) % config.samples();
+        if (this.current >= samples.size()) {
+            HistogramSample sample = newSample(timeMs);
+            this.samples.add(sample);
+            return sample;
+        } else {
+            HistogramSample sample = current(timeMs);
+            sample.reset(timeMs);
+            return sample;
+        }
+    }
+
+    /* Timeout any windows that have expired in the absence of any events */
+    protected void purgeObsoleteSamples(MetricConfig config, long now) {
+        long expireAge = config.samples() * config.timeWindowMs();
+        for (SampledStat.Sample sample : samples) {
+            if (now - sample.lastWindowMs >= expireAge)
+                sample.reset(now);
+        }
+    }
+
+    public double measure(MetricConfig config, long now) {
+        purgeObsoleteSamples(config, now);
+        return combine();
+    }
+
 
     /**
      * Create a Frequencies instance with metrics for the frequency of a boolean sensor that records 0.0 for
@@ -85,7 +128,7 @@ public class Frequencies extends SampledStat implements CompoundStat {
      *                                  {@link Frequency#centerValue() center value} within the specified range
      */
     public Frequencies(int buckets, double min, double max, Frequency... frequencies) {
-        super(0.0); // initial value is unused by this implementation
+        this.samples = new ArrayList<>(2);
         if (max < min) {
             throw new IllegalArgumentException("The maximum value " + max
                     + " must be greater than the minimum value " + min);
@@ -133,7 +176,7 @@ public class Frequencies extends SampledStat implements CompoundStat {
     public double frequency(MetricConfig config, long now, double centerValue) {
         purgeObsoleteSamples(config, now);
         long totalCount = 0;
-        for (Sample sample : samples) {
+        for (HistogramSample sample : samples) {
             totalCount += sample.eventCount;
         }
         if (totalCount == 0) {
@@ -142,8 +185,7 @@ public class Frequencies extends SampledStat implements CompoundStat {
         // Add up all of the counts in the bin corresponding to the center value
         float count = 0.0f;
         int binNum = binScheme.toBin(centerValue);
-        for (Sample s : samples) {
-            HistogramSample sample = (HistogramSample) s;
+        for (HistogramSample sample : samples) {
             float[] hist = sample.histogram.counts();
             count += hist[binNum];
         }
@@ -151,43 +193,19 @@ public class Frequencies extends SampledStat implements CompoundStat {
         return count / (double) totalCount;
     }
 
-    double totalCount() {
+    public double combine() {
         long count = 0;
-        for (Sample sample : samples) {
+        for (HistogramSample sample : samples) {
             count += sample.eventCount;
         }
         return count;
     }
 
-    @Override
-    public double combine(List<Sample> samples, MetricConfig config, long now) {
-        return totalCount();
-    }
-
-    @Override
     protected HistogramSample newSample(long timeMs) {
         return new HistogramSample(binScheme, timeMs);
     }
 
-    @Override
-    protected void update(Sample sample, MetricConfig config, double value, long timeMs) {
-        HistogramSample hist = (HistogramSample) sample;
-        hist.histogram.record(value);
-    }
-
-    private static class HistogramSample extends SampledStat.Sample {
-
-        private final Histogram histogram;
-
-        private HistogramSample(BinScheme scheme, long now) {
-            super(0.0, now);
-            histogram = new Histogram(scheme);
-        }
-
-        @Override
-        public void reset(long now) {
-            super.reset(now);
-            histogram.clear();
-        }
+    protected void update(HistogramSample sample, double value) {
+        sample.histogram.record(value);
     }
 }

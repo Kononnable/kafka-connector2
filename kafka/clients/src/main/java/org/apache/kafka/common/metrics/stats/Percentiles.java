@@ -20,6 +20,7 @@ import java.util.ArrayList;
 import java.util.List;
 
 import org.apache.kafka.common.metrics.CompoundStat;
+import org.apache.kafka.common.metrics.MeasurableStat;
 import org.apache.kafka.common.metrics.MetricConfig;
 import org.apache.kafka.common.metrics.NamedMeasurable;
 import org.apache.kafka.common.metrics.stats.Histogram.BinScheme;
@@ -31,7 +32,53 @@ import org.slf4j.LoggerFactory;
 /**
  * A compound stat that reports one or more percentiles
  */
-public class Percentiles extends SampledStat implements CompoundStat {
+public class Percentiles implements CompoundStat, MeasurableStat {
+
+    private int current = 0;
+    protected List<HistogramSample> samples;
+
+    @Override
+    public void record(MetricConfig config, double value, long timeMs) {
+        HistogramSample sample = current(timeMs);
+        if (sample.isComplete(timeMs, config))
+            sample = advance(config, timeMs);
+        update(sample, config, value, timeMs);
+        sample.eventCount += 1;
+    }
+
+    public HistogramSample current(long timeMs) {
+        if (samples.size() == 0)
+            this.samples.add(newSample(timeMs));
+        return this.samples.get(this.current);
+    }
+
+    private HistogramSample advance(MetricConfig config, long timeMs) {
+        this.current = (this.current + 1) % config.samples();
+        if (this.current >= samples.size()) {
+            HistogramSample sample = newSample(timeMs);
+            this.samples.add(sample);
+            return sample;
+        } else {
+            HistogramSample sample = current(timeMs);
+            sample.reset(timeMs);
+            return sample;
+        }
+    }
+
+    /* Timeout any windows that have expired in the absence of any events */
+    protected void purgeObsoleteSamples(MetricConfig config, long now) {
+        long expireAge = config.samples() * config.timeWindowMs();
+        for (SampledStat.Sample sample : samples) {
+            if (now - sample.lastWindowMs >= expireAge)
+                sample.reset(now);
+        }
+    }
+
+    public double measure(MetricConfig config, long now) {
+        purgeObsoleteSamples(config, now);
+        return combine(config, now);
+    }
+
 
     private final Logger log = LoggerFactory.getLogger(Percentiles.class);
 
@@ -50,7 +97,7 @@ public class Percentiles extends SampledStat implements CompoundStat {
     }
 
     public Percentiles(int sizeInBytes, double min, double max, BucketSizing bucketing, Percentile... percentiles) {
-        super(0.0);
+        this.samples = new ArrayList<>(2);
         this.percentiles = percentiles;
         this.buckets = sizeInBytes / 4;
         this.min = min;
@@ -82,15 +129,14 @@ public class Percentiles extends SampledStat implements CompoundStat {
     public double value(MetricConfig config, long now, double quantile) {
         purgeObsoleteSamples(config, now);
         float count = 0.0f;
-        for (Sample sample : this.samples)
+        for (HistogramSample sample : this.samples)
             count += sample.eventCount;
         if (count == 0.0f)
             return Double.NaN;
         float sum = 0.0f;
         float quant = (float) quantile;
         for (int b = 0; b < buckets; b++) {
-            for (Sample s : this.samples) {
-                HistogramSample sample = (HistogramSample) s;
+            for (HistogramSample sample : this.samples) {
                 float[] hist = sample.histogram.counts();
                 sum += hist[b];
                 if (sum / count > quant)
@@ -100,18 +146,15 @@ public class Percentiles extends SampledStat implements CompoundStat {
         return Double.POSITIVE_INFINITY;
     }
 
-    @Override
-    public double combine(List<Sample> samples, MetricConfig config, long now) {
+    public double combine(MetricConfig config, long now) {
         return value(config, now, 0.5);
     }
 
-    @Override
     protected HistogramSample newSample(long timeMs) {
         return new HistogramSample(this.binScheme, timeMs);
     }
 
-    @Override
-    protected void update(Sample sample, MetricConfig config, double value, long timeMs) {
+    protected void update(HistogramSample sample, MetricConfig config, double value, long timeMs) {
         final double boundedValue;
         if (value > max) {
             log.debug("Received value {} which is greater than max recordable value {}, will be pinned to the max value",
@@ -125,23 +168,7 @@ public class Percentiles extends SampledStat implements CompoundStat {
             boundedValue = value;
         }
 
-        HistogramSample hist = (HistogramSample) sample;
-        hist.histogram.record(boundedValue);
-    }
-
-    private static class HistogramSample extends SampledStat.Sample {
-        private final Histogram histogram;
-
-        private HistogramSample(BinScheme scheme, long now) {
-            super(0.0, now);
-            this.histogram = new Histogram(scheme);
-        }
-
-        @Override
-        public void reset(long now) {
-            super.reset(now);
-            this.histogram.clear();
-        }
+        sample.histogram.record(boundedValue);
     }
 
 }
