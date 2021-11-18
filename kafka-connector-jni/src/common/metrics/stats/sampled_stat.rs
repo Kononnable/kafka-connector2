@@ -281,8 +281,8 @@ pub extern "system" fn Java_org_apache_kafka_common_metrics_stats_SampledStat_pu
 
 fn java_sampled_stat_constructor(env: JNIEnv, obj: JObject, type_: StatType) {
     let result = || -> jni::errors::Result<_> {
-        let token_bucket = Box::new(SampledStat::new(type_));
-        let ptr = Box::into_raw(token_bucket);
+        let sampled_stat = Box::new(SampledStat::new(type_));
+        let ptr = Box::into_raw(sampled_stat);
         env.set_field(obj, "rustPointer", "J", JValue::Long(ptr as i64))?;
 
         Ok(())

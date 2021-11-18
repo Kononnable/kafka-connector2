@@ -16,19 +16,27 @@
  */
 package org.apache.kafka.common.metrics.stats;
 
+import org.apache.kafka.RustLib;
 import org.apache.kafka.common.metrics.MetricConfig;
 
 /**
  * A non-sampled version of {@link WindowedCount} maintained over all time.
- *
+ * <p>
  * This is a special kind of {@link CumulativeSum} that always records {@code 1} instead of the provided value.
  * In other words, it counts the number of
  * {@link CumulativeCount#record(MetricConfig, double, long)} invocations,
  * instead of summing the recorded values.
  */
 public class CumulativeCount extends CumulativeSum {
-    @Override
-    public void record(final MetricConfig config, final double value, final long timeMs) {
-        super.record(config, 1, timeMs);
+    static {
+        RustLib.load();
     }
+
+    public native void rustConstructor(double value);
+
+    @Override
+    public native void record(final MetricConfig config, final double value, final long timeMs);
+//    public void record(final MetricConfig config, final double value, final long timeMs) {
+//        super.record(config, 1, timeMs);
+//    }
 }

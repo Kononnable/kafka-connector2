@@ -16,39 +16,59 @@
  */
 package org.apache.kafka.common.metrics.stats;
 
+import org.apache.kafka.RustLib;
 import org.apache.kafka.common.metrics.MeasurableStat;
 import org.apache.kafka.common.metrics.MetricConfig;
 
 /**
  * An non-sampled cumulative total maintained over all time.
  * This is a non-sampled version of {@link WindowedSum}.
- *
+ * <p>
  * See also {@link CumulativeCount} if you just want to increment the value by 1 on each recording.
  */
 public class CumulativeSum implements MeasurableStat {
+    static {
+        RustLib.load();
+    }
 
-    private double total;
+    protected long rustPointer;
+
+    public native void rustConstructor(double value);
+
+    public native void rustDestructor();
+
+    @Override
+    protected void finalize() throws Throwable {
+        rustDestructor();
+    }
+
+
+//    private double total;
 
     public CumulativeSum() {
-        total = 0.0;
+        rustConstructor(0.0);
+//        total = 0.0;
     }
 
     public CumulativeSum(double value) {
-        total = value;
+        rustConstructor(value);
+//        total = value;
     }
 
     @Override
-    public void record(MetricConfig config, double value, long now) {
-        total += value;
-    }
+    public native void record(MetricConfig config, double value, long now);
+//    public void record(MetricConfig config, double value, long now) {
+//        total += value;
+//    }
 
     @Override
-    public double measure(MetricConfig config, long now) {
-        return total;
-    }
+    public native double measure(MetricConfig config, long now);
+//    public double measure(MetricConfig config, long now) {
+//        return total;
+//    }
 
-    @Override
-    public String toString() {
-        return "CumulativeSum(total=" + total + ")";
-    }
+//    @Override
+//    public String toString() {
+//        return "CumulativeSum(total=" + total + ")";
+//    }
 }
