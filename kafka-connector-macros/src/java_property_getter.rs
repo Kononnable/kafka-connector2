@@ -31,7 +31,6 @@ pub fn java_property_getter_impl(input: TokenStream) -> TokenStream {
             obj: jni::objects::JObject,
         ) -> jni::sys::#rust_return_type {
             let res = env.get_field(obj, #method, #java_return_type).expect(&format!("could not get field {} of type {}",#method,#java_return_type));
-
             #getter
         }
     };

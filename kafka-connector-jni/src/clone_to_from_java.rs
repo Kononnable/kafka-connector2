@@ -21,15 +21,26 @@ pub trait CloneToFromJava {
 macro_rules! clone_to_from_java_for_struct {
     ($struct_name:ty, $class_name:literal) => {
         impl crate::clone_to_from_java::CloneToFromJava for $struct_name {
-            fn clone_to_java<'a>(&self, env: JNIEnv<'a>) -> jni::errors::Result<JValue<'a>> {
+            fn clone_to_java<'a>(
+                &self,
+                env: jni::JNIEnv<'a>,
+            ) -> jni::errors::Result<jni::objects::JValue<'a>> {
                 let class = env.find_class($class_name)?;
                 let obj = env.alloc_object(class)?;
                 let copy = Box::new(self.clone());
                 let ptr = Box::into_raw(copy);
-                env.set_field(obj, "rustPointer", "J", JValue::Long(ptr as i64))?;
+                env.set_field(
+                    obj,
+                    "rustPointer",
+                    "J",
+                    jni::objects::JValue::Long(ptr as i64),
+                )?;
                 Ok(obj.into())
             }
-            fn clone_from_java(env: JNIEnv, obj: JValue) -> jni::errors::Result<Self> {
+            fn clone_from_java(
+                env: jni::JNIEnv,
+                obj: jni::objects::JValue,
+            ) -> jni::errors::Result<Self> {
                 let obj = obj.l()?;
                 let class = env.find_class($class_name)?;
                 if !env.is_instance_of(obj, class)? {
@@ -45,8 +56,8 @@ macro_rules! clone_to_from_java_for_struct {
         }
         impl crate::java_stored_object::FromJObject for $struct_name {
             fn from_jobject(
-                env: JNIEnv,
-                obj: JObject,
+                env: jni::JNIEnv,
+                obj: jni::objects::JObject,
             ) -> jni::errors::Result<crate::java_stored_object::JavaStoredObject<Self>> {
                 crate::java_stored_object::JavaStoredObject::new(env, obj, $class_name)
             }
@@ -376,5 +387,41 @@ where
         }
 
         Ok(hash_set)
+    }
+}
+
+impl<T> CloneToFromJava for Vec<T>
+where
+    T: CloneToFromJava,
+{
+    fn clone_to_java<'a>(&self, env: JNIEnv<'a>) -> jni::errors::Result<JValue<'a>> {
+        let class = env.find_class("java/util/List")?;
+        let list = env.new_object(class, "()V", &[])?;
+        for item in self {
+            let key = T::clone_to_java(item, env)?;
+            env.call_method(list, "add", "(Ljava/lang/Object;)Z", &[key])?;
+        }
+
+        Ok(JValue::Object(list))
+    }
+
+    fn clone_from_java(env: JNIEnv, obj: JValue) -> jni::errors::Result<Self>
+    where
+        Self: Sized,
+    {
+        let mut vec = Vec::new();
+
+        let array = env
+            .call_method(obj.l()?, "toArray", "()[Ljava/lang/Object;", &[])?
+            .l()?
+            .into_inner();
+        let length = env.get_array_length(array)?;
+        for i in 0..length {
+            let key = env.get_object_array_element(array, i)?;
+            let item = T::clone_from_java(env, JValue::Object(key))?;
+            vec.push(item);
+        }
+
+        Ok(vec)
     }
 }

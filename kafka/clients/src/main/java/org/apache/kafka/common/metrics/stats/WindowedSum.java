@@ -16,6 +16,7 @@
  */
 package org.apache.kafka.common.metrics.stats;
 
+import org.apache.kafka.RustLib;
 import org.apache.kafka.common.metrics.MetricConfig;
 
 import java.util.List;
@@ -23,26 +24,45 @@ import java.util.List;
 /**
  * A {@link SampledStat} that maintains the sum of what it has seen.
  * This is a sampled version of {@link CumulativeSum}.
- *
+ * <p>
  * See also {@link WindowedCount} if you want to increment the value by 1 on each recording.
  */
 public class WindowedSum extends SampledStat {
 
+    static {
+        RustLib.load();
+    }
+
+    private long rustPointer;
+
+    public native void rustConstructor();
+
+    public native void rustDeconstructor();
+
+    @Override
+    protected void finalize() throws Throwable {
+        rustDeconstructor();
+        super.finalize();
+    }
+
+
     public WindowedSum() {
-        super(0);
+//        super(0.0);
+        rustConstructor();
     }
 
-    @Override
-    protected void update(Sample sample, MetricConfig config, double value, long now) {
-        sample.value += value;
-    }
+//    @Override
+//    protected void update(Sample sample, MetricConfig config, double value, long now) {
+//        sample.value += value;
+//    }
 
     @Override
-    public double combine(List<Sample> samples, MetricConfig config, long now) {
-        double total = 0.0;
-        for (Sample sample : samples)
-            total += sample.value;
-        return total;
-    }
+    public native double combine(List<Sample> samples, MetricConfig config, long now);
+//    public double combine(List<Sample> samples, MetricConfig config, long now) {
+//        double total = 0.0;
+//        for (Sample sample : samples)
+//            total += sample.value;
+//        return total;
+//    }
 
 }

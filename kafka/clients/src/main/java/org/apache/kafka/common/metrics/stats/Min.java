@@ -18,6 +18,7 @@ package org.apache.kafka.common.metrics.stats;
 
 import java.util.List;
 
+import org.apache.kafka.RustLib;
 import org.apache.kafka.common.metrics.MetricConfig;
 
 /**
@@ -25,24 +26,44 @@ import org.apache.kafka.common.metrics.MetricConfig;
  */
 public class Min extends SampledStat {
 
+    static {
+        RustLib.load();
+    }
+
+    private long rustPointer;
+
+    public native void rustConstructor();
+
+    public native void rustDeconstructor();
+
+    @Override
+    protected void finalize() throws Throwable {
+        rustDeconstructor();
+        super.finalize();
+    }
+
+
     public Min() {
-        super(Double.MAX_VALUE);
+//        super(0.0);
+        rustConstructor();
     }
 
-    @Override
-    protected void update(Sample sample, MetricConfig config, double value, long now) {
-        sample.value = Math.min(sample.value, value);
-    }
+//    @Override
+//    protected void update(Sample sample, MetricConfig config, double value, long now) {
+////        sample.value = Math.min(sample.value, value);
+//    }
+
 
     @Override
-    public double combine(List<Sample> samples, MetricConfig config, long now) {
-        double min = Double.MAX_VALUE;
-        long count = 0;
-        for (Sample sample : samples) {
-            min = Math.min(min, sample.value);
-            count += sample.eventCount;
-        }
-        return count == 0 ? Double.NaN : min;
-    }
+    public native double combine(List<Sample> samples, MetricConfig config, long now);
+//    public double combine(List<Sample> samples, MetricConfig config, long now) {
+//        double min = Double.MAX_VALUE;
+//        long count = 0;
+//        for (Sample sample : samples) {
+//            min = Math.min(min, sample.value);
+//            count += sample.eventCount;
+//        }
+//        return count == 0 ? Double.NaN : min;
+//    }
 
 }

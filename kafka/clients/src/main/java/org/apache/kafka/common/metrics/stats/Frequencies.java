@@ -75,7 +75,7 @@ public class Frequencies implements CompoundStat, MeasurableStat {
     /* Timeout any windows that have expired in the absence of any events */
     protected void purgeObsoleteSamples(MetricConfig config, long now) {
         long expireAge = config.samples() * config.timeWindowMs();
-        for (SampledStat.Sample sample : samples) {
+        for (HistogramSample sample : samples) {
             if (now - sample.lastWindowMs >= expireAge)
                 sample.reset(now);
         }

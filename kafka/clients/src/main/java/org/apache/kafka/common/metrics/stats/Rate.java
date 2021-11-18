@@ -82,7 +82,7 @@ public class Rate implements MeasurableStat {
          * but this approach does not account for sleeps. SampledStat only creates samples whenever record is called,
          * if no record is called for a period of time that time is not accounted for in windowSize and produces incorrect results.
          */
-        long totalElapsedTimeMs = now - stat.oldest(now).lastWindowMs;
+        long totalElapsedTimeMs = now - stat.oldest(now).lastWindowMs();
         // Check how many full windows of data we have currently retained
         int numFullWindows = (int) (totalElapsedTimeMs / config.timeWindowMs());
         int minFullWindows = config.samples() - 1;
@@ -97,8 +97,8 @@ public class Rate implements MeasurableStat {
     @Override
     public String toString() {
         return "Rate(" +
-            "unit=" + unit +
-            ", stat=" + stat +
-            ')';
+                "unit=" + unit +
+                ", stat=" + stat +
+                ')';
     }
 }

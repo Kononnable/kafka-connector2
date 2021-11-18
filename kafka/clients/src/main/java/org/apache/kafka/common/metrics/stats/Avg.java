@@ -18,6 +18,7 @@ package org.apache.kafka.common.metrics.stats;
 
 import java.util.List;
 
+import org.apache.kafka.RustLib;
 import org.apache.kafka.common.metrics.MetricConfig;
 
 /**
@@ -25,25 +26,44 @@ import org.apache.kafka.common.metrics.MetricConfig;
  */
 public class Avg extends SampledStat {
 
+    static {
+        RustLib.load();
+    }
+
+    private long rustPointer;
+
+    public native void rustConstructor();
+
+    public native void rustDeconstructor();
+
+    @Override
+    protected void finalize() throws Throwable {
+        rustDeconstructor();
+        super.finalize();
+    }
+
+
     public Avg() {
-        super(0.0);
+        rustConstructor();
+//        super(0.0);
     }
+//
+//    //    @Override
+//    protected void update(Sample sample, MetricConfig config, double value, long now) {
+////        sample.value += value;
+//    }
 
     @Override
-    protected void update(Sample sample, MetricConfig config, double value, long now) {
-        sample.value += value;
-    }
-
-    @Override
-    public double combine(List<Sample> samples, MetricConfig config, long now) {
-        double total = 0.0;
-        long count = 0;
-        for (Sample s : samples) {
-            total += s.value;
-            count += s.eventCount;
-        }
-        return count == 0 ? Double.NaN : total / count;
-    }
+    public native double combine(List<Sample> samples, MetricConfig config, long now);
+//    public double combine(List<Sample> samples, MetricConfig config, long now) {
+//        double total = 0.0;
+//        long count = 0;
+//        for (Sample s : samples) {
+//            total += s.value;
+//            count += s.eventCount;
+//        }
+//        return count == 0 ? Double.NaN : total / count;
+//    }
 
 }
 

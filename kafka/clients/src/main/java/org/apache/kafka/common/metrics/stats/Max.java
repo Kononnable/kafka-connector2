@@ -18,6 +18,7 @@ package org.apache.kafka.common.metrics.stats;
 
 import java.util.List;
 
+import org.apache.kafka.RustLib;
 import org.apache.kafka.common.metrics.MetricConfig;
 
 /**
@@ -25,24 +26,43 @@ import org.apache.kafka.common.metrics.MetricConfig;
  */
 public final class Max extends SampledStat {
 
+    static {
+        RustLib.load();
+    }
+
+    private long rustPointer;
+
+    public native void rustConstructor();
+
+    public native void rustDeconstructor();
+
+    @Override
+    protected void finalize() throws Throwable {
+        rustDeconstructor();
+        super.finalize();
+    }
+
+
     public Max() {
-        super(Double.NEGATIVE_INFINITY);
+//        super(0.0);
+        rustConstructor();
     }
 
-    @Override
-    protected void update(Sample sample, MetricConfig config, double value, long now) {
-        sample.value = Math.max(sample.value, value);
-    }
+//    @Override
+//    protected void update(Sample sample, MetricConfig config, double value, long now) {
+//        sample.value = Math.max(sample.value, value);
+//    }
 
     @Override
-    public double combine(List<Sample> samples, MetricConfig config, long now) {
-        double max = Double.NEGATIVE_INFINITY;
-        long count = 0;
-        for (Sample sample : samples) {
-            max = Math.max(max, sample.value);
-            count += sample.eventCount;
-        }
-        return count == 0 ? Double.NaN : max;
-    }
+    public native double combine(List<Sample> samples, MetricConfig config, long now);
+//    public double combine(List<Sample> samples, MetricConfig config, long now) {
+//        double max = Double.NEGATIVE_INFINITY;
+//        long count = 0;
+//        for (Sample sample : samples) {
+//            max = Math.max(max, sample.value);
+//            count += sample.eventCount;
+//        }
+//        return count == 0 ? Double.NaN : max;
+//    }
 
 }
