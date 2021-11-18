@@ -13,11 +13,11 @@ public class Sample {
 
     public native void rustConstructor(double initialValue, long now);
 
-    public native void rustDeconstructor();
+    public native void rustDestructor();
 
     @Override
     protected void finalize() throws Throwable {
-        rustDeconstructor();
+        rustDestructor();
         super.finalize();
     }
 

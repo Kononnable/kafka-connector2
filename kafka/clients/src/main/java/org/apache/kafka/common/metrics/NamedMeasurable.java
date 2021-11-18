@@ -14,11 +14,11 @@ public class NamedMeasurable {
 
     public native void rustConstructor(MetricName name, Measurable stat);
 
-    public native void rustDeconstructor();
+    public native void rustDestructor();
 
     @Override
     protected void finalize() throws Throwable {
-        rustDeconstructor();
+        rustDestructor();
         super.finalize();
     }
 

@@ -73,11 +73,11 @@ public final class MetricName {
 
     public native void rustConstructor(String name, String group, String description, Map<String, String> tags);
 
-    public native void rustDeconstructor();
+    public native void rustDestructor();
 
     @Override
     protected void finalize() throws Throwable {
-        rustDeconstructor();
+        rustDestructor();
         super.finalize();
     }
 

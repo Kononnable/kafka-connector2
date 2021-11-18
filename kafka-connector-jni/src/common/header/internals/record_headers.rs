@@ -58,12 +58,12 @@ pub extern "system" fn Java_org_apache_kafka_common_header_internals_RecordHeade
 }
 /*
  * Class:     org_apache_kafka_common_header_internals_RecordHeaders
- * Method:    rustDeconstructor
+ * Method:    rustDestructor
  * Signature: ()V
  */
 #[no_mangle]
 #[allow(non_snake_case)]
-pub extern "system" fn Java_org_apache_kafka_common_header_internals_RecordHeaders_rustDeconstructor(
+pub extern "system" fn Java_org_apache_kafka_common_header_internals_RecordHeaders_rustDestructor(
     env: JNIEnv,
     obj: JObject,
 ) {

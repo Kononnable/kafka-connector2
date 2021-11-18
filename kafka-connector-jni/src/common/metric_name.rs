@@ -67,12 +67,12 @@ pub extern "system" fn Java_org_apache_kafka_common_MetricName_rustConstructor(
 
 /*
  * Class:     org_apache_kafka_common_MetricName
- * Method:    rustDeconstructor
+ * Method:    rustDestructor
  * Signature: ()V
  */
 #[no_mangle]
 #[allow(non_snake_case)]
-pub extern "system" fn Java_org_apache_kafka_common_MetricName_rustDeconstructor(
+pub extern "system" fn Java_org_apache_kafka_common_MetricName_rustDestructor(
     env: JNIEnv,
     obj: JObject,
 ) {

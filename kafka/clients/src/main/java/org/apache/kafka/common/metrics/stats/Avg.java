@@ -34,11 +34,11 @@ public class Avg extends SampledStat {
 
     public native void rustConstructor();
 
-    public native void rustDeconstructor();
+    public native void rustDestructor();
 
     @Override
     protected void finalize() throws Throwable {
-        rustDeconstructor();
+        rustDestructor();
         super.finalize();
     }
 

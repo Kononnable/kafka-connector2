@@ -83,12 +83,12 @@ pub extern "system" fn Java_org_apache_kafka_clients_consumer_ConsumerRecord_rus
 
 /*
  * Class:     org_apache_kafka_clients_consumer_ConsumerRecord
- * Method:    rustDeconstructor
+ * Method:    rustDestructor
  * Signature: ()V
  */
 #[no_mangle]
 #[allow(non_snake_case)]
-pub extern "system" fn Java_org_apache_kafka_clients_consumer_ConsumerRecord_rustDeconstructor(
+pub extern "system" fn Java_org_apache_kafka_clients_consumer_ConsumerRecord_rustDestructor(
     env: JNIEnv,
     obj: JObject,
 ) {

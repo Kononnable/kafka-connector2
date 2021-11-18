@@ -55,11 +55,11 @@ public class ConsumerRecord<K, V> {
             Optional<Integer> leaderEpoch
     );
 
-    public native void rustDeconstructor();
+    public native void rustDestructor();
 
     @Override
     protected void finalize() throws Throwable {
-        rustDeconstructor();
+        rustDestructor();
         super.finalize();
     }
 

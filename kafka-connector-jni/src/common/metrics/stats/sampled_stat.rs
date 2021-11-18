@@ -334,12 +334,12 @@ pub extern "system" fn Java_org_apache_kafka_common_metrics_stats_Avg_rustConstr
 
 /*
  * Class:     org_apache_kafka_common_metrics_stats_Avg
- * Method:    rustDeconstructor
+ * Method:    rustDestructor
  * Signature: ()V
  */
 #[no_mangle]
 #[allow(non_snake_case)]
-pub extern "system" fn Java_org_apache_kafka_common_metrics_stats_Avg_rustDeconstructor(
+pub extern "system" fn Java_org_apache_kafka_common_metrics_stats_Avg_rustDestructor(
     env: JNIEnv,
     obj: JObject,
 ) {
@@ -379,12 +379,12 @@ pub extern "system" fn Java_org_apache_kafka_common_metrics_stats_Max_rustConstr
 
 /*
 * Class:     org_apache_kafka_common_metrics_stats_Max
-* Method:    rustDeconstructor
+* Method:    rustDestructor
 * Signature: ()V
 */
 #[no_mangle]
 #[allow(non_snake_case)]
-pub extern "system" fn Java_org_apache_kafka_common_metrics_stats_Max_rustDeconstructor(
+pub extern "system" fn Java_org_apache_kafka_common_metrics_stats_Max_rustDestructor(
     env: JNIEnv,
     obj: JObject,
 ) {
@@ -424,12 +424,12 @@ pub extern "system" fn Java_org_apache_kafka_common_metrics_stats_Min_rustConstr
 
 /*
  * Class:     org_apache_kafka_common_metrics_stats_Min
- * Method:    rustDeconstructor
+ * Method:    rustDestructor
  * Signature: ()V
  */
 #[no_mangle]
 #[allow(non_snake_case)]
-pub extern "system" fn Java_org_apache_kafka_common_metrics_stats_Min_rustDeconstructor(
+pub extern "system" fn Java_org_apache_kafka_common_metrics_stats_Min_rustDestructor(
     env: JNIEnv,
     obj: JObject,
 ) {
@@ -469,12 +469,12 @@ pub extern "system" fn Java_org_apache_kafka_common_metrics_stats_WindowedCount_
 
 /*
 * Class:     org_apache_kafka_common_metrics_stats_WindowedCount
-* Method:    rustDeconstructor
+* Method:    rustDestructor
 * Signature: ()V
 */
 #[no_mangle]
 #[allow(non_snake_case)]
-pub extern "system" fn Java_org_apache_kafka_common_metrics_stats_WindowedCount_rustDeconstructor(
+pub extern "system" fn Java_org_apache_kafka_common_metrics_stats_WindowedCount_rustDestructor(
     env: JNIEnv,
     obj: JObject,
 ) {
@@ -497,12 +497,12 @@ pub extern "system" fn Java_org_apache_kafka_common_metrics_stats_WindowedSum_ru
 
 /*
  * Class:     org_apache_kafka_common_metrics_stats_WindowedSum
- * Method:    rustDeconstructor
+ * Method:    rustDestructor
  * Signature: ()V
  */
 #[no_mangle]
 #[allow(non_snake_case)]
-pub extern "system" fn Java_org_apache_kafka_common_metrics_stats_WindowedSum_rustDeconstructor(
+pub extern "system" fn Java_org_apache_kafka_common_metrics_stats_WindowedSum_rustDestructor(
     env: JNIEnv,
     obj: JObject,
 ) {

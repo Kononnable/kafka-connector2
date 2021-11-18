@@ -35,7 +35,7 @@ impl Sample {
         self.value = self.initial_value;
     }
     pub fn is_complete(&self, time_ms: u128, config: &MetricConfig) -> bool {
-        time_ms - self.last_window_ms >= config.time_window_ms
+        u128::saturating_sub(time_ms, self.last_window_ms) >= config.time_window_ms
             || self.event_count >= config.event_window
     }
 }
@@ -68,12 +68,12 @@ pub extern "system" fn Java_org_apache_kafka_common_metrics_stats_Sample_rustCon
 
 /*
  * Class:     org_apache_kafka_common_metrics_stats_Sample
- * Method:    rustDeconstructor
+ * Method:    rustDestructor
  * Signature: ()V
  */
 #[no_mangle]
 #[allow(non_snake_case)]
-pub extern "system" fn Java_org_apache_kafka_common_metrics_stats_Sample_rustDeconstructor(
+pub extern "system" fn Java_org_apache_kafka_common_metrics_stats_Sample_rustDestructor(
     env: JNIEnv,
     obj: JObject,
 ) {
