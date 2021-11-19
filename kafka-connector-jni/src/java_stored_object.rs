@@ -9,7 +9,7 @@ pub trait FromJObject {
 }
 
 pub struct JavaStoredObject<T> {
-    obj: Option<Box<T>>,
+    pub obj: Option<Box<T>>,
 }
 
 impl<T> JavaStoredObject<T> {

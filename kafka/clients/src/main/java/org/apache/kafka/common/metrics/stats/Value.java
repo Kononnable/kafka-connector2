@@ -16,6 +16,7 @@
  */
 package org.apache.kafka.common.metrics.stats;
 
+import org.apache.kafka.RustLib;
 import org.apache.kafka.common.metrics.MeasurableStat;
 import org.apache.kafka.common.metrics.MetricConfig;
 
@@ -23,15 +24,37 @@ import org.apache.kafka.common.metrics.MetricConfig;
  * An instantaneous value.
  */
 public class Value implements MeasurableStat {
-    private double value = 0;
-
-    @Override
-    public double measure(MetricConfig config, long now) {
-        return value;
+    static {
+        RustLib.load();
     }
 
+    private long rustPointer;
+
+    public native void rustConstructor();
+
+    public native void rustDestructor();
+
     @Override
-    public void record(MetricConfig config, double value, long timeMs) {
-        this.value = value;
+    protected void finalize() throws Throwable {
+        rustDestructor();
+        super.finalize();
     }
+
+    public Value() {
+        rustConstructor();
+    }
+
+//    private double value = 0;
+
+    @Override
+    public native double measure(MetricConfig config, long now);
+//    public double measure(MetricConfig config, long now) {
+//        return value;
+//    }
+
+    @Override
+    public native void record(MetricConfig config, double value, long timeMs);
+//    public void record(MetricConfig config, double value, long timeMs) {
+//        this.value = value;
+//    }
 }
