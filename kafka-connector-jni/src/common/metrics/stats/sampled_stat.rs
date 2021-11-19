@@ -5,9 +5,8 @@ use jni::{
 };
 
 use crate::{
-    clone_to_from_java::{clone_to_from_java_for_struct, CloneToFromJava},
-    common::metrics::metric_config::MetricConfig,
-    java_stored_object::FromJObject,
+    clone_from_java::CloneFromJava, clone_to_java::CloneToJava,
+    common::metrics::metric_config::MetricConfig, java_stored_object::FromJObject,
 };
 
 use super::sample::Sample;
@@ -133,7 +132,7 @@ impl SampledStat {
                 .fold(0_f64, |total, sample| total + sample.value),
         }
     }
-    fn purge_obsolete_samples(&mut self, config: &MetricConfig, now: u128) {
+    pub(super) fn purge_obsolete_samples(&mut self, config: &MetricConfig, now: u128) {
         let (max_window_ms, overflow) =
             u128::overflowing_sub(now, config.samples as u128 * config.time_window_ms);
         if !overflow {
@@ -145,7 +144,37 @@ impl SampledStat {
     }
 }
 
-clone_to_from_java_for_struct!(
+impl CloneToJava for SampledStat {
+    fn clone_to_java<'a>(&self, env: JNIEnv<'a>) -> jni::errors::Result<JValue<'a>> {
+        let class_name = match self.stat_type {
+            StatType::Avg => "Avg",
+            StatType::Min => "Min",
+            StatType::Max => "Max",
+            StatType::WindowedSum => "WindowedSum",
+            StatType::WindowedCount => "WindowedCount",
+        };
+        let class = env.find_class(&format!(
+            "org/apache/kafka/common/metrics/stats/{}",
+            class_name
+        ))?;
+        let obj = env.alloc_object(class)?;
+
+        let copy = Box::new(self.clone());
+        let ptr = Box::into_raw(copy);
+        env.set_field(
+            obj,
+            "rustPointer",
+            "J",
+            jni::objects::JValue::Long(ptr as i64),
+        )?;
+        Ok(obj.into())
+    }
+}
+clone_from_java!(
+    SampledStat,
+    "org/apache/kafka/common/metrics/stats/SampledStat"
+);
+from_jobject!(
     SampledStat,
     "org/apache/kafka/common/metrics/stats/SampledStat"
 );
@@ -219,7 +248,7 @@ pub extern "system" fn Java_org_apache_kafka_common_metrics_stats_SampledStat_cu
     let result = || -> jni::errors::Result<_> {
         let mut stat = SampledStat::from_jobject(env, obj)?;
         let ret =
-            stat.modify(|stat| CloneToFromJava::clone_to_java(stat.current(time_ms as u128), env));
+            stat.modify(|stat| CloneToJava::clone_to_java(stat.current(time_ms as u128), env));
         ret?.l()
     }();
     match result {
@@ -243,8 +272,7 @@ pub extern "system" fn Java_org_apache_kafka_common_metrics_stats_SampledStat_ol
 ) -> jobject {
     let result = || -> jni::errors::Result<_> {
         let mut stat = SampledStat::from_jobject(env, obj)?;
-        let ret =
-            stat.modify(|stat| CloneToFromJava::clone_to_java(stat.oldest(time_ms as u128), env));
+        let ret = stat.modify(|stat| CloneToJava::clone_to_java(stat.oldest(time_ms as u128), env));
         ret?.l()
     }();
     match result {
@@ -308,7 +336,7 @@ fn java_sampled_stat_destructor(env: JNIEnv, obj: JObject) {
 fn java_sampled_stat_combine(env: JNIEnv, obj: JObject, samples: JObject) -> jdouble {
     let result = || -> jni::errors::Result<_> {
         let stat = SampledStat::from_jobject(env, obj)?;
-        let samples: Vec<Sample> = CloneToFromJava::clone_from_java(env, samples.into())?;
+        let samples: Vec<Sample> = CloneFromJava::clone_from_java(env, samples.into())?;
         let ret = stat.combine(&samples);
         Ok(ret)
     }();

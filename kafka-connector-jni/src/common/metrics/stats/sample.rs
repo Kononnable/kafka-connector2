@@ -6,9 +6,8 @@ use jni::{
 use kafka_connector_macros::{rust_property_chain_setter, rust_property_getter};
 
 use crate::{
-    clone_to_from_java::{clone_to_from_java_for_struct, CloneToFromJava},
-    common::metrics::metric_config::MetricConfig,
-    java_stored_object::FromJObject,
+    clone_from_java::CloneFromJava, clone_to_from_java_for_struct,
+    common::metrics::metric_config::MetricConfig, java_stored_object::FromJObject,
 };
 
 #[derive(Debug, Clone)]

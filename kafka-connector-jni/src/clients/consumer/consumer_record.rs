@@ -6,7 +6,7 @@ use jni::{
 use kafka_connector_macros::rust_property_getter;
 
 use crate::{
-    clone_to_from_java::CloneToFromJava,
+    clone_from_java::CloneFromJava,
     common::{
         header::internals::record_headers::RecordHeaders, record::timestamp_type::TimestampType,
     },
@@ -49,12 +49,12 @@ pub extern "system" fn Java_org_apache_kafka_clients_consumer_ConsumerRecord_rus
     leader_epoch: jobject,
 ) {
     let result = || -> jni::errors::Result<_> {
-        let topic = CloneToFromJava::clone_from_java(env, topic.into())?;
-        let timestamp_type = CloneToFromJava::clone_from_java(env, timestamp_type.into())?;
-        let headers = CloneToFromJava::clone_from_java(env, headers.into())?;
-        let key: GlobalRef = CloneToFromJava::clone_from_java(env, key.into())?;
-        let value: GlobalRef = CloneToFromJava::clone_from_java(env, value.into())?;
-        let leader_epoch = CloneToFromJava::clone_from_java(env, leader_epoch.into())?;
+        let topic = CloneFromJava::clone_from_java(env, topic.into())?;
+        let timestamp_type = CloneFromJava::clone_from_java(env, timestamp_type.into())?;
+        let headers = CloneFromJava::clone_from_java(env, headers.into())?;
+        let key: GlobalRef = CloneFromJava::clone_from_java(env, key.into())?;
+        let value: GlobalRef = CloneFromJava::clone_from_java(env, value.into())?;
+        let leader_epoch = CloneFromJava::clone_from_java(env, leader_epoch.into())?;
 
         let record_headers = Box::new(ConsumerRecord {
             topic,

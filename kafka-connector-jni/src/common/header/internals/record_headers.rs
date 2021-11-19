@@ -1,4 +1,6 @@
-use crate::clone_to_from_java::{clone_to_from_java_for_struct, CloneToFromJava};
+use crate::{
+    clone_from_java::CloneFromJava, clone_to_from_java_for_struct, clone_to_java::CloneToJava,
+};
 use std::{
     ops::{Deref, DerefMut},
     panic,

@@ -2,6 +2,19 @@ use std::ops::Deref;
 
 use jni::{objects::JObject, JNIEnv};
 
+macro_rules! from_jobject {
+    ($struct_name:ty, $class_name:literal) => {
+        impl crate::java_stored_object::FromJObject for $struct_name {
+            fn from_jobject(
+                env: jni::JNIEnv,
+                obj: jni::objects::JObject,
+            ) -> jni::errors::Result<crate::java_stored_object::JavaStoredObject<Self>> {
+                crate::java_stored_object::JavaStoredObject::new(env, obj, $class_name)
+            }
+        }
+    };
+}
+
 pub trait FromJObject {
     fn from_jobject(env: JNIEnv, obj: JObject) -> jni::errors::Result<JavaStoredObject<Self>>
     where

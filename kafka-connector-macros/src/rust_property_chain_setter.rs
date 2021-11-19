@@ -39,11 +39,11 @@ pub fn rust_property_chain_setter_impl(input: TokenStream) -> TokenStream {
             if val.is_null(){
                 None
             } else {
-                Some(crate::clone_to_from_java::CloneToFromJava::clone_from_java(env,val.into())?)
+                Some(crate::clone_from_java::CloneFromJava::clone_from_java(env,val.into())?)
             }
         }
     } else {
-        quote! {crate::clone_to_from_java::CloneToFromJava::clone_from_java(env,val.into())?}
+        quote! {crate::clone_from_java::CloneFromJava::clone_from_java(env,val.into())?}
     };
 
     let expanded = quote! {

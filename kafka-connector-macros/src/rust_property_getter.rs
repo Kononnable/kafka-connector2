@@ -48,14 +48,14 @@ pub fn rust_property_getter_impl(input: TokenStream) -> TokenStream {
     let val = match nullable {
         true => quote! {
             if rust_struct.#rust_field_name.is_some() {
-                crate::clone_to_from_java::CloneToFromJava::clone_to_java(&rust_struct.#rust_field_name.clone().unwrap(),env)
+                crate::clone_to_java::CloneToJava::clone_to_java(&rust_struct.#rust_field_name.clone().unwrap(),env)
             }else{
                 Ok(JValue::Object(JObject::null()))
             }
 
         },
         false => {
-            quote! {crate::clone_to_from_java::CloneToFromJava::clone_to_java(&rust_struct.#rust_field_name, env)}
+            quote! {crate::clone_to_java::CloneToJava::clone_to_java(&rust_struct.#rust_field_name, env)}
         }
     };
 

@@ -18,6 +18,8 @@ package org.apache.kafka.common.metrics.stats;
 
 import org.apache.kafka.common.metrics.MetricConfig;
 
+import java.util.concurrent.TimeUnit;
+
 /**
  * A simple rate the rate is incrementally calculated
  * based on the elapsed time between the earliest reading
@@ -31,9 +33,14 @@ import org.apache.kafka.common.metrics.MetricConfig;
 public class SimpleRate extends Rate {
 
     @Override
-    public long windowSize(MetricConfig config, long now) {
-        stat.purgeObsoleteSamples(config, now);
-        long elapsed = now - stat.oldest(now).lastWindowMs();
-        return Math.max(elapsed, config.timeWindowMs());
-    }
+    public native void rustConstructor(TimeUnit unit, SampledStat stat);
+
+
+    @Override
+    public native long windowSize(MetricConfig config, long now);
+//    public long windowSize(MetricConfig config, long now) {
+//        stat.purgeObsoleteSamples(config, now);
+//        long elapsed = now - stat.oldest(now).lastWindowMs();
+//        return Math.max(elapsed, config.timeWindowMs());
+//    }
 }

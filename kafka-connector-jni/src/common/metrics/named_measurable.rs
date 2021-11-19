@@ -1,5 +1,6 @@
 use crate::{
-    clone_to_from_java::{clone_to_from_java_for_struct, CloneToFromJava},
+    clone_from_java::CloneFromJava,
+    clone_to_from_java_for_struct,
     common::{metric_name::MetricName, metrics::measurable::JavaMeasurable},
 };
 use jni::{

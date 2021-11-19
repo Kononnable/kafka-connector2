@@ -1,7 +1,7 @@
 use jni::{objects::JObject, sys::jobject, JNIEnv};
 use kafka_connector_macros::JavaEnum;
 
-use crate::clone_to_from_java::CloneToFromJava;
+use crate::clone_from_java::CloneFromJava;
 
 #[derive(Clone, Copy, Debug, PartialEq, Eq, JavaEnum)]
 #[java_class = "org/apache/kafka/common/metrics/SensorRecordingLevel"]

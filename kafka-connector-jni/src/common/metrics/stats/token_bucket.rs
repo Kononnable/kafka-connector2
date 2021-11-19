@@ -1,5 +1,6 @@
 use crate::{
-    clone_to_from_java::{clone_to_from_java_for_struct, CloneToFromJava},
+    clone_from_java::CloneFromJava,
+    clone_to_from_java_for_struct,
     common::metrics::{
         internals::metric_utils::TimeUnit, metric_config::MetricConfig, quota::Quota,
     },

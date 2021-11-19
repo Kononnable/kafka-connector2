@@ -3,7 +3,7 @@ use jni::{
     JNIEnv,
 };
 
-use crate::clone_to_from_java::CloneToFromJava;
+use crate::{clone_from_java::CloneFromJava, clone_to_java::CloneToJava};
 
 use super::metric_config::MetricConfig;
 
@@ -12,13 +12,15 @@ pub enum Measurable {
     Java(JavaMeasurable),
 }
 
-impl CloneToFromJava for Measurable {
+impl CloneToJava for Measurable {
     fn clone_to_java<'a>(&self, env: JNIEnv<'a>) -> jni::errors::Result<jni::objects::JValue<'a>> {
         match self {
             Measurable::Java(m) => m.clone_to_java(env),
         }
     }
+}
 
+impl CloneFromJava for Measurable {
     fn clone_from_java(env: JNIEnv, obj: jni::objects::JValue) -> jni::errors::Result<Self>
     where
         Self: Sized,
@@ -49,11 +51,12 @@ impl JavaMeasurable {
         Ok(ret)
     }
 }
-impl CloneToFromJava for JavaMeasurable {
+impl CloneToJava for JavaMeasurable {
     fn clone_to_java<'a>(&self, env: JNIEnv<'a>) -> jni::errors::Result<JValue<'a>> {
         self.measure_fn.clone_to_java(env)
     }
-
+}
+impl CloneFromJava for JavaMeasurable {
     fn clone_from_java(env: JNIEnv, obj: JValue) -> jni::errors::Result<Self>
     where
         Self: Sized,

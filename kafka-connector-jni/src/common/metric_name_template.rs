@@ -1,4 +1,4 @@
-use crate::clone_to_from_java::{clone_to_from_java_for_struct, CloneToFromJava};
+use crate::{clone_from_java::CloneFromJava, clone_to_from_java_for_struct};
 use indexmap::IndexSet;
 use jni::{
     objects::{JObject, JValue},
@@ -54,7 +54,7 @@ pub extern "system" fn Java_org_apache_kafka_common_MetricNameTemplate_rustConst
         let name: String = env.get_string(name.into())?.into();
         let group: String = env.get_string(group.into())?.into();
         let description: String = env.get_string(description.into())?.into();
-        let tags = CloneToFromJava::clone_from_java(env, JValue::Object(tags))?;
+        let tags = CloneFromJava::clone_from_java(env, JValue::Object(tags))?;
 
         let record_header = Box::new(MetricNameTemplate::new(name, group, description, tags));
         let ptr = Box::into_raw(record_header);

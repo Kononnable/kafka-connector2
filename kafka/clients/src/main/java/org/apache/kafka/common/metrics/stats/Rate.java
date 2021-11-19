@@ -19,6 +19,7 @@ package org.apache.kafka.common.metrics.stats;
 import java.util.Locale;
 import java.util.concurrent.TimeUnit;
 
+import org.apache.kafka.RustLib;
 import org.apache.kafka.common.metrics.MeasurableStat;
 import org.apache.kafka.common.metrics.MetricConfig;
 
@@ -32,8 +33,26 @@ import static org.apache.kafka.common.metrics.internals.MetricsUtils.convert;
  */
 public class Rate implements MeasurableStat {
 
-    protected final TimeUnit unit;
-    protected final SampledStat stat;
+    static {
+        RustLib.load();
+    }
+
+    private long rustPointer;
+
+    public native void rustConstructor(TimeUnit unit, SampledStat stat);
+
+    public native void rustDestructor();
+
+    @Override
+    protected void finalize() throws Throwable {
+        rustDestructor();
+        super.finalize();
+    }
+
+    protected native SampledStat stat();
+
+//    protected final TimeUnit unit;
+//    protected final SampledStat stat;
 
     public Rate() {
         this(TimeUnit.SECONDS);
@@ -48,57 +67,62 @@ public class Rate implements MeasurableStat {
     }
 
     public Rate(TimeUnit unit, SampledStat stat) {
-        this.stat = stat;
-        this.unit = unit;
+        rustConstructor(unit, stat);
+//        this.stat = stat;
+//        this.unit = unit;
     }
 
-    public String unitName() {
-        return unit.name().substring(0, unit.name().length() - 2).toLowerCase(Locale.ROOT);
-    }
+//    public String unitName() {
+//        return unit.name().substring(0, unit.name().length() - 2).toLowerCase(Locale.ROOT);
+//    }
 
     @Override
-    public void record(MetricConfig config, double value, long timeMs) {
-        this.stat.record(config, value, timeMs);
-    }
+    public native void record(MetricConfig config, double value, long timeMs);
+//    public void record(MetricConfig config, double value, long timeMs) {
+//        this.stat.record(config, value, timeMs);
+//    }
 
     @Override
-    public double measure(MetricConfig config, long now) {
-        double value = stat.measure(config, now);
-        return value / convert(windowSize(config, now), unit);
-    }
+    public native double measure(MetricConfig config, long now);
+//    public double measure(MetricConfig config, long now) {
+//        double value = stat.measure(config, now);
+//        return value / convert(windowSize(config, now), unit);
+//    }
 
-    public long windowSize(MetricConfig config, long now) {
-        // purge old samples before we compute the window size
-        stat.purgeObsoleteSamples(config, now);
+    public native long windowSize(MetricConfig config, long now);
 
-        /*
-         * Here we check the total amount of time elapsed since the oldest non-obsolete window.
-         * This give the total windowSize of the batch which is the time used for Rate computation.
-         * However, there is an issue if we do not have sufficient data for e.g. if only 1 second has elapsed in a 30 second
-         * window, the measured rate will be very high.
-         * Hence we assume that the elapsed time is always N-1 complete windows plus whatever fraction of the final window is complete.
-         *
-         * Note that we could simply count the amount of time elapsed in the current window and add n-1 windows to get the total time,
-         * but this approach does not account for sleeps. SampledStat only creates samples whenever record is called,
-         * if no record is called for a period of time that time is not accounted for in windowSize and produces incorrect results.
-         */
-        long totalElapsedTimeMs = now - stat.oldest(now).lastWindowMs();
-        // Check how many full windows of data we have currently retained
-        int numFullWindows = (int) (totalElapsedTimeMs / config.timeWindowMs());
-        int minFullWindows = config.samples() - 1;
+//    public long windowSize(MetricConfig config, long now) {
+//        // purge old samples before we compute the window size
+//        stat.purgeObsoleteSamples(config, now);
+//
+//        /*
+//         * Here we check the total amount of time elapsed since the oldest non-obsolete window.
+//         * This give the total windowSize of the batch which is the time used for Rate computation.
+//         * However, there is an issue if we do not have sufficient data for e.g. if only 1 second has elapsed in a 30 second
+//         * window, the measured rate will be very high.
+//         * Hence we assume that the elapsed time is always N-1 complete windows plus whatever fraction of the final window is complete.
+//         *
+//         * Note that we could simply count the amount of time elapsed in the current window and add n-1 windows to get the total time,
+//         * but this approach does not account for sleeps. SampledStat only creates samples whenever record is called,
+//         * if no record is called for a period of time that time is not accounted for in windowSize and produces incorrect results.
+//         */
+//        long totalElapsedTimeMs = now - stat.oldest(now).lastWindowMs();
+//        // Check how many full windows of data we have currently retained
+//        int numFullWindows = (int) (totalElapsedTimeMs / config.timeWindowMs());
+//        int minFullWindows = config.samples() - 1;
+//
+//        // If the available windows are less than the minimum required, add the difference to the totalElapsedTime
+//        if (numFullWindows < minFullWindows)
+//            totalElapsedTimeMs += (minFullWindows - numFullWindows) * config.timeWindowMs();
+//
+//        return totalElapsedTimeMs;
+//    }
 
-        // If the available windows are less than the minimum required, add the difference to the totalElapsedTime
-        if (numFullWindows < minFullWindows)
-            totalElapsedTimeMs += (minFullWindows - numFullWindows) * config.timeWindowMs();
-
-        return totalElapsedTimeMs;
-    }
-
-    @Override
-    public String toString() {
-        return "Rate(" +
-                "unit=" + unit +
-                ", stat=" + stat +
-                ')';
-    }
+//    @Override
+//    public String toString() {
+//        return "Rate(" +
+//                "unit=" + unit +
+//                ", stat=" + stat +
+//                ')';
+//    }
 }

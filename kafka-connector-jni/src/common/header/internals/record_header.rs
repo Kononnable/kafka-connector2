@@ -1,4 +1,4 @@
-use crate::clone_to_from_java::clone_to_from_java_for_struct;
+use crate::clone_to_from_java_for_struct;
 use bytes::Bytes;
 use jni::{
     objects::{JObject, JValue},

@@ -1,6 +1,6 @@
 use std::time::Duration;
 
-use crate::clone_to_from_java::clone_to_from_java_for_struct;
+use crate::clone_to_from_java_for_struct;
 use indexmap::IndexMap;
 use jni::{
     objects::{JObject, JValue},

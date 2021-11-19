@@ -21,7 +21,7 @@ pub fn java_enum_impl(input: TokenStream) -> TokenStream {
     let fields_to_jobject = generate_fields_to_jobject(&input.data, &enum_ident, &class_name);
 
     let expanded = quote! {
-        impl #impl_generics crate::clone_to_from_java::CloneToFromJava for #enum_ident #ty_generics #where_clause {
+        impl #impl_generics crate::clone_to_java::CloneToJava for #enum_ident #ty_generics #where_clause {
             fn clone_to_java<'a>(&self, env: jni::JNIEnv<'a>) -> jni::errors::Result<jni::objects::JValue<'a>> {
                 let class = env.find_class(#class_name)?;
                 let obj = match self {
@@ -29,6 +29,8 @@ pub fn java_enum_impl(input: TokenStream) -> TokenStream {
                 };
                 Ok(jni::objects::JValue::Object(obj))
             }
+        }
+        impl #impl_generics crate::clone_from_java::CloneFromJava for #enum_ident #ty_generics #where_clause {
 
             fn clone_from_java(env: jni::JNIEnv, obj: jni::objects::JValue)-> jni::errors::Result<Self> {
                 let obj = obj.l()?;
