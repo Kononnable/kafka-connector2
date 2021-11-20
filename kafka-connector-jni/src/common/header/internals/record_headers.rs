@@ -1,5 +1,5 @@
 use crate::{
-    clone_from_java::CloneFromJava, clone_to_from_java_for_struct, clone_to_java::CloneToJava,
+    clone_from_java::CloneFromJava, clone_to_java::CloneToJava, java_struct_standard_impl,
 };
 use std::{
     ops::{Deref, DerefMut},
@@ -30,7 +30,7 @@ impl DerefMut for RecordHeaders {
     }
 }
 
-clone_to_from_java_for_struct!(
+java_struct_standard_impl!(
     RecordHeaders,
     "org/apache/kafka/common/header/internals/RecordHeaders"
 );

@@ -1,4 +1,4 @@
-use crate::clone_to_from_java_for_struct;
+use crate::java_struct_standard_impl;
 use bytes::Bytes;
 use jni::{
     objects::{JObject, JValue},
@@ -19,7 +19,7 @@ impl RecordHeader {
     }
 }
 
-clone_to_from_java_for_struct!(
+java_struct_standard_impl!(
     RecordHeader,
     "org/apache/kafka/common/header/internals/RecordHeader"
 );

@@ -1,4 +1,4 @@
-use crate::{clone_from_java::CloneFromJava, clone_to_from_java_for_struct};
+use crate::{clone_from_java::CloneFromJava, java_struct_standard_impl};
 use indexmap::IndexSet;
 use jni::{
     objects::{JObject, JValue},
@@ -30,7 +30,7 @@ impl MetricNameTemplate {
     }
 }
 
-clone_to_from_java_for_struct!(
+java_struct_standard_impl!(
     MetricNameTemplate,
     "org/apache/kafka/common/MetricNameTemplate"
 );

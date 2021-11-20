@@ -1,10 +1,10 @@
 use crate::{
     clone_from_java::CloneFromJava,
-    clone_to_from_java_for_struct,
     common::metrics::{
         internals::metric_utils::TimeUnit, metric_config::MetricConfig, quota::Quota,
     },
     java_stored_object::FromJObject,
+    java_struct_standard_impl,
 };
 use jni::{
     objects::{JObject, JValue},
@@ -53,7 +53,7 @@ impl TokenBucket {
     }
 }
 
-clone_to_from_java_for_struct!(
+java_struct_standard_impl!(
     TokenBucket,
     "org/apache/kafka/common/metrics/stats/TokenBucket"
 );

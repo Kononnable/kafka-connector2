@@ -5,8 +5,8 @@ use jni::{
 };
 
 use crate::{
-    clone_from_java::CloneFromJava, clone_to_from_java_for_struct,
-    common::metrics::metric_config::MetricConfig, java_stored_object::FromJObject,
+    clone_from_java::CloneFromJava, common::metrics::metric_config::MetricConfig,
+    java_stored_object::FromJObject, java_struct_standard_impl,
 };
 
 #[derive(Debug, Clone, Default)]
@@ -23,7 +23,7 @@ impl Value {
         self.value
     }
 }
-clone_to_from_java_for_struct!(Value, "org/apache/kafka/common/metrics/stats/Value");
+java_struct_standard_impl!(Value, "org/apache/kafka/common/metrics/stats/Value");
 
 /*
  * Class:     org_apache_kafka_common_metrics_stats_Value

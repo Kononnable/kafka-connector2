@@ -1,7 +1,7 @@
 use crate::{
     clone_from_java::CloneFromJava,
-    clone_to_from_java_for_struct,
     common::{metric_name::MetricName, metrics::measurable::JavaMeasurable},
+    java_struct_standard_impl,
 };
 use jni::{
     objects::{JObject, JValue},
@@ -17,7 +17,7 @@ pub struct NamedMeasurable {
     pub stat: Measurable,
 }
 
-clone_to_from_java_for_struct!(
+java_struct_standard_impl!(
     NamedMeasurable,
     "org/apache/kafka/common/metrics/NamedMeasurable"
 );

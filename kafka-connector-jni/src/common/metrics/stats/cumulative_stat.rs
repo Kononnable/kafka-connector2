@@ -5,8 +5,8 @@ use jni::{
 };
 
 use crate::{
-    clone_from_java::CloneFromJava, clone_to_from_java_for_struct,
-    common::metrics::metric_config::MetricConfig, java_stored_object::FromJObject,
+    clone_from_java::CloneFromJava, common::metrics::metric_config::MetricConfig,
+    java_stored_object::FromJObject, java_struct_standard_impl,
 };
 
 #[derive(Debug, Clone)]
@@ -38,7 +38,7 @@ impl CumulativeStat {
     }
 }
 
-clone_to_from_java_for_struct!(
+java_struct_standard_impl!(
     CumulativeStat,
     "org/apache/kafka/common/metrics/stats/CumulativeSum"
 );

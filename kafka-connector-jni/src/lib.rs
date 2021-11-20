@@ -9,12 +9,11 @@ pub mod java_stored_object;
 
 pub mod common;
 
-macro_rules! clone_to_from_java_for_struct {
+macro_rules! java_struct_standard_impl {
     ($struct_name:ty, $class_name:literal) => {
         clone_to_java!($struct_name, $class_name);
         clone_from_java!($struct_name, $class_name);
         from_jobject!($struct_name, $class_name);
     };
 }
-// TODO: split
-pub(crate) use clone_to_from_java_for_struct;
+pub(crate) use java_struct_standard_impl;

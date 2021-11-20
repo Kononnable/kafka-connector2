@@ -1,6 +1,6 @@
 use std::time::Duration;
 
-use crate::clone_to_from_java_for_struct;
+use crate::java_struct_standard_impl;
 use indexmap::IndexMap;
 use jni::{
     objects::{JObject, JValue},
@@ -31,7 +31,7 @@ impl Default for MetricConfig {
         }
     }
 }
-clone_to_from_java_for_struct!(MetricConfig, "org/apache/kafka/common/metrics/MetricConfig");
+java_struct_standard_impl!(MetricConfig, "org/apache/kafka/common/metrics/MetricConfig");
 
 /*
  * Class:     org_apache_kafka_common_metrics_MetricConfig

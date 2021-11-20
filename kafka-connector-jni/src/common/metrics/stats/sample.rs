@@ -6,8 +6,8 @@ use jni::{
 use kafka_connector_macros::{rust_property_chain_setter, rust_property_getter};
 
 use crate::{
-    clone_from_java::CloneFromJava, clone_to_from_java_for_struct,
-    common::metrics::metric_config::MetricConfig, java_stored_object::FromJObject,
+    clone_from_java::CloneFromJava, common::metrics::metric_config::MetricConfig,
+    java_stored_object::FromJObject, java_struct_standard_impl,
 };
 
 #[derive(Debug, Clone)]
@@ -17,7 +17,7 @@ pub struct Sample {
     pub last_window_ms: u128,
     pub value: f64,
 }
-clone_to_from_java_for_struct!(Sample, "org/apache/kafka/common/metrics/stats/Sample");
+java_struct_standard_impl!(Sample, "org/apache/kafka/common/metrics/stats/Sample");
 
 impl Sample {
     pub fn new(initial_value: f64, now: u128) -> Sample {

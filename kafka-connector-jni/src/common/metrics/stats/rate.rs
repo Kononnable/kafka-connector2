@@ -7,9 +7,9 @@ use kafka_connector_macros::rust_property_getter;
 
 use crate::{
     clone_from_java::CloneFromJava,
-    clone_to_from_java_for_struct,
     common::metrics::{internals::metric_utils::TimeUnit, metric_config::MetricConfig},
     java_stored_object::FromJObject,
+    java_struct_standard_impl,
 };
 
 use super::sampled_stat::SampledStat;
@@ -60,7 +60,7 @@ impl Rate {
     }
 }
 
-clone_to_from_java_for_struct!(Rate, "org/apache/kafka/common/metrics/stats/Rate");
+java_struct_standard_impl!(Rate, "org/apache/kafka/common/metrics/stats/Rate");
 
 /*
  * Class:     org_apache_kafka_common_metrics_stats_SimpleRate

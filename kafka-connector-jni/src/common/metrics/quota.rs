@@ -1,4 +1,4 @@
-use crate::clone_to_from_java_for_struct;
+use crate::java_struct_standard_impl;
 use jni::{
     objects::{JObject, JValue},
     sys::{jboolean, jdouble},
@@ -26,7 +26,7 @@ impl Quota {
     }
 }
 
-clone_to_from_java_for_struct!(Quota, "org/apache/kafka/common/metrics/Quota");
+java_struct_standard_impl!(Quota, "org/apache/kafka/common/metrics/Quota");
 
 /*
  * Class:     org_apache_kafka_common_metrics_Quota

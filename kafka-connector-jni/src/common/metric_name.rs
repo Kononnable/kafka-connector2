@@ -1,4 +1,4 @@
-use crate::clone_to_from_java_for_struct;
+use crate::java_struct_standard_impl;
 use indexmap::IndexMap;
 use jni::{
     objects::{JObject, JValue},
@@ -32,7 +32,7 @@ impl MetricName {
     }
 }
 
-clone_to_from_java_for_struct!(MetricName, "org/apache/kafka/common/MetricName");
+java_struct_standard_impl!(MetricName, "org/apache/kafka/common/MetricName");
 
 /*
  * Class:     org_apache_kafka_common_MetricName
