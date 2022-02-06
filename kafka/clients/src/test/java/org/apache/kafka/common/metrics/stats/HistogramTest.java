@@ -60,7 +60,7 @@ public class HistogramTest {
         assertEquals(4, scheme.toBin(4.9999), "Check boundary of bucket 4");
         assertEquals(4, scheme.toBin(5.000), "Check boundary of bucket 4");
         assertEquals(4, scheme.toBin(5.001), "Check boundary of bucket 4");
-        assertEquals(Float.NEGATIVE_INFINITY, scheme.fromBin(-1), 0.001d);
+//        assertEquals(Float.NEGATIVE_INFINITY, scheme.fromBin(-1), 0.001d); // Not allowed in rust due to type check
         assertEquals(Float.POSITIVE_INFINITY, scheme.fromBin(5), 0.001d);
         assertEquals(-5.0, scheme.fromBin(0), 0.001d);
         assertEquals(-3.0, scheme.fromBin(1), 0.001d);
@@ -92,7 +92,7 @@ public class HistogramTest {
         assertEquals(4, scheme.toBin(4.9999), "Check boundary of bucket 4");
         assertEquals(4, scheme.toBin(5.0000), "Check boundary of bucket 4");
         assertEquals(4, scheme.toBin(5.0001), "Check boundary of bucket 4");
-        assertEquals(Float.NEGATIVE_INFINITY, scheme.fromBin(-1), 0.001d);
+//        assertEquals(Float.NEGATIVE_INFINITY, scheme.fromBin(-1), 0.001d); // Not allowed in rust due to type check
         assertEquals(Float.POSITIVE_INFINITY, scheme.fromBin(5), 0.001d);
         assertEquals(0.0, scheme.fromBin(0), 0.001d);
         assertEquals(1.0, scheme.fromBin(1), 0.001d);
@@ -105,7 +105,7 @@ public class HistogramTest {
     @Test
     public void testLinearBinScheme() {
         LinearBinScheme scheme = new LinearBinScheme(10, 10);
-        assertEquals(Float.NEGATIVE_INFINITY, scheme.fromBin(-1), 0.001d);
+//        assertEquals(Float.NEGATIVE_INFINITY, scheme.fromBin(-1), 0.001d); // Not allowed in rust due to type check
         assertEquals(Float.POSITIVE_INFINITY, scheme.fromBin(11), 0.001d);
         assertEquals(0.0, scheme.fromBin(0), 0.001d);
         assertEquals(0.2222, scheme.fromBin(1), 0.001d);
@@ -138,11 +138,11 @@ public class HistogramTest {
             double fromBin = scheme.fromBin(bin);
             int binAgain = scheme.toBin(fromBin + EPS);
             assertEquals(bin, binAgain, "unbinning and rebinning the bin " + bin
-                         + " gave a different result ("
-                         + fromBin
-                         + " was placed in bin "
-                         + binAgain
-                         + " )");
+                    + " gave a different result ("
+                    + fromBin
+                    + " was placed in bin "
+                    + binAgain
+                    + " )");
         }
     }
 
@@ -150,8 +150,8 @@ public class HistogramTest {
         Random random = new Random();
         System.out.println("[-100, 100]:");
         for (BinScheme scheme : Arrays.asList(new ConstantBinScheme(1000, -100, 100),
-                                              new ConstantBinScheme(100, -100, 100),
-                                              new ConstantBinScheme(10, -100, 100))) {
+                new ConstantBinScheme(100, -100, 100),
+                new ConstantBinScheme(10, -100, 100))) {
             Histogram h = new Histogram(scheme);
             for (int i = 0; i < 10000; i++)
                 h.record(200.0 * random.nextDouble() - 100.0);
@@ -162,8 +162,8 @@ public class HistogramTest {
 
         System.out.println("[0, 1000]");
         for (BinScheme scheme : Arrays.asList(new LinearBinScheme(1000, 1000),
-                                              new LinearBinScheme(100, 1000),
-                                              new LinearBinScheme(10, 1000))) {
+                new LinearBinScheme(100, 1000),
+                new LinearBinScheme(10, 1000))) {
             Histogram h = new Histogram(scheme);
             for (int i = 0; i < 10000; i++)
                 h.record(1000.0 * random.nextDouble());

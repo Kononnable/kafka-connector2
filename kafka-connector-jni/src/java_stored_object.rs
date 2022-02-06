@@ -31,10 +31,12 @@ impl<T> JavaStoredObject<T> {
         obj: JObject,
         class_name: &str,
     ) -> jni::errors::Result<JavaStoredObject<T>> {
-        let class = env.find_class(class_name)?;
-        if !env.is_instance_of(obj, class)? {
-            env.throw_new("java/lang/Exception", "Wrong object class")?;
-            return Err(jni::errors::Error::JavaException);
+        if !class_name.is_empty() {
+            let class = env.find_class(class_name)?;
+            if !env.is_instance_of(obj, class)? {
+                env.throw_new("java/lang/Exception", "Wrong object class")?;
+                return Err(jni::errors::Error::JavaException);
+            }
         }
         let ptr = env.get_field(obj, "rustPointer", "J")?.j()?;
         let this = unsafe { Box::from_raw(ptr as *mut T) };

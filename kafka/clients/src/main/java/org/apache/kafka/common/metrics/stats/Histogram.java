@@ -16,66 +16,92 @@
  */
 package org.apache.kafka.common.metrics.stats;
 
+import org.apache.kafka.RustLib;
+
 import java.util.Arrays;
 
 public class Histogram {
 
-    private final BinScheme binScheme;
-    private final float[] hist;
-    private double count;
 
-    public Histogram(BinScheme binScheme) {
-        this.hist = new float[binScheme.bins()];
-        this.count = 0.0f;
-        this.binScheme = binScheme;
+    static {
+        RustLib.load();
     }
 
-    public void record(double value) {
-        this.hist[binScheme.toBin(value)] += 1.0f;
-        this.count += 1.0d;
-    }
+    private long rustPointer;
 
-    public double value(double quantile) {
-        if (count == 0.0d)
-            return Double.NaN;
-        if (quantile > 1.00d)
-            return Float.POSITIVE_INFINITY;
-        if (quantile < 0.00d)
-            return Float.NEGATIVE_INFINITY;
-        float sum = 0.0f;
-        float quant = (float) quantile;
-        for (int i = 0; i < this.hist.length - 1; i++) {
-            sum += this.hist[i];
-            if (sum / count > quant)
-                return binScheme.fromBin(i);
-        }
-        return binScheme.fromBin(this.hist.length - 1);
-    }
+    public native void rustConstructor(BinScheme binScheme);
 
-    public float[] counts() {
-        return this.hist;
-    }
-
-    public void clear() {
-        Arrays.fill(this.hist, 0.0f);
-        this.count = 0;
-    }
+    public native void rustDestructor();
 
     @Override
-    public String toString() {
-        StringBuilder b = new StringBuilder("{");
-        for (int i = 0; i < this.hist.length - 1; i++) {
-            b.append(String.format("%.10f", binScheme.fromBin(i)));
-            b.append(':');
-            b.append(String.format("%.0f", this.hist[i]));
-            b.append(',');
-        }
-        b.append(Float.POSITIVE_INFINITY);
-        b.append(':');
-        b.append(String.format("%.0f", this.hist[this.hist.length - 1]));
-        b.append('}');
-        return b.toString();
+    protected void finalize() throws Throwable {
+        rustDestructor();
+        super.finalize();
     }
+
+
+//
+//    private final BinScheme binScheme;
+//    private final float[] hist;
+//    private double count;
+
+    public Histogram(BinScheme binScheme) {
+        rustConstructor(binScheme);
+//        this.hist = new float[binScheme.bins()];
+//        this.count = 0.0f;
+//        this.binScheme = binScheme;
+    }
+
+    public native void record(double value);
+//    public void record(double value) {
+//        this.hist[binScheme.toBin(value)] += 1.0f;
+//        this.count += 1.0d;
+//    }
+
+    public native double value(double quantile);
+//    public double value(double quantile) {
+//        if (count == 0.0d)
+//            return Double.NaN;
+//        if (quantile > 1.00d)
+//            return Float.POSITIVE_INFINITY;
+//        if (quantile < 0.00d)
+//            return Float.NEGATIVE_INFINITY;
+//        float sum = 0.0f;
+//        float quant = (float) quantile;
+//        for (int i = 0; i < this.hist.length - 1; i++) {
+//            sum += this.hist[i];
+//            if (sum / count > quant)
+//                return binScheme.fromBin(i);
+//        }
+//        return binScheme.fromBin(this.hist.length - 1);
+//    }
+
+    public native float[] counts();
+//    public float[] counts() {
+//        return this.hist;
+//    }
+
+    public native void clear();
+//    public void clear() {
+//        Arrays.fill(this.hist, 0.0f);
+//        this.count = 0;
+//    }
+
+//    @Override
+//    public String toString() {
+//        StringBuilder b = new StringBuilder("{");
+//        for (int i = 0; i < this.hist.length - 1; i++) {
+//            b.append(String.format("%.10f", binScheme.fromBin(i)));
+//            b.append(':');
+//            b.append(String.format("%.0f", this.hist[i]));
+//            b.append(',');
+//        }
+//        b.append(Float.POSITIVE_INFINITY);
+//        b.append(':');
+//        b.append(String.format("%.0f", this.hist[this.hist.length - 1]));
+//        b.append('}');
+//        return b.toString();
+//    }
 
     /**
      * An algorithm for determining the bin in which a value is to be placed as well as calculating the upper end
@@ -114,51 +140,72 @@ public class Histogram {
      * and the number of bins.
      */
     public static class ConstantBinScheme implements BinScheme {
-        private static final int MIN_BIN_NUMBER = 0;
-        private final double min;
-        private final double max;
-        private final int bins;
-        private final double bucketWidth;
-        private final int maxBinNumber;
+        static {
+            RustLib.load();
+        }
+
+        private long rustPointer;
+
+        public native void rustConstructor(int bins, double min, double max);
+
+        public native void rustDestructor();
+
+        @Override
+        protected void finalize() throws Throwable {
+            rustDestructor();
+            super.finalize();
+        }
+
+
+//        private static final int MIN_BIN_NUMBER = 0;
+//        private final double min;
+//        private final double max;
+//        private final int bins;
+//        private final double bucketWidth;
+//        private final int maxBinNumber;
 
         /**
          * Create a bin scheme with the specified number of bins that all have the same width.
          *
          * @param bins the number of bins; must be at least 2
-         * @param min the minimum value to be counted in the bins
-         * @param max the maximum value to be counted in the bins
+         * @param min  the minimum value to be counted in the bins
+         * @param max  the maximum value to be counted in the bins
          */
         public ConstantBinScheme(int bins, double min, double max) {
-            if (bins < 2)
-                throw new IllegalArgumentException("Must have at least 2 bins.");
-            this.min = min;
-            this.max = max;
-            this.bins = bins;
-            this.bucketWidth = (max - min) / bins;
-            this.maxBinNumber = bins - 1;
+            rustConstructor(bins, min, max);
+//            if (bins < 2)
+//                throw new IllegalArgumentException("Must have at least 2 bins.");
+//            this.min = min;
+//            this.max = max;
+//            this.bins = bins;
+//            this.bucketWidth = (max - min) / bins;
+//            this.maxBinNumber = bins - 1;
         }
 
-        public int bins() {
-            return this.bins;
-        }
+        public native int bins();
+//        public int bins() {
+//            return this.bins;
+//        }
 
-        public double fromBin(int b) {
-            if (b < MIN_BIN_NUMBER) {
-                return Float.NEGATIVE_INFINITY;
-            }
-            if (b > maxBinNumber) {
-                return Float.POSITIVE_INFINITY;
-            }
-            return min + b * bucketWidth;
-        }
+        public native double fromBin(int b);
+//        public double fromBin(int b) {
+//            if (b < MIN_BIN_NUMBER) {
+//                return Float.NEGATIVE_INFINITY;
+//            }
+//            if (b > maxBinNumber) {
+//                return Float.POSITIVE_INFINITY;
+//            }
+//            return min + b * bucketWidth;
+//        }
 
-        public int toBin(double x) {
-            int binNumber = (int) ((x - min) / bucketWidth);
-            if (binNumber < MIN_BIN_NUMBER) {
-                return MIN_BIN_NUMBER;
-            }
-            return Math.min(binNumber, maxBinNumber);
-        }
+        public native int toBin(double x);
+//        public int toBin(double x) {
+//            int binNumber = (int) ((x - min) / bucketWidth);
+//            if (binNumber < MIN_BIN_NUMBER) {
+//                return MIN_BIN_NUMBER;
+//            }
+//            return Math.min(binNumber, maxBinNumber);
+//        }
     }
 
     /**
@@ -167,47 +214,68 @@ public class Histogram {
      * of values will all fit within the bins (e.g., the upper range of the last bin is equal to the maximum value).
      */
     public static class LinearBinScheme implements BinScheme {
-        private final int bins;
-        private final double max;
-        private final double scale;
+        static {
+            RustLib.load();
+        }
+
+        private long rustPointer;
+
+        public native void rustConstructor(int bins, double max);
+
+        public native void rustDestructor();
+
+        @Override
+        protected void finalize() throws Throwable {
+            rustDestructor();
+            super.finalize();
+        }
+
+
+//        private final int bins;
+//        private final double max;
+//        private final double scale;
 
         /**
          * Create a linear bin scheme with the specified number of bins and the maximum value to be counted in the bins.
          *
          * @param numBins the number of bins; must be at least 2
-         * @param max the maximum value to be counted in the bins
+         * @param max     the maximum value to be counted in the bins
          */
         public LinearBinScheme(int numBins, double max) {
-            if (numBins < 2)
-                throw new IllegalArgumentException("Must have at least 2 bins.");
-            this.bins = numBins;
-            this.max = max;
-            double denom = numBins * (numBins - 1.0) / 2.0;
-            this.scale = max / denom;
+            rustConstructor(numBins, max);
+//            if (numBins < 2)
+//                throw new IllegalArgumentException("Must have at least 2 bins.");
+//            this.bins = numBins;
+//            this.max = max;
+//            double denom = numBins * (numBins - 1.0) / 2.0;
+//            this.scale = max / denom;
         }
 
-        public int bins() {
-            return this.bins;
-        }
+        public native int bins();
+//        public int bins() {
+//            return this.bins;
+//        }
 
-        public double fromBin(int b) {
-            if (b > this.bins - 1) {
-                return Float.POSITIVE_INFINITY;
-            } else if (b < 0.0000d) {
-                return Float.NEGATIVE_INFINITY;
-            } else {
-                return this.scale * (b * (b + 1.0)) / 2.0;
-            }
-        }
+        public native double fromBin(int b);
+//        public double fromBin(int b) {
+//            if (b > this.bins - 1) {
+//                return Float.POSITIVE_INFINITY;
+//            } else if (b < 0.0000d) {
+//                return Float.NEGATIVE_INFINITY;
+//            } else {
+//                return this.scale * (b * (b + 1.0)) / 2.0;
+//            }
+//        }
 
-        public int toBin(double x) {
-            if (x < 0.0d) {
-                throw new IllegalArgumentException("Values less than 0.0 not accepted.");
-            } else if (x > this.max) {
-                return this.bins - 1;
-            } else {
-                return (int) (-0.5 + 0.5 * Math.sqrt(1.0 + 8.0 * x / this.scale));
-            }
-        }
+        public native int toBin(double x);
+//        public int toBin(double x) {
+//            if (x < 0.0d) {
+//                throw new IllegalArgumentException("Values less than 0.0 not accepted.");
+//            } else if (x > this.max) {
+//                return this.bins - 1;
+//            } else {
+//                return (int) (-0.5 + 0.5 * Math.sqrt(1.0 + 8.0 * x / this.scale));
+//            }
+//        }
     }
 }
