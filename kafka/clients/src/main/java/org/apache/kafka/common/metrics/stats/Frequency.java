@@ -17,6 +17,7 @@
 package org.apache.kafka.common.metrics.stats;
 
 
+import org.apache.kafka.RustLib;
 import org.apache.kafka.common.MetricName;
 
 /**
@@ -24,8 +25,26 @@ import org.apache.kafka.common.MetricName;
  */
 public class Frequency {
 
-    private final MetricName name;
-    private final double centerValue;
+
+    static {
+        RustLib.load();
+    }
+
+    private long rustPointer;
+
+    public native void rustConstructor(MetricName name, double centerValue);
+
+    public native void rustDestructor();
+
+    @Override
+    protected void finalize() throws Throwable {
+        rustDestructor();
+        super.finalize();
+    }
+
+
+//    private final MetricName name;
+//    private final double centerValue;
 
     /**
      * Create an instance with the given name and center point value.
@@ -34,8 +53,7 @@ public class Frequency {
      * @param centerValue the value identifying the {@link Frequencies} bucket to be reported
      */
     public Frequency(MetricName name, double centerValue) {
-        this.name = name;
-        this.centerValue = centerValue;
+        rustConstructor(name, centerValue);
     }
 
     /**
@@ -43,24 +61,26 @@ public class Frequency {
      *
      * @return the metric name; never null
      */
-    public MetricName name() {
-        return this.name;
-    }
+    public native MetricName name();
+//    public MetricName name() {
+//        return this.name;
+//    }
 
     /**
      * Get the value of this metrics center point.
      *
      * @return the center point value
      */
-    public double centerValue() {
-        return this.centerValue;
-    }
+    public native double centerValue();
+//    public double centerValue() {
+//        return this.centerValue;
+//    }
 
-    @Override
-    public String toString() {
-        return "Frequency(" +
-            "name=" + name +
-            ", centerValue=" + centerValue +
-            ')';
-    }
+//    @Override
+//    public String toString() {
+//        return "Frequency(" +
+//                "name=" + name +
+//                ", centerValue=" + centerValue +
+//                ')';
+//    }
 }

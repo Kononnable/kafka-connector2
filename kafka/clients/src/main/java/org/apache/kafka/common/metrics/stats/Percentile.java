@@ -16,25 +16,46 @@
  */
 package org.apache.kafka.common.metrics.stats;
 
+import org.apache.kafka.RustLib;
 import org.apache.kafka.common.MetricName;
 
 public class Percentile {
+    static {
+        RustLib.load();
+    }
 
-    private final MetricName name;
-    private final double percentile;
+    private long rustPointer;
+
+    public native void rustConstructor(MetricName name, double percentile);
+
+    public native void rustDestructor();
+
+    @Override
+    protected void finalize() throws Throwable {
+        rustDestructor();
+        super.finalize();
+    }
+
+//    private final MetricName name;
+//    private final double percentile;
 
     public Percentile(MetricName name, double percentile) {
-        super();
-        this.name = name;
-        this.percentile = percentile;
+        rustConstructor(name, percentile);
     }
+//    public Percentile(MetricName name, double percentile) {
+//        super();
+//        this.name = name;
+//        this.percentile = percentile;
+//    }
 
-    public MetricName name() {
-        return this.name;
-    }
+    public native MetricName name();
+//    public MetricName name() {
+//        return this.name;
+//    }
 
-    public double percentile() {
-        return this.percentile;
-    }
+    public native double percentile();
+//    public double percentile() {
+//        return this.percentile;
+//    }
 
 }

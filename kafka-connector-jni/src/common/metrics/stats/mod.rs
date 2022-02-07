@@ -1,5 +1,7 @@
 pub mod cumulative_stat;
+pub mod frequency;
 pub mod histogram;
+pub mod percentile;
 pub mod rate;
 pub mod sample;
 pub mod sampled_stat;
